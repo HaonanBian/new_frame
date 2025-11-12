@@ -1,0 +1,6 @@
+D:/file/RM/new_fram/working/working_second/bsp/usart/bsp_usart.c:29:6:USARTServiceInit	8	static
+D:/file/RM/new_fram/working/working_second/bsp/usart/bsp_usart.c:38:16:USARTRegister	24	static
+D:/file/RM/new_fram/working/working_second/bsp/usart/bsp_usart.c:62:6:USARTSend	8	static
+D:/file/RM/new_fram/working/working_second/bsp/usart/bsp_usart.c:83:9:USARTIsReady	0	static
+D:/file/RM/new_fram/working/working_second/bsp/usart/bsp_usart.c:102:6:HAL_UARTEx_RxEventCallback	16	static
+D:/file/RM/new_fram/working/working_second/bsp/usart/bsp_usart.c:127:6:HAL_UART_ErrorCallback	16	static

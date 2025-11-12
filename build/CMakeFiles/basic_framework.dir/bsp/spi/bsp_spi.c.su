@@ -1,0 +1,7 @@
+D:/file/RM/new_fram/working/working_second/bsp/spi/bsp_spi.c:10:14:SPIRegister	16	static
+D:/file/RM/new_fram/working/working_second/bsp/spi/bsp_spi.c:41:6:SPITransmit	16	static
+D:/file/RM/new_fram/working/working_second/bsp/spi/bsp_spi.c:65:6:SPIRecv	16	static
+D:/file/RM/new_fram/working/working_second/bsp/spi/bsp_spi.c:92:6:SPITransRecv	32	static
+D:/file/RM/new_fram/working/working_second/bsp/spi/bsp_spi.c:139:6:SPISetMode	0	static
+D:/file/RM/new_fram/working/working_second/bsp/spi/bsp_spi.c:156:6:HAL_SPI_RxCpltCallback	16	static
+D:/file/RM/new_fram/working/working_second/bsp/spi/bsp_spi.c:182:6:HAL_SPI_TxRxCpltCallback	8	static

@@ -1,0 +1,3 @@
+D:/file/RM/new_fram/working/working_second/Src/freertos.c:122:6:StartDefaultTask	8	static
+D:/file/RM/new_fram/working/working_second/Src/freertos.c:69:6:vApplicationGetIdleTaskMemory	0	static
+D:/file/RM/new_fram/working/working_second/Src/freertos.c:83:6:MX_FREERTOS_Init	40	static

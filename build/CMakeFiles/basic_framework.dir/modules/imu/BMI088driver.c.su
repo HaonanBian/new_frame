@@ -1,0 +1,8 @@
+D:/file/RM/new_fram/working/working_second/modules/imu/BMI088driver.c:392:13:BMI088_read_muli_reg	16	static
+D:/file/RM/new_fram/working/working_second/modules/imu/BMI088driver.c:380:13:BMI088_write_single_reg	8	static
+D:/file/RM/new_fram/working/working_second/modules/imu/BMI088driver.c:386:13:BMI088_read_single_reg	8	static
+D:/file/RM/new_fram/working/working_second/modules/imu/BMI088driver.c:119:6:Calibrate_MPU_Offset	72	static
+D:/file/RM/new_fram/working/working_second/modules/imu/BMI088driver.c:240:9:bmi088_accel_init	32	static
+D:/file/RM/new_fram/working/working_second/modules/imu/BMI088driver.c:284:9:bmi088_gyro_init	32	static
+D:/file/RM/new_fram/working/working_second/modules/imu/BMI088driver.c:97:9:BMI088Init	16	static
+D:/file/RM/new_fram/working/working_second/modules/imu/BMI088driver.c:330:6:BMI088_Read	16	static

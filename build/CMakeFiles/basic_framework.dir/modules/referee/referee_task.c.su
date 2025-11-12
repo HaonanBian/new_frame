@@ -1,0 +1,7 @@
+D:/file/RM/new_fram/working/working_second/modules/referee/referee_task.c:29:13:DeterminRobotID	0	static
+D:/file/RM/new_fram/working/working_second/modules/referee/referee_task.c:122:13:RobotModeTest	0	static
+D:/file/RM/new_fram/working/working_second/modules/referee/referee_task.c:262:13:UIChangeCheck	0	static
+D:/file/RM/new_fram/working/working_second/modules/referee/referee_task.c:176:13:MyUIRefresh	72	static
+D:/file/RM/new_fram/working/working_second/modules/referee/referee_task.c:42:17:UITaskInit	8	static
+D:/file/RM/new_fram/working/working_second/modules/referee/referee_task.c:50:6:UITask	8	static
+D:/file/RM/new_fram/working/working_second/modules/referee/referee_task.c:62:6:MyUIInit	112	static
