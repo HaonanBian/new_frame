@@ -1,5 +1,5 @@
-D:/file/RM/new_fram/working/working_second/modules/imu/BMI088Middleware.c:6:6:BMI088_ACCEL_NS_L	8	static
-D:/file/RM/new_fram/working/working_second/modules/imu/BMI088Middleware.c:10:6:BMI088_ACCEL_NS_H	8	static
-D:/file/RM/new_fram/working/working_second/modules/imu/BMI088Middleware.c:15:6:BMI088_GYRO_NS_L	8	static
-D:/file/RM/new_fram/working/working_second/modules/imu/BMI088Middleware.c:19:6:BMI088_GYRO_NS_H	8	static
-D:/file/RM/new_fram/working/working_second/modules/imu/BMI088Middleware.c:24:9:BMI088_read_write_byte	32	static
+D:/RM/new_frame/modules/imu/BMI088Middleware.c:6:6:BMI088_ACCEL_NS_L	8	static
+D:/RM/new_frame/modules/imu/BMI088Middleware.c:10:6:BMI088_ACCEL_NS_H	8	static
+D:/RM/new_frame/modules/imu/BMI088Middleware.c:15:6:BMI088_GYRO_NS_L	8	static
+D:/RM/new_frame/modules/imu/BMI088Middleware.c:19:6:BMI088_GYRO_NS_H	8	static
+D:/RM/new_frame/modules/imu/BMI088Middleware.c:24:9:BMI088_read_write_byte	32	static

@@ -1,2 +1,2 @@
-D:/file/RM/new_fram/working/working_second/bsp/usb/bsp_usb.c:20:10:USBInit	24	static
-D:/file/RM/new_fram/working/working_second/bsp/usb/bsp_usb.c:29:6:USBTransmit	8	static
+D:/RM/new_frame/bsp/usb/bsp_usb.c:20:10:USBInit	24	static
+D:/RM/new_frame/bsp/usb/bsp_usb.c:29:6:USBTransmit	8	static

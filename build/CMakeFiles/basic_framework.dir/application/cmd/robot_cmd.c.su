@@ -1,6 +1,6 @@
-D:/file/RM/new_fram/working/working_second/application/cmd/robot_cmd.c:128:13:CalcOffsetAngle	0	static
-D:/file/RM/new_fram/working/working_second/application/cmd/robot_cmd.c:154:13:RemoteControlSet	0	static
-D:/file/RM/new_fram/working/working_second/application/cmd/robot_cmd.c:213:13:MouseKeySet	4	static
-D:/file/RM/new_fram/working/working_second/application/cmd/robot_cmd.c:300:13:EmergencyHandler	16	static
-D:/file/RM/new_fram/working/working_second/application/cmd/robot_cmd.c:51:6:RobotCMDInit	8	static
-D:/file/RM/new_fram/working/working_second/application/cmd/robot_cmd.c:323:6:RobotCMDTask	8	static
+D:/RM/new_frame/application/cmd/robot_cmd.c:128:13:CalcOffsetAngle	0	static
+D:/RM/new_frame/application/cmd/robot_cmd.c:154:13:RemoteControlSet	0	static
+D:/RM/new_frame/application/cmd/robot_cmd.c:213:13:MouseKeySet	4	static
+D:/RM/new_frame/application/cmd/robot_cmd.c:300:13:EmergencyHandler	16	static
+D:/RM/new_frame/application/cmd/robot_cmd.c:51:6:RobotCMDInit	8	static
+D:/RM/new_frame/application/cmd/robot_cmd.c:323:6:RobotCMDTask	8	static

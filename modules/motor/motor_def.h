@@ -104,6 +104,7 @@ typedef enum
     MOTOR_TYPE_NONE = 0,
     GM6020,
     M3508,
+    DM4310,
     M2006,
     LK9025,
     HT04,

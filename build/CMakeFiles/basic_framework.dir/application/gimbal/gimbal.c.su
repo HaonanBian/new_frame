@@ -1,2 +1,2 @@
-D:/file/RM/new_fram/working/working_second/application/gimbal/gimbal.c:18:6:GimbalInit	400	static
-D:/file/RM/new_fram/working/working_second/application/gimbal/gimbal.c:103:6:GimbalTask	16	static
+D:/RM/new_frame/application/gimbal/gimbal.c:22:6:GimbalInit	400	static
+D:/RM/new_frame/application/gimbal/gimbal.c:108:6:GimbalTask	16	static

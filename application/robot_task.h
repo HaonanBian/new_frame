@@ -2,6 +2,7 @@
 #pragma once
 
 #include "FreeRTOS.h"
+#include "dmmotor.h"
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
@@ -51,7 +52,8 @@ void OSTaskInit()
     osThreadDef(uitask, StartUITASK, osPriorityNormal, 0, 512);
     uiTaskHandle = osThreadCreate(osThread(uitask), NULL);
 
-    HTMotorControlInit(); // 没有注册HT电机则不会执行
+    // HTMotorControlInit(); // 没有注册HT电机则不会执行
+    DMMotorControlInit();
 }
 
 __attribute__((noreturn)) void StartINSTASK(void const *argument)
