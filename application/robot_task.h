@@ -34,23 +34,31 @@ void StartUITASK(void const *argument);
  * @brief 初始化机器人任务,所有持续运行的任务都在这里初始化
  *
  */
+
+ // osThreadDef(任务别名, 任务函数, 优先级, 实例数, 栈大小)
 void OSTaskInit()
 {
+    // 1. 创建姿态解算任务（传感器读取+姿态解算）
+    // osThreadDef(任务别名, 任务函数, 优先级, 实例数, 栈大小)
     osThreadDef(instask, StartINSTASK, osPriorityAboveNormal, 0, 1024);
     insTaskHandle = osThreadCreate(osThread(instask), NULL); // 由于是阻塞读取传感器,为姿态解算设置较高优先级,确保以1khz的频率执行
     // // 后续修改为读取传感器数据准备好的中断处理,
 
+    // 2. 创建电机控制任务
     osThreadDef(motortask, StartMOTORTASK, osPriorityNormal, 0, 256);
     motorTaskHandle = osThreadCreate(osThread(motortask), NULL);
+     
+    // 3. 创建守护任务（后台辅助任务）
+    // osThreadDef(daemontask, StartDAEMONTASK, osPriorityNormal, 0, 128);
+    // daemonTaskHandle = osThreadCreate(osThread(daemontask), NULL);
 
-    osThreadDef(daemontask, StartDAEMONTASK, osPriorityNormal, 0, 128);
-    daemonTaskHandle = osThreadCreate(osThread(daemontask), NULL);
-
+    // 4. 创建机器人核心逻辑任务
     osThreadDef(robottask, StartROBOTTASK, osPriorityNormal, 0, 1024);
     robotTaskHandle = osThreadCreate(osThread(robottask), NULL);
 
-    osThreadDef(uitask, StartUITASK, osPriorityNormal, 0, 512);
-    uiTaskHandle = osThreadCreate(osThread(uitask), NULL);
+    // 5. 创建UI交互任务
+    // osThreadDef(uitask, StartUITASK, osPriorityNormal, 0, 512);
+    // uiTaskHandle = osThreadCreate(osThread(uitask), NULL);
 
     // HTMotorControlInit(); // 没有注册HT电机则不会执行
     DMMotorControlInit();

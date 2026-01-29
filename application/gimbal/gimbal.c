@@ -9,8 +9,9 @@
 #include "bmi088.h"
 #include <assert.h>
 
+
 static attitude_t *gimba_IMU_data; // 云台IMU数据
-static DJIMotorInstance *yaw_motor;
+static DMMotorInstance *yaw_motor;
 static DMMotorInstance *pitch_motor;
 
 static Publisher_t *gimbal_pub;                   // 云台应用消息发布者(云台反馈给cmd)
@@ -19,6 +20,8 @@ static Gimbal_Upload_Data_s gimbal_feedback_data; // 回传给cmd的云台状态
 static Gimbal_Ctrl_Cmd_s gimbal_cmd_recv;         // 来自cmd的控制信息
 
 static BMI088Instance *bmi088; // 云台IMU
+
+
 void GimbalInit()
 {   
     gimba_IMU_data = INS_Init(); // IMU先初始化,获取姿态数据指针赋给yaw电机的其他数据来源
@@ -26,7 +29,8 @@ void GimbalInit()
     Motor_Init_Config_s yaw_config = {
         .can_init_config = {
             .can_handle = &hcan1,
-            .tx_id = 1,
+            .tx_id = 0x01,
+            .rx_id = 0x03,
         },
         .controller_param_init_config = {
             .angle_PID = {
@@ -58,7 +62,7 @@ void GimbalInit()
             .close_loop_type = ANGLE_LOOP | SPEED_LOOP,
             .motor_reverse_flag = MOTOR_DIRECTION_NORMAL,
         },
-        .motor_type = GM6020};
+        .motor_type = DM4310};
     // PITCH
     Motor_Init_Config_s pitch_config = {
         .can_init_config = {
@@ -97,59 +101,81 @@ void GimbalInit()
         .motor_type = DM4310,
     };
     // 电机对total_angle闭环,上电时为零,会保持静止,收到遥控器数据再动
-    yaw_motor = DJIMotorInit(&yaw_config);
+    yaw_motor = DMMotorInit(&yaw_config);
     pitch_motor = DMMotorInit(&pitch_config);
 
     gimbal_pub = PubRegister("gimbal_feed", sizeof(Gimbal_Upload_Data_s));
     gimbal_sub = SubRegister("gimbal_cmd", sizeof(Gimbal_Ctrl_Cmd_s));
 }
 
-/* 机器人云台控制核心任务,后续考虑只保留IMU控制,不再需要电机的反馈 */
+/* 机器人云台控制核心任务,使用MIT模式控制 */
 void GimbalTask()
 {
     // 获取云台控制数据
-    // 后续增加未收到数据的处理
     SubGetMessage(gimbal_sub, &gimbal_cmd_recv);
 
-    // @todo:现在已不再需要电机反馈,实际上可以始终使用IMU的姿态数据来作为云台的反馈,yaw电机的offset只是用来跟随底盘
-    // 根据控制模式进行电机反馈切换和过渡,视觉模式在robot_cmd模块就已经设置好,gimbal只看yaw_ref和pitch_ref
+    // 计算当前姿态与目标姿态的误差
+    float yaw_error = gimbal_cmd_recv.yaw - gimba_IMU_data->YawTotalAngle;
+    float pitch_error = gimbal_cmd_recv.pitch - gimba_IMU_data->Pitch;
+    
+    // 计算角速度参考值
+    float yaw_vel_ref = yaw_error * 10.0f; // 简单的比例控制，将角度误差转换为角速度指令
+    float pitch_vel_ref = pitch_error * 10.0f;
+    float pitch_gravity_ff = PITCH_GRAVITY_FF_COEFF * sinf(gimba_IMU_data->Pitch);
+    
+    // 限制角速度
+    LIMIT_MIN_MAX(yaw_vel_ref, -20.0f, 20.0f);
+    LIMIT_MIN_MAX(pitch_vel_ref, -20.0f, 20.0f);
+    LIMIT_MIN_MAX(pitch_gravity_ff, -100.0f, 100.0f);
+    // 根据控制模式进行处理
     switch (gimbal_cmd_recv.gimbal_mode)
     {
-    // 停止
-    case GIMBAL_ZERO_FORCE:
-        DJIMotorStop(yaw_motor);
+        // 停止
+    case GIMBAL_ZERO_FORCE:        
+        DMMotorStop(yaw_motor);
         DMMotorStop(pitch_motor);
+        
         break;
     // 使用陀螺仪的反馈,底盘根据yaw电机的offset跟随云台或视觉模式采用
-    case GIMBAL_GYRO_MODE: // 后续只保留此模式
-        DJIMotorEnable(yaw_motor);
-        DMMotorEnable(pitch_motor);
-        DJIMotorChangeFeed(yaw_motor, ANGLE_LOOP, OTHER_FEED);
-        DJIMotorChangeFeed(yaw_motor, SPEED_LOOP, OTHER_FEED);
-
-        DJIMotorSetRef(yaw_motor, gimbal_cmd_recv.yaw); // yaw和pitch会在robot_cmd中处理好多圈和单圈
-        DMMotorSetRef(pitch_motor, gimbal_cmd_recv.pitch);
-        break;
-    // 云台自由模式,使用编码器反馈,底盘和云台分离,仅云台旋转,一般用于调整云台姿态(英雄吊射等)/能量机关
-    case GIMBAL_FREE_MODE: // 后续删除,或加入云台追地盘的跟随模式(响应速度更快)
-        DJIMotorEnable(yaw_motor);
-        DMMotorEnable(pitch_motor);
-        DJIMotorChangeFeed(yaw_motor, ANGLE_LOOP, OTHER_FEED);
-        DJIMotorChangeFeed(yaw_motor, SPEED_LOOP, OTHER_FEED);
-        DJIMotorSetRef(yaw_motor, gimbal_cmd_recv.yaw); // yaw和pitch会在robot_cmd中处理好多圈和单圈
-        DMMotorSetRef(pitch_motor, gimbal_cmd_recv.pitch);
+    case GIMBAL_GYRO_MODE: 
+    case GIMBAL_FREE_MODE: 
+        // 使用MIT模式直接控制电机
+        // 参数说明：位置指令、速度指令、Kp、Kd、力矩指令
+        DMMotorMITCtrl(yaw_motor, 
+                      gimbal_cmd_recv.yaw,     // 目标位置
+                      yaw_vel_ref,              // 目标速度
+                      10.0f,                    // Kp
+                      0.5f,                     // Kd
+                      0.0f);                    // 力矩前馈
+        
+        DMMotorMITCtrl(pitch_motor, 
+                      gimbal_cmd_recv.pitch,    // 目标位置
+                      pitch_vel_ref,            // 目标速度
+                      15.0f,                    // Kp
+                      0.5f,                     // Kd
+                      pitch_gravity_ff);       // 力矩前馈
         break;
     default:
         break;
     }
 
-    // 在合适的地方添加pitch重力补偿前馈力矩
-    // 根据IMU姿态/pitch电机角度反馈计算出当前配重下的重力矩
-    // ...
-
-    // 设置反馈数据,主要是imu和yaw的ecd
+    // 设置反馈数据,主要是imu和yaw电机的单圈角度
     gimbal_feedback_data.gimbal_imu_data = *gimba_IMU_data;
-    gimbal_feedback_data.yaw_motor_single_round_angle = yaw_motor->measure.angle_single_round;
+    
+    // 计算yaw电机的单圈角度
+    // DM_Motor_Measure_s结构体中的position字段范围是[-2π, 2π]弧度
+    float yaw_position = yaw_motor->measure.position;
+    
+    // 将位置转换为单圈角度(0-2π弧度)
+    float yaw_single_round_rad = yaw_position;
+    while (yaw_single_round_rad < 0) yaw_single_round_rad += 6.28318530718f;
+    while (yaw_single_round_rad >= 6.28318530718f) yaw_single_round_rad -= 6.28318530718f;
+    
+    // 转换为角度值(0-360度)
+    float yaw_single_round_deg = yaw_single_round_rad * 57.2957795131f;
+    
+    // 转换为uint16_t类型,范围0-65535,对应0-360度
+    gimbal_feedback_data.yaw_motor_single_round_angle = (uint16_t)(yaw_single_round_deg * 182.044444444f); // 65535 / 360 = 182.044444444
 
     // 推送消息
     PubPushMessage(gimbal_pub, (void *)&gimbal_feedback_data);
