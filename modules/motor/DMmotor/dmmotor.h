@@ -8,12 +8,12 @@
 
 #define DM_MOTOR_CNT 4
 
-#define DM_P_MIN  (-2.0f)
-#define DM_P_MAX  4.0f
-#define DM_V_MIN  (-45.0f)
-#define DM_V_MAX  45.0f
-#define DM_T_MIN  (-18.0f)
-#define DM_T_MAX   18.0f
+#define DM_P_MIN  (-12.56637f)
+#define DM_P_MAX  12.56637f
+#define DM_V_MIN  (-30.0f)
+#define DM_V_MAX  30.0f
+#define DM_T_MIN  (-10.0f)
+#define DM_T_MAX   10.0f
 
 typedef struct 
 {
@@ -73,4 +73,15 @@ void DMMotorEnable(DMMotorInstance *motor);
 void DMMotorStop(DMMotorInstance *motor);
 void DMMotorCaliEncoder(DMMotorInstance *motor);
 void DMMotorControlInit();
+
+/**
+ * @brief 设置DM4310电机的MIT模式控制参数
+ * @param motor 电机实例指针
+ * @param pos 位置指令
+ * @param vel 速度指令
+ * @param kp 位置比例系数
+ * @param kd 位置微分系数
+ * @param torq 力矩指令
+ */
+void DMMotorMITCtrl(DMMotorInstance *motor, float pos, float vel, float kp, float kd, float torq);
 #endif // !DMMOTOR
