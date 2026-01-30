@@ -78,11 +78,12 @@ static void DMMotorLostCallback(void *motor_ptr)
     
     // 可以在这里添加报警或其他处理逻辑
 }
-void DMMotorCaliEncoder(DMMotorInstance *motor)
+void DMMotorCaliEncoder(DMMotorInstance *motor) // 电机的零点设置
 {
     DMMotorSetMode(DM_CMD_ZERO_POSITION, motor);
     DWT_Delay(0.1);
 }
+
 DMMotorInstance *DMMotorInit(Motor_Init_Config_s *config)
 {
     DMMotorInstance *motor = (DMMotorInstance *)malloc(sizeof(DMMotorInstance));
@@ -123,7 +124,7 @@ void DMMotorSetRef(DMMotorInstance *motor, float ref)
     motor->pid_ref = ref;
 }
 
-void DMMotorEnable(DMMotorInstance *motor)
+ void DMMotorEnable(DMMotorInstance *motor)
 {
     motor->stop_flag = MOTOR_ENALBED;
 }

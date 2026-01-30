@@ -228,8 +228,8 @@ static void RemoteControlSet()
     // 左侧开关状态为[下],或视觉未识别到目标,纯遥控器拨杆控制
     if (switch_is_down(rc_data[TEMP].rc.switch_left) || vision_recv_data->target_state == NO_TARGET)
     { // 按照摇杆的输出大小进行角度增量,增益系数需调整
-        gimbal_cmd_send.yaw += 0.005f * (float)rc_data[TEMP].rc.rocker_l_;
-        gimbal_cmd_send.pitch += 0.001f * (float)rc_data[TEMP].rc.rocker_l1;
+        gimbal_cmd_send.yaw += 0.00005f * (float)rc_data[TEMP].rc.rocker_l_;
+        gimbal_cmd_send.pitch += 0.00001f * (float)rc_data[TEMP].rc.rocker_l1;
     }
     // 云台软件限位
 

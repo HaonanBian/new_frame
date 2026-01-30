@@ -29,8 +29,8 @@ void GimbalInit()
     Motor_Init_Config_s yaw_config = {
         .can_init_config = {
             .can_handle = &hcan1,
-            .tx_id = 0x01,
-            .rx_id = 0x03,
+            .tx_id = 0x04,
+            .rx_id = 0x06,
         },
         .controller_param_init_config = {
             .angle_PID = {
@@ -124,7 +124,7 @@ void GimbalTask()
     float pitch_gravity_ff = PITCH_GRAVITY_FF_COEFF * sinf(gimba_IMU_data->Pitch);
     
     // 限制角速度
-    LIMIT_MIN_MAX(yaw_vel_ref, -20.0f, 20.0f);
+    LIMIT_MIN_MAX(yaw_vel_ref, -10.0f, 10.0f);
     LIMIT_MIN_MAX(pitch_vel_ref, -20.0f, 20.0f);
     LIMIT_MIN_MAX(pitch_gravity_ff, -100.0f, 100.0f);
     // 根据控制模式进行处理
@@ -144,7 +144,7 @@ void GimbalTask()
         DMMotorMITCtrl(yaw_motor, 
                       gimbal_cmd_recv.yaw,     // 目标位置
                       yaw_vel_ref,              // 目标速度
-                      10.0f,                    // Kp
+                      5.0f,                    // Kp
                       0.5f,                     // Kd
                       0.0f);                    // 力矩前馈
         
