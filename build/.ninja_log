@@ -58,7 +58,7 @@
 1496	2234	7913954232973160	CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj	6001d32222a17e7a
 1578	2336	7913954234319072	CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj	9e7130f6dda75862
 1838	2557	7913954236508978	CMakeFiles/basic_framework.dir/modules/TFminiPlus/tfminiplus.c.obj	2b35194e43787cb5
-41	471	7914636768524871	CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj	65e11c22c41fd70c
+26	770	7914674831839534	CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj	65e11c22c41fd70c
 1678	2450	7913954235453728	CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj	cb8a8ec561bf5498
 1993	2563	7913954236493899	CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj	29bf7cdffd581b03
 1915	2692	7913954237766901	CMakeFiles/basic_framework.dir/modules/alarm/buzzer.c.obj	510cd82286571b44
@@ -125,6 +125,7 @@
 4482	5033	7913954261314937	cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c.obj	104eb2c27ce8d634
 4495	5067	7913954261655671	cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c.obj	e1ad5e0ed57ca8d5
 4558	5066	7913954261655671	cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c.obj	3bdaab1eecc9b417
-471	908	7914636772645737	basic_framework.elf	587d44f88c74d0ae
-26	770	7914674831839534	CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj	65e11c22c41fd70c
 770	1968	7914674843594076	basic_framework.elf	587d44f88c74d0ae
+27	1398	7914842683575454	CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj	323eb99c286ab83b
+31	1402	7914842683602932	CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj	65e11c22c41fd70c
+1402	2742	7914842696802099	basic_framework.elf	587d44f88c74d0ae

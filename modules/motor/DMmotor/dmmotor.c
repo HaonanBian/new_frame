@@ -80,8 +80,14 @@ static void DMMotorLostCallback(void *motor_ptr)
 }
 void DMMotorCaliEncoder(DMMotorInstance *motor) // 电机的零点设置
 {
-    DMMotorSetMode(DM_CMD_ZERO_POSITION, motor);
-    DWT_Delay(0.1);
+    // 首先将当前位置设置为零点
+    // DMMotorSetMode(DM_CMD_ZERO_POSITION, motor);
+    // DWT_Delay(0.1);
+    
+    // 然后控制电机回到零点位置（使用MIT模式）
+    // 参数：目标位置(0)、目标速度(0)、位置增益、速度增益、力矩前馈
+    DMMotorMITCtrl(motor, 0.0f, 0.0f, 5.0f, 0.1f, 0.0f);
+    DWT_Delay(0.5); // 给电机足够时间回到零点
 }
 
 DMMotorInstance *DMMotorInit(Motor_Init_Config_s *config)
