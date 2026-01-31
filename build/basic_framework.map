@@ -61,7 +61,7 @@ D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-ea
 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_arm_muldivdf3.o)
                               CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj (__aeabi_ddiv)
 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_arm_cmpdf2.o)
-                              CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj (__aeabi_dcmplt)
+                              CMakeFiles/basic_framework.dir/modules/BMI088/bmi088.c.obj (__aeabi_dcmpgt)
 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_arm_truncdfsf2.o)
                               CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj (__aeabi_d2f)
 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_uldivmod.o)
@@ -19841,7 +19841,7 @@ LOAD D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-no
                 0x08000000                g_pfnVectors
                 0x08000188                        . = ALIGN (0x4)
 
-.text           0x08000190    0x187d8
+.text           0x08000190    0x18450
                 0x08000190                        . = ALIGN (0x4)
  *(.text)
  .text          0x08000190       0x40 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
@@ -21189,671 +21189,663 @@ LOAD D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-no
                 0x080110a4       0x1e CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c.obj
                 0x080110a4                SEGGER_RTT_printf
  *fill*         0x080110c2        0x6 
- .text.MecanumCalculate
-                0x080110c8      0x24c CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
+ .text.OmniWheelCalculate
+                0x080110c8       0xe8 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
  .text.LimitChassisOutput
-                0x08011314       0x5c CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
+                0x080111b0       0x5c CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
  .text.ChassisInit
-                0x08011370      0x124 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
-                0x08011370                ChassisInit
+                0x0801120c      0x124 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
+                0x0801120c                ChassisInit
  .text.ChassisTask
-                0x08011494      0x148 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
-                0x08011494                ChassisTask
+                0x08011330      0x148 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
+                0x08011330                ChassisTask
  .text.CalcOffsetAngle
-                0x080115dc       0x68 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+                0x08011478       0x68 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
  .text.RemoteControlSet
-                0x08011644       0xf8 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+                0x080114e0       0xf8 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
  .text.MouseKeySet
-                0x0801173c      0x188 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+                0x080115d8      0x188 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
  .text.EmergencyHandler
-                0x080118c4       0x98 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
- *fill*         0x0801195c        0x4 
- .text.mx_sin   0x08011960       0xec CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
-                0x08011960                mx_sin
- *fill*         0x08011a4c        0x4 
- .text.my_sin   0x08011a50       0x90 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
-                0x08011a50                my_sin
- .text.my_cos   0x08011ae0       0xa0 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
-                0x08011ae0                my_cos
+                0x08011760       0x98 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
  .text.RobotCMDInit
-                0x08011b80       0xa4 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
-                0x08011b80                RobotCMDInit
+                0x080117f8       0xa4 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+                0x080117f8                RobotCMDInit
  .text.RobotCMDTask
-                0x08011c24       0x98 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
-                0x08011c24                RobotCMDTask
+                0x0801189c       0x98 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+                0x0801189c                RobotCMDTask
  .text.GimbalInit
-                0x08011cbc      0x170 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
-                0x08011cbc                GimbalInit
+                0x08011934      0x170 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
+                0x08011934                GimbalInit
  .text.GimbalTask
-                0x08011e2c      0x1c0 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
-                0x08011e2c                GimbalTask
+                0x08011aa4      0x1c0 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
+                0x08011aa4                GimbalTask
  .text.StartINSTASK
-                0x08011fec       0x8c CMakeFiles/basic_framework.dir/application/robot.c.obj
-                0x08011fec                StartINSTASK
+                0x08011c64       0x8c CMakeFiles/basic_framework.dir/application/robot.c.obj
+                0x08011c64                StartINSTASK
  .text.StartMOTORTASK
-                0x08012078       0x84 CMakeFiles/basic_framework.dir/application/robot.c.obj
-                0x08012078                StartMOTORTASK
- .text.BSPInit  0x080120fc        0xe CMakeFiles/basic_framework.dir/application/robot.c.obj
-                0x080120fc                BSPInit
- *fill*         0x0801210a        0x2 
+                0x08011cf0       0x84 CMakeFiles/basic_framework.dir/application/robot.c.obj
+                0x08011cf0                StartMOTORTASK
+ .text.BSPInit  0x08011d74        0xe CMakeFiles/basic_framework.dir/application/robot.c.obj
+                0x08011d74                BSPInit
+ *fill*         0x08011d82        0x2 
  .text.OSTaskInit
-                0x0801210c       0x88 CMakeFiles/basic_framework.dir/application/robot.c.obj
-                0x0801210c                OSTaskInit
+                0x08011d84       0x88 CMakeFiles/basic_framework.dir/application/robot.c.obj
+                0x08011d84                OSTaskInit
  .text.RobotInit
-                0x08012194       0x1c CMakeFiles/basic_framework.dir/application/robot.c.obj
-                0x08012194                RobotInit
+                0x08011e0c       0x1c CMakeFiles/basic_framework.dir/application/robot.c.obj
+                0x08011e0c                RobotInit
  .text.RobotTask
-                0x080121b0       0x10 CMakeFiles/basic_framework.dir/application/robot.c.obj
-                0x080121b0                RobotTask
+                0x08011e28       0x10 CMakeFiles/basic_framework.dir/application/robot.c.obj
+                0x08011e28                RobotTask
  .text.StartROBOTTASK
-                0x080121c0       0x84 CMakeFiles/basic_framework.dir/application/robot.c.obj
-                0x080121c0                StartROBOTTASK
+                0x08011e38       0x84 CMakeFiles/basic_framework.dir/application/robot.c.obj
+                0x08011e38                StartROBOTTASK
  .text.CANServiceInit
-                0x08012244       0x3c CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+                0x08011ebc       0x3c CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
  .text.CANAddFilter
-                0x08012280       0x60 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+                0x08011ef8       0x60 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
  .text.CANFIFOxCallback
-                0x080122e0       0x78 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+                0x08011f58       0x78 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
  .text.CANRegister
-                0x08012358       0xf4 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
-                0x08012358                CANRegister
+                0x08011fd0       0xf4 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+                0x08011fd0                CANRegister
  .text.CANTransmit
-                0x0801244c       0xb8 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
-                0x0801244c                CANTransmit
+                0x080120c4       0xb8 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+                0x080120c4                CANTransmit
  .text.HAL_CAN_RxFifo0MsgPendingCallback
-                0x08012504        0xa CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
-                0x08012504                HAL_CAN_RxFifo0MsgPendingCallback
+                0x0801217c        0xa CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+                0x0801217c                HAL_CAN_RxFifo0MsgPendingCallback
  .text.HAL_CAN_RxFifo1MsgPendingCallback
-                0x0801250e        0xa CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
-                0x0801250e                HAL_CAN_RxFifo1MsgPendingCallback
+                0x08012186        0xa CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+                0x08012186                HAL_CAN_RxFifo1MsgPendingCallback
  .text.DWT_CNT_Update
-                0x08012518       0x4c CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+                0x08012190       0x4c CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
  .text.DWT_Init
-                0x08012564       0x70 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
-                0x08012564                DWT_Init
+                0x080121dc       0x70 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+                0x080121dc                DWT_Init
  .text.DWT_GetDeltaT
-                0x080125d4       0x48 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
-                0x080125d4                DWT_GetDeltaT
+                0x0801224c       0x48 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+                0x0801224c                DWT_GetDeltaT
  .text.DWT_SysTimeUpdate
-                0x0801261c       0xd4 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
-                0x0801261c                DWT_SysTimeUpdate
+                0x08012294       0xd4 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+                0x08012294                DWT_SysTimeUpdate
  .text.DWT_GetTimeline_s
-                0x080126f0       0x4c CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
-                0x080126f0                DWT_GetTimeline_s
+                0x08012368       0x4c CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+                0x08012368                DWT_GetTimeline_s
  .text.DWT_GetTimeline_ms
-                0x0801273c       0x3c CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
-                0x0801273c                DWT_GetTimeline_ms
+                0x080123b4       0x3c CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+                0x080123b4                DWT_GetTimeline_ms
  .text.DWT_Delay
-                0x08012778       0x34 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
-                0x08012778                DWT_Delay
+                0x080123f0       0x34 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+                0x080123f0                DWT_Delay
  .text.HAL_GPIO_EXTI_Callback
-                0x080127ac       0x30 CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
-                0x080127ac                HAL_GPIO_EXTI_Callback
+                0x08012424       0x30 CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
+                0x08012424                HAL_GPIO_EXTI_Callback
  .text.HAL_I2C_MasterRxCpltCallback
-                0x080127dc       0x54 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
-                0x080127dc                HAL_I2C_MasterRxCpltCallback
+                0x08012454       0x54 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
+                0x08012454                HAL_I2C_MasterRxCpltCallback
  .text.HAL_I2C_MemRxCpltCallback
-                0x08012830        0x8 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
-                0x08012830                HAL_I2C_MemRxCpltCallback
+                0x080124a8        0x8 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
+                0x080124a8                HAL_I2C_MemRxCpltCallback
  .text.BSPLogInit
-                0x08012838        0x8 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
-                0x08012838                BSPLogInit
+                0x080124b0        0x8 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
+                0x080124b0                BSPLogInit
  .text.HAL_TIM_PWM_PulseFinishedCallback
-                0x08012840       0x44 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
-                0x08012840                HAL_TIM_PWM_PulseFinishedCallback
+                0x080124b8       0x44 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
+                0x080124b8                HAL_TIM_PWM_PulseFinishedCallback
  .text.USARTServiceInit
-                0x08012884       0x24 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
-                0x08012884                USARTServiceInit
+                0x080124fc       0x24 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+                0x080124fc                USARTServiceInit
  .text.USARTRegister
-                0x080128a8       0xa8 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
-                0x080128a8                USARTRegister
+                0x08012520       0xa8 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+                0x08012520                USARTRegister
  .text.HAL_UARTEx_RxEventCallback
-                0x08012950       0x6c CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
-                0x08012950                HAL_UARTEx_RxEventCallback
+                0x080125c8       0x6c CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+                0x080125c8                HAL_UARTEx_RxEventCallback
  .text.HAL_UART_ErrorCallback
-                0x080129bc       0x70 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
-                0x080129bc                HAL_UART_ErrorCallback
+                0x08012634       0x70 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+                0x08012634                HAL_UART_ErrorCallback
  .text.USBTransmit
-                0x08012a2c        0x8 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
-                0x08012a2c                USBTransmit
- .text.invSqrt  0x08012a34       0x30 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+                0x080126a4        0x8 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
+                0x080126a4                USBTransmit
+ .text.invSqrt  0x080126ac       0x30 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
  .text.IMU_QuaternionEKF_F_Linearization_P_Fading
-                0x08012a64      0x1a0 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+                0x080126dc      0x1a0 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
  .text.IMU_QuaternionEKF_Observe
-                0x08012c04       0x38 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+                0x0801287c       0x38 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
  .text.IMU_QuaternionEKF_xhatUpdate
-                0x08012c3c      0x444 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+                0x080128b4      0x444 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
  .text.IMU_QuaternionEKF_SetH
-                0x08013080       0xe4 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+                0x08012cf8       0xe4 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
  .text.IMU_QuaternionEKF_Init
-                0x08013164       0xe4 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
-                0x08013164                IMU_QuaternionEKF_Init
+                0x08012ddc       0xe4 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+                0x08012ddc                IMU_QuaternionEKF_Init
  .text.IMU_QuaternionEKF_Update
-                0x08013248      0x420 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
-                0x08013248                IMU_QuaternionEKF_Update
+                0x08012ec0      0x420 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+                0x08012ec0                IMU_QuaternionEKF_Update
  .text.f_Trapezoid_Intergral
-                0x08013668       0x2a CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+                0x080132e0       0x2a CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
  .text.f_Changing_Integration_Rate
-                0x08013692       0x66 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+                0x0801330a       0x66 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
  .text.f_Integral_Limit
-                0x080136f8       0x94 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+                0x08013370       0x94 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
  .text.f_Derivative_On_Measurement
-                0x0801378c       0x22 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+                0x08013404       0x22 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
  .text.f_Derivative_Filter
-                0x080137ae       0x2e CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+                0x08013426       0x2e CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
  .text.f_Output_Filter
-                0x080137dc       0x2e CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+                0x08013454       0x2e CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
  .text.f_Output_Limit
-                0x0801380a       0x2e CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+                0x08013482       0x2e CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
  .text.f_PID_ErrorHandle
-                0x08013838       0x90 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
- .text.PIDInit  0x080138c8       0x4a CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
-                0x080138c8                PIDInit
+                0x080134b0       0x90 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+ .text.PIDInit  0x08013540       0x4a CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+                0x08013540                PIDInit
  .text.PIDCalculate
-                0x08013912      0x140 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
-                0x08013912                PIDCalculate
- *fill*         0x08013a52        0x2 
+                0x0801358a      0x140 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+                0x0801358a                PIDCalculate
+ *fill*         0x080136ca        0x2 
  .text.init_crc16_tab
-                0x08013a54       0x54 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
-                0x08013a54                init_crc16_tab
- .text.crc_16   0x08013aa8       0x50 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
-                0x08013aa8                crc_16
- .text.crc_8    0x08013af8       0x28 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
-                0x08013af8                crc_8
+                0x080136cc       0x54 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
+                0x080136cc                init_crc16_tab
+ .text.crc_16   0x08013720       0x50 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
+                0x08013720                crc_16
+ .text.crc_8    0x08013770       0x28 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
+                0x08013770                crc_8
  .text.H_K_R_Adjustment
-                0x08013b20      0x114 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+                0x08013798      0x114 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
  .text.Kalman_Filter_Init
-                0x08013c34      0x42c CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
-                0x08013c34                Kalman_Filter_Init
+                0x080138ac      0x42c CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+                0x080138ac                Kalman_Filter_Init
  .text.Kalman_Filter_Measure
-                0x08014060       0x4c CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
-                0x08014060                Kalman_Filter_Measure
+                0x08013cd8       0x4c CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+                0x08013cd8                Kalman_Filter_Measure
  .text.Kalman_Filter_xhatMinusUpdate
-                0x080140ac       0x76 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
-                0x080140ac                Kalman_Filter_xhatMinusUpdate
+                0x08013d24       0x76 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+                0x08013d24                Kalman_Filter_xhatMinusUpdate
  .text.Kalman_Filter_PminusUpdate
-                0x08014122       0x68 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
-                0x08014122                Kalman_Filter_PminusUpdate
+                0x08013d9a       0x68 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+                0x08013d9a                Kalman_Filter_PminusUpdate
  .text.Kalman_Filter_SetK
-                0x0801418a       0xcc CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
-                0x0801418a                Kalman_Filter_SetK
+                0x08013e02       0xcc CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+                0x08013e02                Kalman_Filter_SetK
  .text.Kalman_Filter_xhatUpdate
-                0x08014256       0x82 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
-                0x08014256                Kalman_Filter_xhatUpdate
+                0x08013ece       0x82 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+                0x08013ece                Kalman_Filter_xhatUpdate
  .text.Kalman_Filter_P_Update
-                0x080142d8       0x64 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
-                0x080142d8                Kalman_Filter_P_Update
+                0x08013f50       0x64 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+                0x08013f50                Kalman_Filter_P_Update
  .text.Kalman_Filter_Update
-                0x0801433c       0xf8 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
-                0x0801433c                Kalman_Filter_Update
- .text.Sqrt     0x08014434       0x5c CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
-                0x08014434                Sqrt
+                0x08013fb4       0xf8 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+                0x08013fb4                Kalman_Filter_Update
+ .text.Sqrt     0x080140ac       0x5c CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+                0x080140ac                Sqrt
  .text.float_constrain
-                0x08014490       0x20 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
-                0x08014490                float_constrain
+                0x08014108       0x20 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+                0x08014108                float_constrain
  .text.float_rounding
-                0x080144b0       0x40 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
-                0x080144b0                float_rounding
- .text.Norm3d   0x080144f0       0x4c CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
-                0x080144f0                Norm3d
- .text.Cross3d  0x0801453c       0x62 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
-                0x0801453c                Cross3d
- .text.Dot3d    0x0801459e       0x2e CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
-                0x0801459e                Dot3d
+                0x08014128       0x40 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+                0x08014128                float_rounding
+ .text.Norm3d   0x08014168       0x4c CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+                0x08014168                Norm3d
+ .text.Cross3d  0x080141b4       0x62 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+                0x080141b4                Cross3d
+ .text.Dot3d    0x08014216       0x2e CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+                0x08014216                Dot3d
  .text.DaemonRegister
-                0x080145cc       0x48 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
-                0x080145cc                DaemonRegister
+                0x08014244       0x48 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
+                0x08014244                DaemonRegister
  .text.DaemonReload
-                0x08014614        0x6 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
-                0x08014614                DaemonReload
- *fill*         0x0801461a        0x2 
+                0x0801428c        0x6 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
+                0x0801428c                DaemonReload
+ *fill*         0x08014292        0x2 
  .text.BMI088_ACCEL_NS_L
-                0x0801461c       0x14 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
-                0x0801461c                BMI088_ACCEL_NS_L
+                0x08014294       0x14 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
+                0x08014294                BMI088_ACCEL_NS_L
  .text.BMI088_ACCEL_NS_H
-                0x08014630       0x14 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
-                0x08014630                BMI088_ACCEL_NS_H
+                0x080142a8       0x14 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
+                0x080142a8                BMI088_ACCEL_NS_H
  .text.BMI088_GYRO_NS_L
-                0x08014644       0x14 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
-                0x08014644                BMI088_GYRO_NS_L
+                0x080142bc       0x14 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
+                0x080142bc                BMI088_GYRO_NS_L
  .text.BMI088_GYRO_NS_H
-                0x08014658       0x14 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
-                0x08014658                BMI088_GYRO_NS_H
+                0x080142d0       0x14 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
+                0x080142d0                BMI088_GYRO_NS_H
  .text.BMI088_read_write_byte
-                0x0801466c       0x30 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
-                0x0801466c                BMI088_read_write_byte
+                0x080142e4       0x30 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
+                0x080142e4                BMI088_read_write_byte
  .text.BMI088_read_muli_reg
-                0x0801469c       0x24 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+                0x08014314       0x24 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
  .text.BMI088_write_single_reg
-                0x080146c0       0x10 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+                0x08014338       0x10 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
  .text.BMI088_read_single_reg
-                0x080146d0       0x16 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
- *fill*         0x080146e6        0x2 
+                0x08014348       0x16 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+ *fill*         0x0801435e        0x2 
  .text.Calibrate_MPU_Offset
-                0x080146e8      0x4c4 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+                0x08014360      0x4c4 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
  .text.bmi088_accel_init
-                0x08014bac      0x18c CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
-                0x08014bac                bmi088_accel_init
+                0x08014824      0x18c CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+                0x08014824                bmi088_accel_init
  .text.bmi088_gyro_init
-                0x08014d38      0x160 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
-                0x08014d38                bmi088_gyro_init
+                0x080149b0      0x160 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+                0x080149b0                bmi088_gyro_init
  .text.BMI088Init
-                0x08014e98       0x6c CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
-                0x08014e98                BMI088Init
+                0x08014b10       0x6c CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+                0x08014b10                BMI088Init
  .text.BMI088_Read
-                0x08014f04      0x1f0 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
-                0x08014f04                BMI088_Read
+                0x08014b7c      0x1f0 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+                0x08014b7c                BMI088_Read
  .text.IMUPWMSet
-                0x080150f4        0xc CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+                0x08014d6c        0xc CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
  .text.InitQuaternion
-                0x08015100      0x108 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+                0x08014d78      0x108 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
  .text.IMU_Param_Correction
-                0x08015208      0x2c8 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+                0x08014e80      0x2c8 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
  .text.IMU_Temperature_Ctrl
-                0x080154d0       0x54 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+                0x08015148       0x54 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
  .text.INS_Init
-                0x08015524       0xf8 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
-                0x08015524                INS_Init
+                0x0801519c       0xf8 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+                0x0801519c                INS_Init
  .text.BodyFrameToEarthFrame
-                0x0801561c      0x126 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
-                0x0801561c                BodyFrameToEarthFrame
+                0x08015294      0x126 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+                0x08015294                BodyFrameToEarthFrame
  .text.EarthFrameToBodyFrame
-                0x08015742      0x126 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
-                0x08015742                EarthFrameToBodyFrame
+                0x080153ba      0x126 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+                0x080153ba                EarthFrameToBodyFrame
  .text.INS_Task
-                0x08015868      0x18c CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
-                0x08015868                INS_Task
+                0x080154e0      0x18c CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+                0x080154e0                INS_Task
  .text.VisionSetAltitude
-                0x080159f4       0x20 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
-                0x080159f4                VisionSetAltitude
+                0x0801566c       0x20 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
+                0x0801566c                VisionSetAltitude
  .text.VisionSend
-                0x08015a14       0x3c CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
-                0x08015a14                VisionSend
+                0x0801568c       0x3c CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
+                0x0801568c                VisionSend
  .text.get_protocol_send_data
-                0x08015a50       0xa4 CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
-                0x08015a50                get_protocol_send_data
+                0x080156c8       0xa4 CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
+                0x080156c8                get_protocol_send_data
  .text.CheckName
-                0x08015af4       0x38 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+                0x0801576c       0x38 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
  .text.CheckLen
-                0x08015b2c       0x30 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+                0x080157a4       0x30 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
  .text.PubRegister
-                0x08015b5c       0x60 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
-                0x08015b5c                PubRegister
+                0x080157d4       0x60 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+                0x080157d4                PubRegister
  .text.SubRegister
-                0x08015bbc       0x42 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
-                0x08015bbc                SubRegister
+                0x08015834       0x42 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+                0x08015834                SubRegister
  .text.SubGetMessage
-                0x08015bfe       0x2e CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
-                0x08015bfe                SubGetMessage
+                0x08015876       0x2e CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+                0x08015876                SubGetMessage
  .text.PubPushMessage
-                0x08015c2c       0x4c CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
-                0x08015c2c                PubPushMessage
+                0x080158a4       0x4c CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+                0x080158a4                PubPushMessage
  .text.DJIMotorStop
-                0x08015c78        0x8 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
-                0x08015c78                DJIMotorStop
+                0x080158f0        0x8 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
+                0x080158f0                DJIMotorStop
  .text.DJIMotorEnable
-                0x08015c80        0x8 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
-                0x08015c80                DJIMotorEnable
+                0x080158f8        0x8 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
+                0x080158f8                DJIMotorEnable
  .text.DJIMotorSetRef
-                0x08015c88        0x6 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
-                0x08015c88                DJIMotorSetRef
- *fill*         0x08015c8e        0x2 
+                0x08015900        0x6 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
+                0x08015900                DJIMotorSetRef
+ *fill*         0x08015906        0x2 
  .text.DJIMotorControl
-                0x08015c90      0x158 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
-                0x08015c90                DJIMotorControl
+                0x08015908      0x158 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
+                0x08015908                DJIMotorControl
  .text.float_to_uint
-                0x08015de8       0x2a CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+                0x08015a60       0x2a CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
  .text.uint_to_float
-                0x08015e12       0x28 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+                0x08015a8a       0x28 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
  .text.DMMotorLostCallback
-                0x08015e3a       0x12 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+                0x08015ab2       0x12 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
  .text.DMMotorDecode
-                0x08015e4c       0xf0 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+                0x08015ac4       0xf0 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
  .text.DMMotorSetMode
-                0x08015f3c       0x26 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+                0x08015bb4       0x26 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
  .text.DMMotorEnable
-                0x08015f62        0x8 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
-                0x08015f62                DMMotorEnable
+                0x08015bda        0x8 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+                0x08015bda                DMMotorEnable
  .text.DMMotorStop
-                0x08015f6a        0x8 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
-                0x08015f6a                DMMotorStop
- *fill*         0x08015f72        0x2 
+                0x08015be2        0x8 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+                0x08015be2                DMMotorStop
+ *fill*         0x08015bea        0x2 
  .text.DMMotorMITCtrl
-                0x08015f74      0x174 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
-                0x08015f74                DMMotorMITCtrl
+                0x08015bec      0x174 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+                0x08015bec                DMMotorMITCtrl
  .text.DMMotorCaliEncoder
-                0x080160e8       0x2c CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
-                0x080160e8                DMMotorCaliEncoder
+                0x08015d60       0x2c CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+                0x08015d60                DMMotorCaliEncoder
  .text.DMMotorInit
-                0x08016114       0xd4 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
-                0x08016114                DMMotorInit
+                0x08015d8c       0xd4 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+                0x08015d8c                DMMotorInit
  .text.DMMotorControlInit
-                0x080161e8        0x2 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
-                0x080161e8                DMMotorControlInit
- *fill*         0x080161ea        0x2 
+                0x08015e60        0x2 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+                0x08015e60                DMMotorControlInit
+ *fill*         0x08015e62        0x2 
  .text.LKMotorControl
-                0x080161ec      0x140 CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
-                0x080161ec                LKMotorControl
+                0x08015e64      0x140 CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
+                0x08015e64                LKMotorControl
  .text.MotorControlTask
-                0x0801632c       0x10 CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
-                0x0801632c                MotorControlTask
+                0x08015fa4       0x10 CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
+                0x08015fa4                MotorControlTask
  .text.DJIMotorLostCallback
-                0x0801633c       0x48 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+                0x08015fb4       0x48 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
  .text.MotorSenderGrouping
-                0x08016384      0x194 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+                0x08015ffc      0x194 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
  .text.DecodeDJIMotor
-                0x08016518      0x108 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+                0x08016190      0x108 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
  .text.SetPowerLimit
-                0x08016620        0xc CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
-                0x08016620                SetPowerLimit
+                0x08016298        0xc CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+                0x08016298                SetPowerLimit
  .text.PowerControlInit
-                0x0801662c       0xd0 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
-                0x0801662c                PowerControlInit
+                0x080162a4       0xd0 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+                0x080162a4                PowerControlInit
  .text.PowerControl
-                0x080166fc      0x3e4 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
-                0x080166fc                PowerControl
+                0x08016374      0x3e4 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+                0x08016374                PowerControl
  .text.RectifyRCjoystick
-                0x08016ae0       0x30 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+                0x08016758       0x30 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
  .text.sbus_to_rc
-                0x08016b10      0x160 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+                0x08016788      0x160 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
  .text.RCLostCallback
-                0x08016c70       0x44 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+                0x080168e8       0x44 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
  .text.RemoteControlRxCallback
-                0x08016cb4       0x1c CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+                0x0801692c       0x1c CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
  .text.RemoteControlInit
-                0x08016cd0       0x5c CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
-                0x08016cd0                RemoteControlInit
+                0x08016948       0x5c CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+                0x08016948                RemoteControlInit
  .text.SuperCapRxCallback
-                0x08016d2c       0x34 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
+                0x080169a4       0x34 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
  .text.SuperCapInit
-                0x08016d60       0x30 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
-                0x08016d60                SuperCapInit
+                0x080169d8       0x30 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
+                0x080169d8                SuperCapInit
  .text.arm_mat_trans_f32
-                0x08016d90       0xb8 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
-                0x08016d90                arm_mat_trans_f32
+                0x08016a08       0xb8 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
+                0x08016a08                arm_mat_trans_f32
  .text.arm_mat_sub_f32
-                0x08016e48       0xd4 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
-                0x08016e48                arm_mat_sub_f32
+                0x08016ac0       0xd4 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
+                0x08016ac0                arm_mat_sub_f32
  .text.arm_mat_mult_f32
-                0x08016f1c      0x140 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
-                0x08016f1c                arm_mat_mult_f32
+                0x08016b94      0x140 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
+                0x08016b94                arm_mat_mult_f32
  .text.arm_mat_inverse_f32
-                0x0801705c      0x20c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
-                0x0801705c                arm_mat_inverse_f32
+                0x08016cd4      0x20c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
+                0x08016cd4                arm_mat_inverse_f32
  .text.arm_mat_init_f32
-                0x08017268        0x8 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
-                0x08017268                arm_mat_init_f32
+                0x08016ee0        0x8 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
+                0x08016ee0                arm_mat_init_f32
  .text.arm_mat_add_f32
-                0x08017270       0xd4 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
-                0x08017270                arm_mat_add_f32
+                0x08016ee8       0xd4 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
+                0x08016ee8                arm_mat_add_f32
  .text.arm_sin_f32
-                0x08017344       0x8c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
-                0x08017344                arm_sin_f32
+                0x08016fbc       0x8c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
+                0x08016fbc                arm_sin_f32
  .text.arm_cos_f32
-                0x080173d0       0x94 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
-                0x080173d0                arm_cos_f32
- .text.malloc   0x08017464       0x10 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
-                0x08017464                malloc
- .text.strnlen  0x08017474       0x18 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
-                0x08017474                strnlen
- .text.__errno  0x0801748c        0xc D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
-                0x0801748c                __errno
- .text.strcpy   0x08017498       0x10 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
-                0x08017498                strcpy
- .text.memcpy   0x080174a8       0x1c D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
-                0x080174a8                memcpy
- .text.sqrt     0x080174c4       0x58 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-w_sqrt.o)
-                0x080174c4                sqrt
- .text.acosf    0x0801751c       0x58 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_acos.o)
-                0x0801751c                acosf
- .text.asinf    0x08017574       0x58 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_asin.o)
-                0x08017574                asinf
- .text.atan2f   0x080175cc        0x4 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_atan2.o)
-                0x080175cc                atan2f
- .text.sqrtf    0x080175d0       0x3c D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_sqrt.o)
-                0x080175d0                sqrtf
- .text.cosf     0x0801760c       0x88 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_cos.o)
-                0x0801760c                cosf
- .text.fabsf    0x08017694        0xe D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_fabs.o)
-                0x08017694                fabsf
- *fill*         0x080176a2        0x2 
- .text.sinf     0x080176a4       0x8c D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_sin.o)
-                0x080176a4                sinf
- .text.nanf     0x08017730        0xc D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_nan.o)
-                0x08017730                nanf
+                0x08017048       0x94 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
+                0x08017048                arm_cos_f32
+ .text.malloc   0x080170dc       0x10 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
+                0x080170dc                malloc
+ .text.strnlen  0x080170ec       0x18 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
+                0x080170ec                strnlen
+ .text.__errno  0x08017104        0xc D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
+                0x08017104                __errno
+ .text.strcpy   0x08017110       0x10 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
+                0x08017110                strcpy
+ .text.memcpy   0x08017120       0x1c D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
+                0x08017120                memcpy
+ .text.sqrt     0x0801713c       0x58 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-w_sqrt.o)
+                0x0801713c                sqrt
+ .text.acosf    0x08017194       0x58 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_acos.o)
+                0x08017194                acosf
+ .text.asinf    0x080171ec       0x58 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_asin.o)
+                0x080171ec                asinf
+ .text.atan2f   0x08017244        0x4 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_atan2.o)
+                0x08017244                atan2f
+ .text.sqrtf    0x08017248       0x3c D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_sqrt.o)
+                0x08017248                sqrtf
+ .text.cosf     0x08017284       0x88 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_cos.o)
+                0x08017284                cosf
+ .text.fabsf    0x0801730c        0xe D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_fabs.o)
+                0x0801730c                fabsf
+ *fill*         0x0801731a        0x2 
+ .text.sinf     0x0801731c       0x8c D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_sin.o)
+                0x0801731c                sinf
+ .text.nanf     0x080173a8        0xc D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_nan.o)
+                0x080173a8                nanf
  .text.__ieee754_sqrt
-                0x0801773c      0x1ac D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-e_sqrt.o)
-                0x0801773c                __ieee754_sqrt
+                0x080173b4      0x1ac D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-e_sqrt.o)
+                0x080173b4                __ieee754_sqrt
  .text.__ieee754_sqrtf
-                0x080178e8        0x6 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_sqrt.o)
-                0x080178e8                __ieee754_sqrtf
- *fill*         0x080178ee        0x2 
+                0x08017560        0x6 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_sqrt.o)
+                0x08017560                __ieee754_sqrtf
+ *fill*         0x08017566        0x2 
  .text.__kernel_cosf
-                0x080178f0       0xb0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-kf_cos.o)
-                0x080178f0                __kernel_cosf
+                0x08017568       0xb0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-kf_cos.o)
+                0x08017568                __kernel_cosf
  .text.__kernel_sinf
-                0x080179a0       0x90 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-kf_sin.o)
-                0x080179a0                __kernel_sinf
+                0x08017618       0x90 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-kf_sin.o)
+                0x08017618                __kernel_sinf
  .text.__ieee754_acosf
-                0x08017a30      0x1ec D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_acos.o)
-                0x08017a30                __ieee754_acosf
+                0x080176a8      0x1ec D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_acos.o)
+                0x080176a8                __ieee754_acosf
  .text.__ieee754_asinf
-                0x08017c1c      0x1c8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_asin.o)
-                0x08017c1c                __ieee754_asinf
+                0x08017894      0x1c8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_asin.o)
+                0x08017894                __ieee754_asinf
  .text.__ieee754_atan2f
-                0x08017de4      0x140 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_atan2.o)
-                0x08017de4                __ieee754_atan2f
+                0x08017a5c      0x140 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_atan2.o)
+                0x08017a5c                __ieee754_atan2f
  .text.__ieee754_rem_pio2f
-                0x08017f24      0x260 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_rem_pio2.o)
-                0x08017f24                __ieee754_rem_pio2f
- .text.atanf    0x08018184      0x1a8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_atan.o)
-                0x08018184                atanf
+                0x08017b9c      0x260 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_rem_pio2.o)
+                0x08017b9c                __ieee754_rem_pio2f
+ .text.atanf    0x08017dfc      0x1a8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_atan.o)
+                0x08017dfc                atanf
  .text.__kernel_rem_pio2f
-                0x0801832c      0x4d0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-kf_rem_pio2.o)
-                0x0801832c                __kernel_rem_pio2f
- .text.scalbnf  0x080187fc       0xcc D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_scalbn.o)
-                0x080187fc                scalbnf
- .text.floorf   0x080188c8       0x88 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_floor.o)
-                0x080188c8                floorf
+                0x08017fa4      0x4d0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-kf_rem_pio2.o)
+                0x08017fa4                __kernel_rem_pio2f
+ .text.scalbnf  0x08018474       0xcc D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_scalbn.o)
+                0x08018474                scalbnf
+ .text.floorf   0x08018540       0x88 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_floor.o)
+                0x08018540                floorf
  *(.glue_7)
- .glue_7        0x08018950        0x0 linker stubs
+ .glue_7        0x080185c8        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x08018950        0x0 linker stubs
+ .glue_7t       0x080185c8        0x0 linker stubs
  *(.eh_frame)
- .eh_frame      0x08018950        0x0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+ .eh_frame      0x080185c8        0x0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
  *(.init)
- .init          0x08018950        0x4 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crti.o
-                0x08018950                _init
- .init          0x08018954        0x8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtn.o
+ .init          0x080185c8        0x4 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crti.o
+                0x080185c8                _init
+ .init          0x080185cc        0x8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtn.o
  *(.fini)
- .fini          0x0801895c        0x4 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crti.o
-                0x0801895c                _fini
- .fini          0x08018960        0x8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtn.o
-                0x08018968                        . = ALIGN (0x4)
-                0x08018968                        _etext = .
+ .fini          0x080185d4        0x4 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crti.o
+                0x080185d4                _fini
+ .fini          0x080185d8        0x8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtn.o
+                0x080185e0                        . = ALIGN (0x4)
+                0x080185e0                        _etext = .
 
-.vfp11_veneer   0x08018968        0x0
- .vfp11_veneer  0x08018968        0x0 linker stubs
+.vfp11_veneer   0x080185e0        0x0
+ .vfp11_veneer  0x080185e0        0x0 linker stubs
 
-.v4_bx          0x08018968        0x0
- .v4_bx         0x08018968        0x0 linker stubs
+.v4_bx          0x080185e0        0x0
+ .v4_bx         0x080185e0        0x0 linker stubs
 
-.iplt           0x08018968        0x0
- .iplt          0x08018968        0x0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+.iplt           0x080185e0        0x0
+ .iplt          0x080185e0        0x0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 
-.rodata         0x08018968     0x15e8
-                0x08018968                        . = ALIGN (0x4)
+.rodata         0x080185e0     0x15e8
+                0x080185e0                        . = ALIGN (0x4)
  *(.rodata)
- .rodata        0x08018968        0x5 cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/tasks.c.obj
- *fill*         0x0801896d        0x3 
- .rodata        0x08018970       0x1c CMakeFiles/basic_framework.dir/Src/freertos.c.obj
- .rodata        0x0801898c       0x54 CMakeFiles/basic_framework.dir/application/robot.c.obj
+ .rodata        0x080185e0        0x5 cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/tasks.c.obj
+ *fill*         0x080185e5        0x3 
+ .rodata        0x080185e8       0x1c CMakeFiles/basic_framework.dir/Src/freertos.c.obj
+ .rodata        0x08018604       0x54 CMakeFiles/basic_framework.dir/application/robot.c.obj
  *(.rodata*)
  .rodata.AHBPrescTable
-                0x080189e0       0x10 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Src/system_stm32f4xx.c.obj
-                0x080189e0                AHBPrescTable
+                0x08018658       0x10 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Src/system_stm32f4xx.c.obj
+                0x08018658                AHBPrescTable
  .rodata.APBPrescTable
-                0x080189f0        0x8 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Src/system_stm32f4xx.c.obj
-                0x080189f0                APBPrescTable
+                0x08018668        0x8 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Src/system_stm32f4xx.c.obj
+                0x08018668                APBPrescTable
  .rodata.flagBitshiftOffset.0
-                0x080189f8        0x8 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c.obj
+                0x08018670        0x8 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c.obj
  .rodata.main.str1.4
-                0x08018a00      0x6ff CMakeFiles/basic_framework.dir/Src/main.c.obj
+                0x08018678      0x6ff CMakeFiles/basic_framework.dir/Src/main.c.obj
                                  0x45 (size before relaxing)
  .rodata.str1.4
-                0x080190ff        0xc CMakeFiles/basic_framework.dir/Src/freertos.c.obj
+                0x08018d77        0xc CMakeFiles/basic_framework.dir/Src/freertos.c.obj
  .rodata.USBD_FS_ProductStrDescriptor.str1.4
-                0x080190ff       0x11 CMakeFiles/basic_framework.dir/Src/usbd_desc.c.obj
+                0x08018d77       0x11 CMakeFiles/basic_framework.dir/Src/usbd_desc.c.obj
  .rodata.USBD_FS_ManufacturerStrDescriptor.str1.4
-                0x080190ff        0xe CMakeFiles/basic_framework.dir/Src/usbd_desc.c.obj
+                0x08018d77        0xe CMakeFiles/basic_framework.dir/Src/usbd_desc.c.obj
  .rodata.USBD_FS_ConfigStrDescriptor.str1.4
-                0x080190ff        0xb CMakeFiles/basic_framework.dir/Src/usbd_desc.c.obj
+                0x08018d77        0xb CMakeFiles/basic_framework.dir/Src/usbd_desc.c.obj
  .rodata.USBD_FS_InterfaceStrDescriptor.str1.4
-                0x080190ff        0xe CMakeFiles/basic_framework.dir/Src/usbd_desc.c.obj
+                0x08018d77        0xe CMakeFiles/basic_framework.dir/Src/usbd_desc.c.obj
  .rodata._DoInit.str1.4
-                0x080190ff        0x9 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c.obj
- *fill*         0x080190ff        0x1 
+                0x08018d77        0x9 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c.obj
+ *fill*         0x08018d77        0x1 
  .rodata._aInitStr.0
-                0x08019100       0x11 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c.obj
- *fill*         0x08019111        0x3 
+                0x08018d78       0x11 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c.obj
+ *fill*         0x08018d89        0x3 
  .rodata._aV2C.0
-                0x08019114       0x10 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c.obj
+                0x08018d8c       0x10 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c.obj
  .rodata.ChassisInit.str1.4
-                0x08019124       0x19 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
+                0x08018d9c       0x19 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
  .rodata.EmergencyHandler.str1.4
-                0x08019124       0x67 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+                0x08018d9c       0x67 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
  .rodata.RobotCMDInit.str1.4
-                0x08019124       0x49 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+                0x08018d9c       0x49 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
  .rodata.GimbalInit.str1.4
-                0x08019124       0x17 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
+                0x08018d9c       0x17 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
  .rodata.StartINSTASK.str1.4
-                0x08019124       0x7c CMakeFiles/basic_framework.dir/application/robot.c.obj
+                0x08018d9c       0x7c CMakeFiles/basic_framework.dir/application/robot.c.obj
  .rodata.StartMOTORTASK.str1.4
-                0x08019124       0x62 CMakeFiles/basic_framework.dir/application/robot.c.obj
+                0x08018d9c       0x62 CMakeFiles/basic_framework.dir/application/robot.c.obj
  .rodata.StartROBOTTASK.str1.4
-                0x08019124       0x6b CMakeFiles/basic_framework.dir/application/robot.c.obj
+                0x08018d9c       0x6b CMakeFiles/basic_framework.dir/application/robot.c.obj
  .rodata.str1.4
-                0x08019124       0x20 CMakeFiles/basic_framework.dir/application/robot.c.obj
+                0x08018d9c       0x20 CMakeFiles/basic_framework.dir/application/robot.c.obj
  .rodata.CANRegister.str1.4
-                0x08019124       0xe9 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+                0x08018d9c       0xe9 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
  .rodata.CANTransmit.str1.4
-                0x08019124       0x84 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+                0x08018d9c       0x84 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
  .rodata.USARTRegister.str1.4
-                0x08019124       0x85 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+                0x08018d9c       0x85 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
  .rodata.HAL_UART_ErrorCallback.str1.4
-                0x08019124       0x54 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+                0x08018d9c       0x54 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
  .rodata.IMU_QuaternionEKF_F
-                0x08019124       0x90 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
-                0x08019124                IMU_QuaternionEKF_F
+                0x08018d9c       0x90 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+                0x08018d9c                IMU_QuaternionEKF_F
  .rodata.sht75_crc_table
-                0x080191b4      0x100 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
+                0x08018e2c      0x100 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
  .rodata.Calibrate_MPU_Offset.str1.4
-                0x080192b4       0x88 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+                0x08018f2c       0x88 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
  .rodata.bmi088_accel_init.str1.4
-                0x080192b4       0x33 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+                0x08018f2c       0x33 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
  .rodata.bmi088_gyro_init.str1.4
-                0x080192b4       0x34 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+                0x08018f2c       0x34 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
  .rodata.BMI088_Gyro_Init_Table
-                0x080192b4       0x12 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
- *fill*         0x080192c6        0x2 
+                0x08018f2c       0x12 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+ *fill*         0x08018f3e        0x2 
  .rodata.BMI088_Accel_Init_Table
-                0x080192c8       0x12 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
- *fill*         0x080192da        0x2 
- .rodata.zb     0x080192dc        0xc CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
-                0x080192dc                zb
- .rodata.yb     0x080192e8        0xc CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
-                0x080192e8                yb
- .rodata.xb     0x080192f4        0xc CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
-                0x080192f4                xb
+                0x08018f40       0x12 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+ *fill*         0x08018f52        0x2 
+ .rodata.zb     0x08018f54        0xc CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+                0x08018f54                zb
+ .rodata.yb     0x08018f60        0xc CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+                0x08018f60                yb
+ .rodata.xb     0x08018f6c        0xc CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+                0x08018f6c                xb
  .rodata.CheckName.str1.4
-                0x08019300       0x35 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+                0x08018f78       0x35 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
  .rodata.CheckLen.str1.4
-                0x08019300       0x23 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+                0x08018f78       0x23 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
  .rodata.DJIMotorLostCallback.str1.4
-                0x08019300       0x4d CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+                0x08018f78       0x4d CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
  .rodata.MotorSenderGrouping.str1.4
-                0x08019300       0xfc CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+                0x08018f78       0xfc CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
  .rodata.constant
-                0x08019300       0x10 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
-                0x08019300                constant
- .rodata.K2     0x08019310       0x10 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
-                0x08019310                K2
- .rodata.K1     0x08019320       0x10 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
-                0x08019320                K1
+                0x08018f78       0x10 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+                0x08018f78                constant
+ .rodata.K2     0x08018f88       0x10 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+                0x08018f88                K2
+ .rodata.K1     0x08018f98       0x10 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+                0x08018f98                K1
  .rodata.RCLostCallback.str1.4
-                0x08019330       0x35 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+                0x08018fa8       0x35 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
  .rodata.sinTable_f32
-                0x08019330      0x804 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_common_tables.o)
-                0x08019330                sinTable_f32
+                0x08018fa8      0x804 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_common_tables.o)
+                0x08018fa8                sinTable_f32
  .rodata.acosf.str1.1
-                0x08019b34        0x1 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_acos.o)
+                0x080197ac        0x1 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_acos.o)
  .rodata.asinf.str1.1
-                0x08019b35        0x1 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_asin.o)
- *fill*         0x08019b35        0x3 
- .rodata.tiny   0x08019b38        0x8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-e_sqrt.o)
- .rodata.one    0x08019b40        0x8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-e_sqrt.o)
+                0x080197ad        0x1 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_asin.o)
+ *fill*         0x080197ad        0x3 
+ .rodata.tiny   0x080197b0        0x8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-e_sqrt.o)
+ .rodata.one    0x080197b8        0x8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-e_sqrt.o)
  .rodata.CSWTCH.9
-                0x08019b48        0xc D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_atan2.o)
+                0x080197c0        0xc D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_atan2.o)
  .rodata.CSWTCH.8
-                0x08019b54        0xc D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_atan2.o)
+                0x080197cc        0xc D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_atan2.o)
  .rodata.npio2_hw
-                0x08019b60       0x80 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_rem_pio2.o)
+                0x080197d8       0x80 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_rem_pio2.o)
  .rodata.two_over_pi
-                0x08019be0      0x318 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_rem_pio2.o)
+                0x08019858      0x318 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_rem_pio2.o)
  .rodata.atanlo
-                0x08019ef8       0x10 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_atan.o)
+                0x08019b70       0x10 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_atan.o)
  .rodata.atanhi
-                0x08019f08       0x10 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_atan.o)
- .rodata.PIo2   0x08019f18       0x2c D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-kf_rem_pio2.o)
+                0x08019b80       0x10 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_atan.o)
+ .rodata.PIo2   0x08019b90       0x2c D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-kf_rem_pio2.o)
  .rodata.init_jk
-                0x08019f44        0xc D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-kf_rem_pio2.o)
-                0x08019f50                        . = ALIGN (0x4)
+                0x08019bbc        0xc D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-kf_rem_pio2.o)
+                0x08019bc8                        . = ALIGN (0x4)
 
-.ARM.extab      0x08019f50        0x0
-                0x08019f50                        . = ALIGN (0x4)
+.ARM.extab      0x08019bc8        0x0
+                0x08019bc8                        . = ALIGN (0x4)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x08019f50                        . = ALIGN (0x4)
+                0x08019bc8                        . = ALIGN (0x4)
 
-.ARM            0x08019f50        0x8
-                0x08019f50                        . = ALIGN (0x4)
-                0x08019f50                        __exidx_start = .
+.ARM            0x08019bc8        0x8
+                0x08019bc8                        . = ALIGN (0x4)
+                0x08019bc8                        __exidx_start = .
  *(.ARM.exidx*)
- .ARM.exidx     0x08019f50        0x8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_udivmoddi4.o)
- .ARM.exidx     0x08019f58        0x0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
+ .ARM.exidx     0x08019bc8        0x8 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_udivmoddi4.o)
+ .ARM.exidx     0x08019bd0        0x0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
                                   0x8 (size before relaxing)
-                0x08019f58                        __exidx_end = .
-                0x08019f58                        . = ALIGN (0x4)
+                0x08019bd0                        __exidx_end = .
+                0x08019bd0                        . = ALIGN (0x4)
 
-.preinit_array  0x08019f58        0x0
-                0x08019f58                        . = ALIGN (0x4)
-                0x08019f58                        PROVIDE (__preinit_array_start = .)
+.preinit_array  0x08019bd0        0x0
+                0x08019bd0                        . = ALIGN (0x4)
+                0x08019bd0                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x08019f58                        PROVIDE (__preinit_array_end = .)
-                0x08019f58                        . = ALIGN (0x4)
+                0x08019bd0                        PROVIDE (__preinit_array_end = .)
+                0x08019bd0                        . = ALIGN (0x4)
 
-.init_array     0x08019f58        0x4
-                0x08019f58                        . = ALIGN (0x4)
-                0x08019f58                        PROVIDE (__init_array_start = .)
+.init_array     0x08019bd0        0x4
+                0x08019bd0                        . = ALIGN (0x4)
+                0x08019bd0                        PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
- .init_array    0x08019f58        0x4 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
-                0x08019f5c                        PROVIDE (__init_array_end = .)
-                0x08019f5c                        . = ALIGN (0x4)
+ .init_array    0x08019bd0        0x4 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+                0x08019bd4                        PROVIDE (__init_array_end = .)
+                0x08019bd4                        . = ALIGN (0x4)
 
-.fini_array     0x08019f5c        0x4
-                0x08019f5c                        . = ALIGN (0x4)
+.fini_array     0x08019bd4        0x4
+                0x08019bd4                        . = ALIGN (0x4)
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x08019f5c        0x4 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+ .fini_array    0x08019bd4        0x4 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
                 [!provide]                        PROVIDE (__fini_array_end = .)
-                0x08019f60                        . = ALIGN (0x4)
-                0x08019f60                        _sidata = LOADADDR (.data)
+                0x08019bd8                        . = ALIGN (0x4)
+                0x08019bd8                        _sidata = LOADADDR (.data)
 
-.rel.dyn        0x08019f60        0x0
- .rel.iplt      0x08019f60        0x0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+.rel.dyn        0x08019bd8        0x0
+ .rel.iplt      0x08019bd8        0x0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 
-.data           0x20000000      0x550 load address 0x08019f60
+.data           0x20000000      0x550 load address 0x08019bd8
                 0x20000000                        . = ALIGN (0x4)
                 0x20000000                        _sdata = .
  *(.data)
@@ -21937,12 +21929,12 @@ LOAD D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-no
                 0x20000550                        . = ALIGN (0x4)
  *fill*         0x2000054e        0x2 
                 0x20000550                        _edata = .
-                0x0801a4b0                        _siccmram = LOADADDR (.ccmram)
+                0x0801a128                        _siccmram = LOADADDR (.ccmram)
 
-.igot.plt       0x20000550        0x0 load address 0x0801a4b0
+.igot.plt       0x20000550        0x0 load address 0x0801a128
  .igot.plt      0x20000550        0x0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 
-.ccmram         0x10000000        0x0 load address 0x0801a4b0
+.ccmram         0x10000000        0x0 load address 0x0801a128
                 0x10000000                        . = ALIGN (0x4)
                 0x10000000                        _sccmram = .
  *(.ccmram)
@@ -22830,7 +22822,7 @@ LOAD D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-no
  .comment       0x000000b8       0x44 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
  .comment       0x000000b8       0x44 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
 
-.debug_frame    0x00000000     0xbd94
+.debug_frame    0x00000000     0xbd3c
  .debug_frame   0x00000000      0x144 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-findfp.o)
  .debug_frame   0x00000144       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memset.o)
  .debug_frame   0x00000164       0x38 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-reent.o)
@@ -22895,60 +22887,60 @@ LOAD D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-no
  .debug_frame   0x00009a04       0x28 CMakeFiles/basic_framework.dir/Src/sysmem.c.obj
  .debug_frame   0x00009a2c      0x414 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c.obj
  .debug_frame   0x00009e40       0xd4 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c.obj
- .debug_frame   0x00009f14       0xa0 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
- .debug_frame   0x00009fb4       0xfc CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
- .debug_frame   0x0000a0b0       0x90 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
- .debug_frame   0x0000a140       0xf0 CMakeFiles/basic_framework.dir/application/robot.c.obj
- .debug_frame   0x0000a230      0x108 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
- .debug_frame   0x0000a338      0x120 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
- .debug_frame   0x0000a458       0xa0 CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
- .debug_frame   0x0000a4f8       0xdc CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
- .debug_frame   0x0000a5d4       0x74 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
- .debug_frame   0x0000a648       0xc4 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
- .debug_frame   0x0000a70c       0xb0 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
- .debug_frame   0x0000a7bc       0x48 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
- .debug_frame   0x0000a804      0x134 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
- .debug_frame   0x0000a938       0xd8 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
- .debug_frame   0x0000aa10       0x74 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
- .debug_frame   0x0000aa84       0x30 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
- .debug_frame   0x0000aab4      0x130 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
- .debug_frame   0x0000abe4      0x158 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
- .debug_frame   0x0000ad3c       0x60 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
- .debug_frame   0x0000ad9c       0x8c CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
- .debug_frame   0x0000ae28      0x13c CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
- .debug_frame   0x0000af64      0x1a8 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
- .debug_frame   0x0000b10c       0xa8 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
- .debug_frame   0x0000b1b4       0xe0 CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
- .debug_frame   0x0000b294       0xbc CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
- .debug_frame   0x0000b350      0x108 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
- .debug_frame   0x0000b458      0x198 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
- .debug_frame   0x0000b5f0       0xcc CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
- .debug_frame   0x0000b6bc       0x28 CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
- .debug_frame   0x0000b6e4       0xe0 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
- .debug_frame   0x0000b7c4       0xa8 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
- .debug_frame   0x0000b86c       0x64 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
- .debug_frame   0x0000b8d0       0x40 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
- .debug_frame   0x0000b910       0x38 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
- .debug_frame   0x0000b948       0x44 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
- .debug_frame   0x0000b98c       0x4c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
- .debug_frame   0x0000b9d8       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
- .debug_frame   0x0000b9f8       0x38 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
- .debug_frame   0x0000ba30       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
- .debug_frame   0x0000ba50       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
- .debug_frame   0x0000ba70       0xac D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_arm_addsubdf3.o)
- .debug_frame   0x0000bb1c       0x50 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_arm_muldivdf3.o)
- .debug_frame   0x0000bb6c       0xc4 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_arm_cmpdf2.o)
- .debug_frame   0x0000bc30       0x24 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_arm_truncdfsf2.o)
- .debug_frame   0x0000bc54       0x2c D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_uldivmod.o)
- .debug_frame   0x0000bc80       0x34 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_udivmoddi4.o)
- .debug_frame   0x0000bcb4       0x30 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
- .debug_frame   0x0000bce4       0x28 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
- .debug_frame   0x0000bd0c       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
- .debug_frame   0x0000bd2c       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
- .debug_frame   0x0000bd4c       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
- .debug_frame   0x0000bd6c       0x28 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
+ .debug_frame   0x00009f14       0xa4 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
+ .debug_frame   0x00009fb8       0xa0 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+ .debug_frame   0x0000a058       0x90 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
+ .debug_frame   0x0000a0e8       0xf0 CMakeFiles/basic_framework.dir/application/robot.c.obj
+ .debug_frame   0x0000a1d8      0x108 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+ .debug_frame   0x0000a2e0      0x120 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+ .debug_frame   0x0000a400       0xa0 CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
+ .debug_frame   0x0000a4a0       0xdc CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
+ .debug_frame   0x0000a57c       0x74 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
+ .debug_frame   0x0000a5f0       0xc4 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
+ .debug_frame   0x0000a6b4       0xb0 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+ .debug_frame   0x0000a764       0x48 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
+ .debug_frame   0x0000a7ac      0x134 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+ .debug_frame   0x0000a8e0       0xd8 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+ .debug_frame   0x0000a9b8       0x74 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
+ .debug_frame   0x0000aa2c       0x30 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
+ .debug_frame   0x0000aa5c      0x130 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+ .debug_frame   0x0000ab8c      0x158 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+ .debug_frame   0x0000ace4       0x60 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
+ .debug_frame   0x0000ad44       0x8c CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
+ .debug_frame   0x0000add0      0x13c CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+ .debug_frame   0x0000af0c      0x1a8 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+ .debug_frame   0x0000b0b4       0xa8 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
+ .debug_frame   0x0000b15c       0xe0 CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
+ .debug_frame   0x0000b23c       0xbc CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+ .debug_frame   0x0000b2f8      0x108 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
+ .debug_frame   0x0000b400      0x198 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+ .debug_frame   0x0000b598       0xcc CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
+ .debug_frame   0x0000b664       0x28 CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
+ .debug_frame   0x0000b68c       0xe0 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+ .debug_frame   0x0000b76c       0xa8 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+ .debug_frame   0x0000b814       0x64 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
+ .debug_frame   0x0000b878       0x40 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
+ .debug_frame   0x0000b8b8       0x38 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
+ .debug_frame   0x0000b8f0       0x44 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
+ .debug_frame   0x0000b934       0x4c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
+ .debug_frame   0x0000b980       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
+ .debug_frame   0x0000b9a0       0x38 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
+ .debug_frame   0x0000b9d8       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
+ .debug_frame   0x0000b9f8       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
+ .debug_frame   0x0000ba18       0xac D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_arm_addsubdf3.o)
+ .debug_frame   0x0000bac4       0x50 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_arm_muldivdf3.o)
+ .debug_frame   0x0000bb14       0xc4 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_arm_cmpdf2.o)
+ .debug_frame   0x0000bbd8       0x24 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_arm_truncdfsf2.o)
+ .debug_frame   0x0000bbfc       0x2c D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_uldivmod.o)
+ .debug_frame   0x0000bc28       0x34 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_udivmoddi4.o)
+ .debug_frame   0x0000bc5c       0x30 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
+ .debug_frame   0x0000bc8c       0x28 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
+ .debug_frame   0x0000bcb4       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
+ .debug_frame   0x0000bcd4       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
+ .debug_frame   0x0000bcf4       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
+ .debug_frame   0x0000bd14       0x28 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
 
-.debug_info     0x00000000    0x58ff5
+.debug_info     0x00000000    0x58bdc
  .debug_info    0x00000000      0x512 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Src/system_stm32f4xx.c.obj
  .debug_info    0x00000512     0x299d cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c.obj
  .debug_info    0x00002eaf     0x14db cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c.obj
@@ -23006,55 +22998,55 @@ LOAD D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-no
  .debug_info    0x0002ef1d       0x30 CMakeFiles/basic_framework.dir/startup_stm32f407xx.s.obj
  .debug_info    0x0002ef4d     0x1fbf CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c.obj
  .debug_info    0x00030f0c      0x707 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c.obj
- .debug_info    0x00031613     0x236b CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
- .debug_info    0x0003397e     0x2489 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
- .debug_info    0x00035e07     0x23c8 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
- .debug_info    0x000381cf      0xc97 CMakeFiles/basic_framework.dir/application/robot.c.obj
- .debug_info    0x00038e66      0xfe6 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
- .debug_info    0x00039e4c      0x6ba CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
- .debug_info    0x0003a506      0x580 CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
- .debug_info    0x0003aa86      0xdff CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
- .debug_info    0x0003b885      0x308 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
- .debug_info    0x0003bb8d      0xe77 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
- .debug_info    0x0003ca04      0xbf7 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
- .debug_info    0x0003d5fb      0x266 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
- .debug_info    0x0003d861     0x128a CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
- .debug_info    0x0003eaeb      0x73c CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
- .debug_info    0x0003f227      0x2b0 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
- .debug_info    0x0003f4d7      0x196 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
- .debug_info    0x0003f66d     0x13b4 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
- .debug_info    0x00040a21      0x753 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
- .debug_info    0x00041174      0x307 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
- .debug_info    0x0004147b      0x938 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
- .debug_info    0x00041db3     0x13e8 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
- .debug_info    0x0004319b     0x24aa CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
- .debug_info    0x00045645      0xced CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
- .debug_info    0x00046332      0x5ba CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
- .debug_info    0x000468ec      0x655 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
- .debug_info    0x00046f41     0x188f CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
- .debug_info    0x000487d0     0x1f40 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
- .debug_info    0x0004a710     0x14fe CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
- .debug_info    0x0004bc0e       0xed CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
- .debug_info    0x0004bcfb     0x19df CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
- .debug_info    0x0004d6da      0xe1c CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
- .debug_info    0x0004e4f6      0x974 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
- .debug_info    0x0004ee6a      0xc1e D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
- .debug_info    0x0004fa88      0xbf9 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
- .debug_info    0x00050681      0xcb5 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
- .debug_info    0x00051336      0xd81 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
- .debug_info    0x000520b7      0xb0c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
- .debug_info    0x00052bc3      0xbf9 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
- .debug_info    0x000537bc     0x1612 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
- .debug_info    0x00054dce     0x1612 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
- .debug_info    0x000563e0     0x1a84 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_common_tables.o)
- .debug_info    0x00057e64      0x7a0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
- .debug_info    0x00058604       0xe1 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
- .debug_info    0x000586e5      0x6fb D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
- .debug_info    0x00058de0       0x31 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
- .debug_info    0x00058e11       0xc3 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
- .debug_info    0x00058ed4      0x121 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
+ .debug_info    0x00031613     0x219c CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
+ .debug_info    0x000337af     0x223f CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+ .debug_info    0x000359ee     0x23c8 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
+ .debug_info    0x00037db6      0xc97 CMakeFiles/basic_framework.dir/application/robot.c.obj
+ .debug_info    0x00038a4d      0xfe6 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+ .debug_info    0x00039a33      0x6ba CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+ .debug_info    0x0003a0ed      0x580 CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
+ .debug_info    0x0003a66d      0xdff CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
+ .debug_info    0x0003b46c      0x308 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
+ .debug_info    0x0003b774      0xe77 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
+ .debug_info    0x0003c5eb      0xbf7 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+ .debug_info    0x0003d1e2      0x266 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
+ .debug_info    0x0003d448     0x128a CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+ .debug_info    0x0003e6d2      0x73c CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+ .debug_info    0x0003ee0e      0x2b0 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
+ .debug_info    0x0003f0be      0x196 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
+ .debug_info    0x0003f254     0x13b4 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+ .debug_info    0x00040608      0x753 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+ .debug_info    0x00040d5b      0x307 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
+ .debug_info    0x00041062      0x938 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
+ .debug_info    0x0004199a     0x13e8 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+ .debug_info    0x00042d82     0x24aa CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+ .debug_info    0x0004522c      0xced CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
+ .debug_info    0x00045f19      0x5ba CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
+ .debug_info    0x000464d3      0x655 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+ .debug_info    0x00046b28     0x188f CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
+ .debug_info    0x000483b7     0x1f40 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+ .debug_info    0x0004a2f7     0x14fe CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
+ .debug_info    0x0004b7f5       0xed CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
+ .debug_info    0x0004b8e2     0x19df CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+ .debug_info    0x0004d2c1      0xe1c CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+ .debug_info    0x0004e0dd      0x974 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
+ .debug_info    0x0004ea51      0xc1e D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
+ .debug_info    0x0004f66f      0xbf9 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
+ .debug_info    0x00050268      0xcb5 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
+ .debug_info    0x00050f1d      0xd81 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
+ .debug_info    0x00051c9e      0xb0c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
+ .debug_info    0x000527aa      0xbf9 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
+ .debug_info    0x000533a3     0x1612 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
+ .debug_info    0x000549b5     0x1612 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
+ .debug_info    0x00055fc7     0x1a84 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_common_tables.o)
+ .debug_info    0x00057a4b      0x7a0 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
+ .debug_info    0x000581eb       0xe1 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
+ .debug_info    0x000582cc      0x6fb D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
+ .debug_info    0x000589c7       0x31 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
+ .debug_info    0x000589f8       0xc3 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
+ .debug_info    0x00058abb      0x121 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
 
-.debug_abbrev   0x00000000     0xdd13
+.debug_abbrev   0x00000000     0xdcd5
  .debug_abbrev  0x00000000      0x11a cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Src/system_stm32f4xx.c.obj
  .debug_abbrev  0x0000011a      0x278 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c.obj
  .debug_abbrev  0x00000392      0x283 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c.obj
@@ -23112,55 +23104,55 @@ LOAD D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-no
  .debug_abbrev  0x0000763d       0x1d CMakeFiles/basic_framework.dir/startup_stm32f407xx.s.obj
  .debug_abbrev  0x0000765a      0x294 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c.obj
  .debug_abbrev  0x000078ee      0x225 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c.obj
- .debug_abbrev  0x00007b13      0x269 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
- .debug_abbrev  0x00007d7c      0x341 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
- .debug_abbrev  0x000080bd      0x28c CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
- .debug_abbrev  0x00008349      0x248 CMakeFiles/basic_framework.dir/application/robot.c.obj
- .debug_abbrev  0x00008591      0x2ac CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
- .debug_abbrev  0x0000883d      0x1b5 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
- .debug_abbrev  0x000089f2      0x21e CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
- .debug_abbrev  0x00008c10      0x274 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
- .debug_abbrev  0x00008e84      0x19d CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
- .debug_abbrev  0x00009021      0x2cc CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
- .debug_abbrev  0x000092ed      0x27b CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
- .debug_abbrev  0x00009568      0x157 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
- .debug_abbrev  0x000096bf      0x31c CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
- .debug_abbrev  0x000099db      0x1b2 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
- .debug_abbrev  0x00009b8d      0x10e CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
- .debug_abbrev  0x00009c9b       0xf8 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
- .debug_abbrev  0x00009d93      0x276 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
- .debug_abbrev  0x0000a009      0x1fd CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
- .debug_abbrev  0x0000a206      0x1b9 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
- .debug_abbrev  0x0000a3bf      0x1fa CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
- .debug_abbrev  0x0000a5b9      0x365 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
- .debug_abbrev  0x0000a91e      0x3dc CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
- .debug_abbrev  0x0000acfa      0x276 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
- .debug_abbrev  0x0000af70      0x1bd CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
- .debug_abbrev  0x0000b12d      0x1a0 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
- .debug_abbrev  0x0000b2cd      0x32f CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
- .debug_abbrev  0x0000b5fc      0x37b CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
- .debug_abbrev  0x0000b977      0x2c4 CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
- .debug_abbrev  0x0000bc3b       0x7d CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
- .debug_abbrev  0x0000bcb8      0x34c CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
- .debug_abbrev  0x0000c004      0x305 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
- .debug_abbrev  0x0000c309      0x225 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
- .debug_abbrev  0x0000c52e      0x216 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
- .debug_abbrev  0x0000c744      0x202 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
- .debug_abbrev  0x0000c946      0x225 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
- .debug_abbrev  0x0000cb6b      0x26c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
- .debug_abbrev  0x0000cdd7      0x1e7 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
- .debug_abbrev  0x0000cfbe      0x202 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
- .debug_abbrev  0x0000d1c0      0x22c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
- .debug_abbrev  0x0000d3ec      0x22c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
- .debug_abbrev  0x0000d618      0x1dd D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_common_tables.o)
- .debug_abbrev  0x0000d7f5      0x1cf D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
- .debug_abbrev  0x0000d9c4       0x8d D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
- .debug_abbrev  0x0000da51      0x15e D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
- .debug_abbrev  0x0000dbaf       0x28 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
- .debug_abbrev  0x0000dbd7       0x7b D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
- .debug_abbrev  0x0000dc52       0xc1 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
+ .debug_abbrev  0x00007b13      0x281 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
+ .debug_abbrev  0x00007d94      0x2eb CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+ .debug_abbrev  0x0000807f      0x28c CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
+ .debug_abbrev  0x0000830b      0x248 CMakeFiles/basic_framework.dir/application/robot.c.obj
+ .debug_abbrev  0x00008553      0x2ac CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+ .debug_abbrev  0x000087ff      0x1b5 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+ .debug_abbrev  0x000089b4      0x21e CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
+ .debug_abbrev  0x00008bd2      0x274 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
+ .debug_abbrev  0x00008e46      0x19d CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
+ .debug_abbrev  0x00008fe3      0x2cc CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
+ .debug_abbrev  0x000092af      0x27b CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+ .debug_abbrev  0x0000952a      0x157 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
+ .debug_abbrev  0x00009681      0x31c CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+ .debug_abbrev  0x0000999d      0x1b2 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+ .debug_abbrev  0x00009b4f      0x10e CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
+ .debug_abbrev  0x00009c5d       0xf8 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
+ .debug_abbrev  0x00009d55      0x276 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+ .debug_abbrev  0x00009fcb      0x1fd CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+ .debug_abbrev  0x0000a1c8      0x1b9 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
+ .debug_abbrev  0x0000a381      0x1fa CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
+ .debug_abbrev  0x0000a57b      0x365 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+ .debug_abbrev  0x0000a8e0      0x3dc CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+ .debug_abbrev  0x0000acbc      0x276 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
+ .debug_abbrev  0x0000af32      0x1bd CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
+ .debug_abbrev  0x0000b0ef      0x1a0 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+ .debug_abbrev  0x0000b28f      0x32f CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
+ .debug_abbrev  0x0000b5be      0x37b CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+ .debug_abbrev  0x0000b939      0x2c4 CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
+ .debug_abbrev  0x0000bbfd       0x7d CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
+ .debug_abbrev  0x0000bc7a      0x34c CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+ .debug_abbrev  0x0000bfc6      0x305 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+ .debug_abbrev  0x0000c2cb      0x225 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
+ .debug_abbrev  0x0000c4f0      0x216 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
+ .debug_abbrev  0x0000c706      0x202 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
+ .debug_abbrev  0x0000c908      0x225 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
+ .debug_abbrev  0x0000cb2d      0x26c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
+ .debug_abbrev  0x0000cd99      0x1e7 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
+ .debug_abbrev  0x0000cf80      0x202 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
+ .debug_abbrev  0x0000d182      0x22c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
+ .debug_abbrev  0x0000d3ae      0x22c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
+ .debug_abbrev  0x0000d5da      0x1dd D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_common_tables.o)
+ .debug_abbrev  0x0000d7b7      0x1cf D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
+ .debug_abbrev  0x0000d986       0x8d D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
+ .debug_abbrev  0x0000da13      0x15e D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
+ .debug_abbrev  0x0000db71       0x28 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
+ .debug_abbrev  0x0000db99       0x7b D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
+ .debug_abbrev  0x0000dc14       0xc1 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
 
-.debug_aranges  0x00000000     0x3340
+.debug_aranges  0x00000000     0x3328
  .debug_aranges
                 0x00000000       0x28 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Src/system_stm32f4xx.c.obj
  .debug_aranges
@@ -23278,97 +23270,97 @@ LOAD D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-no
  .debug_aranges
                 0x00002798       0x38 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
  .debug_aranges
-                0x000027d0       0x60 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+                0x000027d0       0x48 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
  .debug_aranges
-                0x00002830       0x28 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
+                0x00002818       0x28 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
  .debug_aranges
-                0x00002858       0x60 CMakeFiles/basic_framework.dir/application/robot.c.obj
+                0x00002840       0x60 CMakeFiles/basic_framework.dir/application/robot.c.obj
  .debug_aranges
-                0x000028b8       0x58 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+                0x000028a0       0x58 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
  .debug_aranges
-                0x00002910       0x60 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+                0x000028f8       0x60 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
  .debug_aranges
-                0x00002970       0x48 CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
+                0x00002958       0x48 CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
  .debug_aranges
-                0x000029b8       0x50 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
+                0x000029a0       0x50 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
  .debug_aranges
-                0x00002a08       0x30 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
+                0x000029f0       0x30 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
  .debug_aranges
-                0x00002a38       0x58 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
+                0x00002a20       0x58 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
  .debug_aranges
-                0x00002a90       0x48 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+                0x00002a78       0x48 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
  .debug_aranges
-                0x00002ad8       0x28 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
+                0x00002ac0       0x28 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
  .debug_aranges
-                0x00002b00       0x50 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+                0x00002ae8       0x50 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
  .debug_aranges
-                0x00002b50       0x68 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+                0x00002b38       0x68 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
  .debug_aranges
-                0x00002bb8       0x38 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
+                0x00002ba0       0x38 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
  .debug_aranges
-                0x00002bf0       0x28 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
+                0x00002bd8       0x28 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
  .debug_aranges
-                0x00002c18       0x60 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+                0x00002c00       0x60 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
  .debug_aranges
-                0x00002c78       0x98 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+                0x00002c60       0x98 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
  .debug_aranges
-                0x00002d10       0x38 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
+                0x00002cf8       0x38 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
  .debug_aranges
-                0x00002d48       0x40 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
+                0x00002d30       0x40 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
  .debug_aranges
-                0x00002d88       0x58 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+                0x00002d70       0x58 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
  .debug_aranges
-                0x00002de0       0x70 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+                0x00002dc8       0x70 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
  .debug_aranges
-                0x00002e50       0x48 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
+                0x00002e38       0x48 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
  .debug_aranges
-                0x00002e98       0x50 CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
+                0x00002e80       0x50 CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
  .debug_aranges
-                0x00002ee8       0x48 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+                0x00002ed0       0x48 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
  .debug_aranges
-                0x00002f30       0x68 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
+                0x00002f18       0x68 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
  .debug_aranges
-                0x00002f98       0x88 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+                0x00002f80       0x88 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
  .debug_aranges
-                0x00003020       0x58 CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
+                0x00003008       0x58 CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
  .debug_aranges
-                0x00003078       0x20 CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
+                0x00003060       0x20 CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
  .debug_aranges
-                0x00003098       0x48 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+                0x00003080       0x48 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
  .debug_aranges
-                0x000030e0       0x48 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+                0x000030c8       0x48 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
  .debug_aranges
-                0x00003128       0x38 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
+                0x00003110       0x38 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
  .debug_aranges
-                0x00003160       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
+                0x00003148       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
  .debug_aranges
-                0x00003180       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
+                0x00003168       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
  .debug_aranges
-                0x000031a0       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
+                0x00003188       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
  .debug_aranges
-                0x000031c0       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
+                0x000031a8       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
  .debug_aranges
-                0x000031e0       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
+                0x000031c8       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
  .debug_aranges
-                0x00003200       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
+                0x000031e8       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
  .debug_aranges
-                0x00003220       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
+                0x00003208       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
  .debug_aranges
-                0x00003240       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
+                0x00003228       0x20 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
  .debug_aranges
-                0x00003260       0x18 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_common_tables.o)
+                0x00003248       0x18 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_common_tables.o)
  .debug_aranges
-                0x00003278       0x28 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
+                0x00003260       0x28 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
  .debug_aranges
-                0x000032a0       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
+                0x00003288       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
  .debug_aranges
-                0x000032c0       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
+                0x000032a8       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
  .debug_aranges
-                0x000032e0       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
+                0x000032c8       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
  .debug_aranges
-                0x00003300       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
+                0x000032e8       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
  .debug_aranges
-                0x00003320       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
+                0x00003308       0x20 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
 
 .debug_rnglists
                 0x00000000     0x191c
@@ -23688,7 +23680,7 @@ LOAD D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-no
  .debug_macro   0x00035ba4      0x429 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
  .debug_macro   0x00035fcd      0x3b8 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
 
-.debug_line     0x00000000    0x50187
+.debug_line     0x00000000    0x4ff84
  .debug_line    0x00000000      0x809 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Src/system_stm32f4xx.c.obj
  .debug_line    0x00000809     0x37ff cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c.obj
  .debug_line    0x00004008     0x19ea cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c.obj
@@ -23746,162 +23738,162 @@ LOAD D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-no
  .debug_line    0x00031701       0x83 CMakeFiles/basic_framework.dir/startup_stm32f407xx.s.obj
  .debug_line    0x00031784     0x1598 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c.obj
  .debug_line    0x00032d1c      0x94b CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c.obj
- .debug_line    0x00033667     0x1137 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
- .debug_line    0x0003479e     0x1240 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
- .debug_line    0x000359de      0xef0 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
- .debug_line    0x000368ce     0x12c0 CMakeFiles/basic_framework.dir/application/robot.c.obj
- .debug_line    0x00037b8e      0xcd5 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
- .debug_line    0x00038863      0xd74 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
- .debug_line    0x000395d7      0x99c CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
- .debug_line    0x00039f73      0xad1 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
- .debug_line    0x0003aa44      0x49b CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
- .debug_line    0x0003aedf      0xac7 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
- .debug_line    0x0003b9a6      0xb61 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
- .debug_line    0x0003c507      0xae0 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
- .debug_line    0x0003cfe7     0x106d CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
- .debug_line    0x0003e054      0xe42 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
- .debug_line    0x0003ee96      0x92f CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
- .debug_line    0x0003f7c5      0x7f2 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
- .debug_line    0x0003ffb7      0xd94 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
- .debug_line    0x00040d4b      0xe3f CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
- .debug_line    0x00041b8a      0xb06 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
- .debug_line    0x00042690      0x816 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
- .debug_line    0x00042ea6     0x12b3 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
- .debug_line    0x00044159     0x15ed CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
- .debug_line    0x00045746      0xd16 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
- .debug_line    0x0004645c      0xb58 CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
- .debug_line    0x00046fb4      0x6e0 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
- .debug_line    0x00047694     0x110a CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
- .debug_line    0x0004879e     0x12a4 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
- .debug_line    0x00049a42      0xe7f CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
- .debug_line    0x0004a8c1      0xc12 CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
- .debug_line    0x0004b4d3     0x11f1 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
- .debug_line    0x0004c6c4      0xcda CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
- .debug_line    0x0004d39e      0x960 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
- .debug_line    0x0004dcfe      0x330 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
- .debug_line    0x0004e02e      0x31e D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
- .debug_line    0x0004e34c      0x39a D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
- .debug_line    0x0004e6e6      0x4f6 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
- .debug_line    0x0004ebdc      0x259 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
- .debug_line    0x0004ee35      0x31e D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
- .debug_line    0x0004f153      0x2d0 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
- .debug_line    0x0004f423      0x2d3 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
- .debug_line    0x0004f6f6      0x243 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_common_tables.o)
- .debug_line    0x0004f939      0x201 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
- .debug_line    0x0004fb3a      0x180 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
- .debug_line    0x0004fcba      0x185 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
- .debug_line    0x0004fe3f       0x50 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
- .debug_line    0x0004fe8f       0xf6 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
- .debug_line    0x0004ff85      0x202 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
+ .debug_line    0x00033667     0x105d CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
+ .debug_line    0x000346c4     0x1117 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+ .debug_line    0x000357db      0xef0 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
+ .debug_line    0x000366cb     0x12c0 CMakeFiles/basic_framework.dir/application/robot.c.obj
+ .debug_line    0x0003798b      0xcd5 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+ .debug_line    0x00038660      0xd74 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+ .debug_line    0x000393d4      0x99c CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
+ .debug_line    0x00039d70      0xad1 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
+ .debug_line    0x0003a841      0x49b CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
+ .debug_line    0x0003acdc      0xac7 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
+ .debug_line    0x0003b7a3      0xb61 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+ .debug_line    0x0003c304      0xae0 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
+ .debug_line    0x0003cde4     0x106d CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+ .debug_line    0x0003de51      0xe42 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+ .debug_line    0x0003ec93      0x92f CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
+ .debug_line    0x0003f5c2      0x7f2 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
+ .debug_line    0x0003fdb4      0xd94 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+ .debug_line    0x00040b48      0xe3f CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+ .debug_line    0x00041987      0xb06 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
+ .debug_line    0x0004248d      0x816 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
+ .debug_line    0x00042ca3     0x12b3 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+ .debug_line    0x00043f56     0x15ed CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+ .debug_line    0x00045543      0xd16 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
+ .debug_line    0x00046259      0xb58 CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
+ .debug_line    0x00046db1      0x6e0 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+ .debug_line    0x00047491     0x110a CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
+ .debug_line    0x0004859b     0x12a4 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+ .debug_line    0x0004983f      0xe7f CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
+ .debug_line    0x0004a6be      0xc12 CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
+ .debug_line    0x0004b2d0     0x11f1 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+ .debug_line    0x0004c4c1      0xcda CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+ .debug_line    0x0004d19b      0x960 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
+ .debug_line    0x0004dafb      0x330 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
+ .debug_line    0x0004de2b      0x31e D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
+ .debug_line    0x0004e149      0x39a D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
+ .debug_line    0x0004e4e3      0x4f6 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
+ .debug_line    0x0004e9d9      0x259 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
+ .debug_line    0x0004ec32      0x31e D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
+ .debug_line    0x0004ef50      0x2d0 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
+ .debug_line    0x0004f220      0x2d3 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
+ .debug_line    0x0004f4f3      0x243 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_common_tables.o)
+ .debug_line    0x0004f736      0x201 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
+ .debug_line    0x0004f937      0x180 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
+ .debug_line    0x0004fab7      0x185 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
+ .debug_line    0x0004fc3c       0x50 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
+ .debug_line    0x0004fc8c       0xf6 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
+ .debug_line    0x0004fd82      0x202 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
 
-.debug_str      0x00000000    0xfeb4c
- .debug_str     0x00000000    0xfeb4c cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Src/system_stm32f4xx.c.obj
+.debug_str      0x00000000    0xfeb0c
+ .debug_str     0x00000000    0xfeb0c cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Src/system_stm32f4xx.c.obj
                               0xddc84 (size before relaxing)
- .debug_str     0x000feb4c    0xdf013 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c.obj
- .debug_str     0x000feb4c    0xde81f cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c.obj
- .debug_str     0x000feb4c    0xde767 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c.obj
- .debug_str     0x000feb4c    0xde057 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c.obj
- .debug_str     0x000feb4c    0xde642 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c.obj
- .debug_str     0x000feb4c    0xde0bd cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c.obj
- .debug_str     0x000feb4c    0xddddb cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c.obj
- .debug_str     0x000feb4c    0xdde79 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c.obj
- .debug_str     0x000feb4c    0xddec9 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c.obj
- .debug_str     0x000feb4c    0xdde04 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c.obj
- .debug_str     0x000feb4c    0xde0a3 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c.obj
- .debug_str     0x000feb4c    0xde589 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c.obj
- .debug_str     0x000feb4c    0xde80d cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c.obj
- .debug_str     0x000feb4c    0xde276 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c.obj
- .debug_str     0x000feb4c    0xde383 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_can.c.obj
- .debug_str     0x000feb4c    0xddcb7 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_crc.c.obj
- .debug_str     0x000feb4c    0xde10b cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac.c.obj
- .debug_str     0x000feb4c    0xdeca7 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c.obj
- .debug_str     0x000feb4c    0xddd89 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c.obj
- .debug_str     0x000feb4c    0xde0f8 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc.c.obj
- .debug_str     0x000feb4c    0xde547 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c.obj
- .debug_str     0x000feb4c    0xde69e cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c.obj
- .debug_str     0x000feb4c    0xe2381 cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c.obj
- .debug_str     0x000feb4c    0xe21ac cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c.obj
- .debug_str     0x000feb4c    0xe2081 cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c.obj
- .debug_str     0x000feb4c    0xe2a28 cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c.obj
- .debug_str     0x000feb4c     0xa5b8 cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/list.c.obj
- .debug_str     0x000feb4c     0xc962 cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/tasks.c.obj
- .debug_str     0x000feb4c     0xe534 cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c.obj
- .debug_str     0x000feb4c     0xaefa cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c.obj
- .debug_str     0x000feb4c     0x878d cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c.obj
- .debug_str     0x000feb4c    0xe9478 CMakeFiles/basic_framework.dir/Src/main.c.obj
- .debug_str     0x000feb4c    0xde4d7 CMakeFiles/basic_framework.dir/Src/gpio.c.obj
- .debug_str     0x000feb4c    0xe414d CMakeFiles/basic_framework.dir/Src/freertos.c.obj
- .debug_str     0x000feb4c    0xde38f CMakeFiles/basic_framework.dir/Src/adc.c.obj
- .debug_str     0x000feb4c    0xde7c5 CMakeFiles/basic_framework.dir/Src/can.c.obj
- .debug_str     0x000feb4c    0xde067 CMakeFiles/basic_framework.dir/Src/crc.c.obj
- .debug_str     0x000feb4c    0xde3ac CMakeFiles/basic_framework.dir/Src/dac.c.obj
- .debug_str     0x000feb4c    0xde409 CMakeFiles/basic_framework.dir/Src/dma.c.obj
- .debug_str     0x000feb4c    0xdea63 CMakeFiles/basic_framework.dir/Src/i2c.c.obj
- .debug_str     0x000feb4c    0xde058 CMakeFiles/basic_framework.dir/Src/rng.c.obj
- .debug_str     0x000feb4c    0xde120 CMakeFiles/basic_framework.dir/Src/rtc.c.obj
- .debug_str     0x000feb4c    0xde9c0 CMakeFiles/basic_framework.dir/Src/spi.c.obj
- .debug_str     0x000feb4c    0xded55 CMakeFiles/basic_framework.dir/Src/tim.c.obj
- .debug_str     0x000feb4c    0xdea45 CMakeFiles/basic_framework.dir/Src/usart.c.obj
- .debug_str     0x000feb4c    0xe2490 CMakeFiles/basic_framework.dir/Src/usb_device.c.obj
- .debug_str     0x000feb4c    0xe32cf CMakeFiles/basic_framework.dir/Src/usbd_conf.c.obj
- .debug_str     0x000feb4c    0xe1fc9 CMakeFiles/basic_framework.dir/Src/usbd_desc.c.obj
- .debug_str     0x000feb4c    0xe2519 CMakeFiles/basic_framework.dir/Src/usbd_cdc_if.c.obj
- .debug_str     0x000feb4c    0xdf342 CMakeFiles/basic_framework.dir/Src/stm32f4xx_it.c.obj
- .debug_str     0x000feb4c    0xde40c CMakeFiles/basic_framework.dir/Src/stm32f4xx_hal_msp.c.obj
- .debug_str     0x000feb4c    0xde7e3 CMakeFiles/basic_framework.dir/Src/stm32f4xx_hal_timebase_tim.c.obj
- .debug_str     0x000feb4c     0x716e CMakeFiles/basic_framework.dir/Src/sysmem.c.obj
- .debug_str     0x000feb4c       0x58 CMakeFiles/basic_framework.dir/startup_stm32f407xx.s.obj
- .debug_str     0x000feb4c     0x776c CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c.obj
- .debug_str     0x000feb4c     0x70bf CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c.obj
- .debug_str     0x000feb4c    0xe81cc CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
- .debug_str     0x000feb4c    0xe5175 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
- .debug_str     0x000feb4c    0xe50ff CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
- .debug_str     0x000feb4c    0xeacab CMakeFiles/basic_framework.dir/application/robot.c.obj
- .debug_str     0x000feb4c    0xe2772 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
- .debug_str     0x000feb4c    0xe8217 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
- .debug_str     0x000feb4c    0xe0cbd CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
- .debug_str     0x000feb4c    0xe1287 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
- .debug_str     0x000feb4c     0x7803 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
- .debug_str     0x000feb4c    0xe12c5 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
- .debug_str     0x000feb4c    0xe26cb CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
- .debug_str     0x000feb4c    0xe2f4b CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
- .debug_str     0x000feb4c    0x8c3bb CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
- .debug_str     0x000feb4c    0xe31c5 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
- .debug_str     0x000feb4c    0xdde97 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
- .debug_str     0x000feb4c    0xdde42 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
- .debug_str     0x000feb4c    0x8c163 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
- .debug_str     0x000feb4c    0xe7c0c CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
- .debug_str     0x000feb4c    0xe2229 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
- .debug_str     0x000feb4c    0xde38b CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
- .debug_str     0x000feb4c    0xe4dea CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
- .debug_str     0x000feb4c    0xea94a CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
- .debug_str     0x000feb4c    0xe4b2e CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
- .debug_str     0x000feb4c    0xe12c7 CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
- .debug_str     0x000feb4c     0x84f9 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
- .debug_str     0x000feb4c    0xe3d3f CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
- .debug_str     0x000feb4c    0xea2ff CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
- .debug_str     0x000feb4c    0xe3cb6 CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
- .debug_str     0x000feb4c    0xe326f CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
- .debug_str     0x000feb4c    0xe3e0c CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
- .debug_str     0x000feb4c    0xe29fe CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
- .debug_str     0x000feb4c    0xe0f62 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
- .debug_str     0x000feb4c      0x755 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
- .debug_str     0x000feb4c      0x768 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
- .debug_str     0x000feb4c      0x784 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
- .debug_str     0x000feb4c      0x7c8 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
- .debug_str     0x000feb4c      0x693 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
- .debug_str     0x000feb4c      0x768 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
- .debug_str     0x000feb4c      0xd42 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
- .debug_str     0x000feb4c      0xd42 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
- .debug_str     0x000feb4c      0xd1d D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_common_tables.o)
- .debug_str     0x000feb4c      0x556 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
- .debug_str     0x000feb4c      0x219 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
- .debug_str     0x000feb4c      0x52b D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
- .debug_str     0x000feb4c       0xf2 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
- .debug_str     0x000feb4c      0x20f D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
- .debug_str     0x000feb4c      0x22f D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
+ .debug_str     0x000feb0c    0xdf013 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c.obj
+ .debug_str     0x000feb0c    0xde81f cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c.obj
+ .debug_str     0x000feb0c    0xde767 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c.obj
+ .debug_str     0x000feb0c    0xde057 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c.obj
+ .debug_str     0x000feb0c    0xde642 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c.obj
+ .debug_str     0x000feb0c    0xde0bd cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c.obj
+ .debug_str     0x000feb0c    0xddddb cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c.obj
+ .debug_str     0x000feb0c    0xdde79 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c.obj
+ .debug_str     0x000feb0c    0xddec9 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c.obj
+ .debug_str     0x000feb0c    0xdde04 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c.obj
+ .debug_str     0x000feb0c    0xde0a3 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c.obj
+ .debug_str     0x000feb0c    0xde589 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c.obj
+ .debug_str     0x000feb0c    0xde80d cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c.obj
+ .debug_str     0x000feb0c    0xde276 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c.obj
+ .debug_str     0x000feb0c    0xde383 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_can.c.obj
+ .debug_str     0x000feb0c    0xddcb7 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_crc.c.obj
+ .debug_str     0x000feb0c    0xde10b cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac.c.obj
+ .debug_str     0x000feb0c    0xdeca7 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c.obj
+ .debug_str     0x000feb0c    0xddd89 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c.obj
+ .debug_str     0x000feb0c    0xde0f8 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc.c.obj
+ .debug_str     0x000feb0c    0xde547 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c.obj
+ .debug_str     0x000feb0c    0xde69e cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c.obj
+ .debug_str     0x000feb0c    0xe2381 cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c.obj
+ .debug_str     0x000feb0c    0xe21ac cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c.obj
+ .debug_str     0x000feb0c    0xe2081 cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c.obj
+ .debug_str     0x000feb0c    0xe2a28 cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c.obj
+ .debug_str     0x000feb0c     0xa5b8 cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/list.c.obj
+ .debug_str     0x000feb0c     0xc962 cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/tasks.c.obj
+ .debug_str     0x000feb0c     0xe534 cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c.obj
+ .debug_str     0x000feb0c     0xaefa cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c.obj
+ .debug_str     0x000feb0c     0x878d cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c.obj
+ .debug_str     0x000feb0c    0xe9478 CMakeFiles/basic_framework.dir/Src/main.c.obj
+ .debug_str     0x000feb0c    0xde4d7 CMakeFiles/basic_framework.dir/Src/gpio.c.obj
+ .debug_str     0x000feb0c    0xe414d CMakeFiles/basic_framework.dir/Src/freertos.c.obj
+ .debug_str     0x000feb0c    0xde38f CMakeFiles/basic_framework.dir/Src/adc.c.obj
+ .debug_str     0x000feb0c    0xde7c5 CMakeFiles/basic_framework.dir/Src/can.c.obj
+ .debug_str     0x000feb0c    0xde067 CMakeFiles/basic_framework.dir/Src/crc.c.obj
+ .debug_str     0x000feb0c    0xde3ac CMakeFiles/basic_framework.dir/Src/dac.c.obj
+ .debug_str     0x000feb0c    0xde409 CMakeFiles/basic_framework.dir/Src/dma.c.obj
+ .debug_str     0x000feb0c    0xdea63 CMakeFiles/basic_framework.dir/Src/i2c.c.obj
+ .debug_str     0x000feb0c    0xde058 CMakeFiles/basic_framework.dir/Src/rng.c.obj
+ .debug_str     0x000feb0c    0xde120 CMakeFiles/basic_framework.dir/Src/rtc.c.obj
+ .debug_str     0x000feb0c    0xde9c0 CMakeFiles/basic_framework.dir/Src/spi.c.obj
+ .debug_str     0x000feb0c    0xded55 CMakeFiles/basic_framework.dir/Src/tim.c.obj
+ .debug_str     0x000feb0c    0xdea45 CMakeFiles/basic_framework.dir/Src/usart.c.obj
+ .debug_str     0x000feb0c    0xe2490 CMakeFiles/basic_framework.dir/Src/usb_device.c.obj
+ .debug_str     0x000feb0c    0xe32cf CMakeFiles/basic_framework.dir/Src/usbd_conf.c.obj
+ .debug_str     0x000feb0c    0xe1fc9 CMakeFiles/basic_framework.dir/Src/usbd_desc.c.obj
+ .debug_str     0x000feb0c    0xe2519 CMakeFiles/basic_framework.dir/Src/usbd_cdc_if.c.obj
+ .debug_str     0x000feb0c    0xdf342 CMakeFiles/basic_framework.dir/Src/stm32f4xx_it.c.obj
+ .debug_str     0x000feb0c    0xde40c CMakeFiles/basic_framework.dir/Src/stm32f4xx_hal_msp.c.obj
+ .debug_str     0x000feb0c    0xde7e3 CMakeFiles/basic_framework.dir/Src/stm32f4xx_hal_timebase_tim.c.obj
+ .debug_str     0x000feb0c     0x716e CMakeFiles/basic_framework.dir/Src/sysmem.c.obj
+ .debug_str     0x000feb0c       0x58 CMakeFiles/basic_framework.dir/startup_stm32f407xx.s.obj
+ .debug_str     0x000feb0c     0x776c CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c.obj
+ .debug_str     0x000feb0c     0x70bf CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c.obj
+ .debug_str     0x000feb0c    0xe81b3 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
+ .debug_str     0x000feb0c    0xe5102 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+ .debug_str     0x000feb0c    0xe50ff CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
+ .debug_str     0x000feb0c    0xeacab CMakeFiles/basic_framework.dir/application/robot.c.obj
+ .debug_str     0x000feb0c    0xe2772 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+ .debug_str     0x000feb0c    0xe8217 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+ .debug_str     0x000feb0c    0xe0cbd CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
+ .debug_str     0x000feb0c    0xe1287 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
+ .debug_str     0x000feb0c     0x7803 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
+ .debug_str     0x000feb0c    0xe12c5 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
+ .debug_str     0x000feb0c    0xe26cb CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+ .debug_str     0x000feb0c    0xe2f4b CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
+ .debug_str     0x000feb0c    0x8c3bb CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+ .debug_str     0x000feb0c    0xe31c5 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+ .debug_str     0x000feb0c    0xdde97 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
+ .debug_str     0x000feb0c    0xdde42 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
+ .debug_str     0x000feb0c    0x8c163 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+ .debug_str     0x000feb0c    0xe7c0c CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+ .debug_str     0x000feb0c    0xe2229 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
+ .debug_str     0x000feb0c    0xde38b CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
+ .debug_str     0x000feb0c    0xe4dea CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+ .debug_str     0x000feb0c    0xea94a CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+ .debug_str     0x000feb0c    0xe4b2e CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
+ .debug_str     0x000feb0c    0xe12c7 CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
+ .debug_str     0x000feb0c     0x84f9 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+ .debug_str     0x000feb0c    0xe3d3f CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
+ .debug_str     0x000feb0c    0xea2ff CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+ .debug_str     0x000feb0c    0xe3cb6 CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
+ .debug_str     0x000feb0c    0xe326f CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
+ .debug_str     0x000feb0c    0xe3e0c CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+ .debug_str     0x000feb0c    0xe29fe CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+ .debug_str     0x000feb0c    0xe0f62 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
+ .debug_str     0x000feb0c      0x755 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
+ .debug_str     0x000feb0c      0x768 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
+ .debug_str     0x000feb0c      0x784 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
+ .debug_str     0x000feb0c      0x7c8 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
+ .debug_str     0x000feb0c      0x693 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
+ .debug_str     0x000feb0c      0x768 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
+ .debug_str     0x000feb0c      0xd42 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
+ .debug_str     0x000feb0c      0xd42 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
+ .debug_str     0x000feb0c      0xd1d D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_common_tables.o)
+ .debug_str     0x000feb0c      0x556 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-malloc.o)
+ .debug_str     0x000feb0c      0x219 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strnlen.o)
+ .debug_str     0x000feb0c      0x52b D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-errno.o)
+ .debug_str     0x000feb0c       0xf2 D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcmp.o)
+ .debug_str     0x000feb0c      0x20f D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-strcpy.o)
+ .debug_str     0x000feb0c      0x22f D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libg_nano.a(libc_a-memcpy-stub.o)
 
-.debug_loc      0x00000000     0xf4bb
+.debug_loc      0x00000000     0xf239
  .debug_loc     0x00000000       0xe0 CMakeFiles/basic_framework.dir/Src/main.c.obj
  .debug_loc     0x000000e0       0x39 CMakeFiles/basic_framework.dir/Src/gpio.c.obj
  .debug_loc     0x00000119       0x83 CMakeFiles/basic_framework.dir/Src/freertos.c.obj
@@ -23927,46 +23919,46 @@ LOAD D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-no
  .debug_loc     0x00002c1e     0x2c0a CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c.obj
  .debug_loc     0x00005828      0x94f CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c.obj
  .debug_loc     0x00006177       0xb1 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
- .debug_loc     0x00006228      0x33e CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
- .debug_loc     0x00006566      0x1cc CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
- .debug_loc     0x00006732      0x24c CMakeFiles/basic_framework.dir/application/robot.c.obj
- .debug_loc     0x0000697e      0x48d CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
- .debug_loc     0x00006e0b      0x2f7 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
- .debug_loc     0x00007102      0x229 CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
- .debug_loc     0x0000732b      0x768 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
- .debug_loc     0x00007a93      0x379 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
- .debug_loc     0x00007e0c      0x382 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
- .debug_loc     0x0000818e      0x528 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
- .debug_loc     0x000086b6       0xae CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
- .debug_loc     0x00008764      0x6df CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
- .debug_loc     0x00008e43      0x185 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
- .debug_loc     0x00008fc8      0x42e CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
- .debug_loc     0x000093f6      0x154 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
- .debug_loc     0x0000954a      0x4a0 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
- .debug_loc     0x000099ea      0x55d CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
- .debug_loc     0x00009f47       0xfd CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
- .debug_loc     0x0000a044       0xdb CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
- .debug_loc     0x0000a11f      0x709 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
- .debug_loc     0x0000a828      0x8bb CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
- .debug_loc     0x0000b0e3      0x161 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
- .debug_loc     0x0000b244      0x61f CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
- .debug_loc     0x0000b863      0x3f1 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
- .debug_loc     0x0000bc54      0x794 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
- .debug_loc     0x0000c3e8      0x7d2 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
- .debug_loc     0x0000cbba      0x385 CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
- .debug_loc     0x0000cf3f       0x20 CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
- .debug_loc     0x0000cf5f      0x858 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
- .debug_loc     0x0000d7b7      0x317 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
- .debug_loc     0x0000dace       0xfc CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
- .debug_loc     0x0000dbca      0x30f D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
- .debug_loc     0x0000ded9      0x2e6 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
- .debug_loc     0x0000e1bf      0x62c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
- .debug_loc     0x0000e7eb      0x7f6 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
- .debug_loc     0x0000efe1      0x2e6 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
- .debug_loc     0x0000f2c7       0xfa D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
- .debug_loc     0x0000f3c1       0xfa D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
+ .debug_loc     0x00006228       0xbc CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+ .debug_loc     0x000062e4      0x1cc CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
+ .debug_loc     0x000064b0      0x24c CMakeFiles/basic_framework.dir/application/robot.c.obj
+ .debug_loc     0x000066fc      0x48d CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+ .debug_loc     0x00006b89      0x2f7 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+ .debug_loc     0x00006e80      0x229 CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
+ .debug_loc     0x000070a9      0x768 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
+ .debug_loc     0x00007811      0x379 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
+ .debug_loc     0x00007b8a      0x382 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
+ .debug_loc     0x00007f0c      0x528 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+ .debug_loc     0x00008434       0xae CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
+ .debug_loc     0x000084e2      0x6df CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+ .debug_loc     0x00008bc1      0x185 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+ .debug_loc     0x00008d46      0x42e CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
+ .debug_loc     0x00009174      0x154 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
+ .debug_loc     0x000092c8      0x4a0 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+ .debug_loc     0x00009768      0x55d CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+ .debug_loc     0x00009cc5       0xfd CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
+ .debug_loc     0x00009dc2       0xdb CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
+ .debug_loc     0x00009e9d      0x709 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+ .debug_loc     0x0000a5a6      0x8bb CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+ .debug_loc     0x0000ae61      0x161 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
+ .debug_loc     0x0000afc2      0x61f CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
+ .debug_loc     0x0000b5e1      0x3f1 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+ .debug_loc     0x0000b9d2      0x794 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
+ .debug_loc     0x0000c166      0x7d2 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+ .debug_loc     0x0000c938      0x385 CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
+ .debug_loc     0x0000ccbd       0x20 CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
+ .debug_loc     0x0000ccdd      0x858 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+ .debug_loc     0x0000d535      0x317 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+ .debug_loc     0x0000d84c       0xfc CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
+ .debug_loc     0x0000d948      0x30f D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
+ .debug_loc     0x0000dc57      0x2e6 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
+ .debug_loc     0x0000df3d      0x62c D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
+ .debug_loc     0x0000e569      0x7f6 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
+ .debug_loc     0x0000ed5f      0x2e6 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
+ .debug_loc     0x0000f045       0xfa D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
+ .debug_loc     0x0000f13f       0xfa D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
 
-.debug_ranges   0x00000000     0x12a8
+.debug_ranges   0x00000000     0x1290
  .debug_ranges  0x00000000       0x28 CMakeFiles/basic_framework.dir/Src/main.c.obj
  .debug_ranges  0x00000028       0x10 CMakeFiles/basic_framework.dir/Src/gpio.c.obj
  .debug_ranges  0x00000038       0x20 CMakeFiles/basic_framework.dir/Src/freertos.c.obj
@@ -23993,45 +23985,45 @@ LOAD D:/toolchains/STM32CubeCLT_1.18.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-no
  .debug_ranges  0x00000510      0x368 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c.obj
  .debug_ranges  0x00000878       0x30 CMakeFiles/basic_framework.dir/Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c.obj
  .debug_ranges  0x000008a8       0x28 CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj
- .debug_ranges  0x000008d0       0x50 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
- .debug_ranges  0x00000920       0x18 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
- .debug_ranges  0x00000938       0x50 CMakeFiles/basic_framework.dir/application/robot.c.obj
- .debug_ranges  0x00000988       0x48 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
- .debug_ranges  0x000009d0       0x50 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
- .debug_ranges  0x00000a20       0x38 CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
- .debug_ranges  0x00000a58       0x60 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
- .debug_ranges  0x00000ab8       0x20 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
- .debug_ranges  0x00000ad8       0x48 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
- .debug_ranges  0x00000b20       0x38 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
- .debug_ranges  0x00000b58       0x18 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
- .debug_ranges  0x00000b70       0x40 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
- .debug_ranges  0x00000bb0       0x58 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
- .debug_ranges  0x00000c08       0x28 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
- .debug_ranges  0x00000c30       0x18 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
- .debug_ranges  0x00000c48       0x50 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
- .debug_ranges  0x00000c98       0xa0 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
- .debug_ranges  0x00000d38       0x28 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
- .debug_ranges  0x00000d60       0x30 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
- .debug_ranges  0x00000d90       0x90 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
- .debug_ranges  0x00000e20       0x60 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
- .debug_ranges  0x00000e80       0x38 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
- .debug_ranges  0x00000eb8       0x40 CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
- .debug_ranges  0x00000ef8       0x50 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
- .debug_ranges  0x00000f48       0xb8 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
- .debug_ranges  0x00001000       0x78 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
- .debug_ranges  0x00001078       0x48 CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
- .debug_ranges  0x000010c0       0x10 CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
- .debug_ranges  0x000010d0       0xe0 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
- .debug_ranges  0x000011b0       0x50 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
- .debug_ranges  0x00001200       0x28 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
- .debug_ranges  0x00001228       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
- .debug_ranges  0x00001238       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
- .debug_ranges  0x00001248       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
- .debug_ranges  0x00001258       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
- .debug_ranges  0x00001268       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
- .debug_ranges  0x00001278       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
- .debug_ranges  0x00001288       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
- .debug_ranges  0x00001298       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
+ .debug_ranges  0x000008d0       0x38 CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj
+ .debug_ranges  0x00000908       0x18 CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj
+ .debug_ranges  0x00000920       0x50 CMakeFiles/basic_framework.dir/application/robot.c.obj
+ .debug_ranges  0x00000970       0x48 CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj
+ .debug_ranges  0x000009b8       0x50 CMakeFiles/basic_framework.dir/bsp/dwt/bsp_dwt.c.obj
+ .debug_ranges  0x00000a08       0x38 CMakeFiles/basic_framework.dir/bsp/gpio/bsp_gpio.c.obj
+ .debug_ranges  0x00000a40       0x60 CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj
+ .debug_ranges  0x00000aa0       0x20 CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj
+ .debug_ranges  0x00000ac0       0x48 CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj
+ .debug_ranges  0x00000b08       0x38 CMakeFiles/basic_framework.dir/bsp/usart/bsp_usart.c.obj
+ .debug_ranges  0x00000b40       0x18 CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj
+ .debug_ranges  0x00000b58       0x40 CMakeFiles/basic_framework.dir/modules/algorithm/QuaternionEKF.c.obj
+ .debug_ranges  0x00000b98       0x58 CMakeFiles/basic_framework.dir/modules/algorithm/controller.c.obj
+ .debug_ranges  0x00000bf0       0x28 CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj
+ .debug_ranges  0x00000c18       0x18 CMakeFiles/basic_framework.dir/modules/algorithm/crc8.c.obj
+ .debug_ranges  0x00000c30       0x50 CMakeFiles/basic_framework.dir/modules/algorithm/kalman_filter.c.obj
+ .debug_ranges  0x00000c80       0xa0 CMakeFiles/basic_framework.dir/modules/algorithm/user_lib.c.obj
+ .debug_ranges  0x00000d20       0x28 CMakeFiles/basic_framework.dir/modules/daemon/daemon.c.obj
+ .debug_ranges  0x00000d48       0x30 CMakeFiles/basic_framework.dir/modules/imu/BMI088Middleware.c.obj
+ .debug_ranges  0x00000d78       0x90 CMakeFiles/basic_framework.dir/modules/imu/BMI088driver.c.obj
+ .debug_ranges  0x00000e08       0x60 CMakeFiles/basic_framework.dir/modules/imu/ins_task.c.obj
+ .debug_ranges  0x00000e68       0x38 CMakeFiles/basic_framework.dir/modules/master_machine/master_process.c.obj
+ .debug_ranges  0x00000ea0       0x40 CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj
+ .debug_ranges  0x00000ee0       0x50 CMakeFiles/basic_framework.dir/modules/message_center/message_center.c.obj
+ .debug_ranges  0x00000f30       0xb8 CMakeFiles/basic_framework.dir/modules/motor/DJImotor/dji_motor.c.obj
+ .debug_ranges  0x00000fe8       0x78 CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj
+ .debug_ranges  0x00001060       0x48 CMakeFiles/basic_framework.dir/modules/motor/LKmotor/LK9025.c.obj
+ .debug_ranges  0x000010a8       0x10 CMakeFiles/basic_framework.dir/modules/motor/motor_task.c.obj
+ .debug_ranges  0x000010b8       0xe0 CMakeFiles/basic_framework.dir/modules/motor/power_control.c.obj
+ .debug_ranges  0x00001198       0x50 CMakeFiles/basic_framework.dir/modules/remote/remote_control.c.obj
+ .debug_ranges  0x000011e8       0x28 CMakeFiles/basic_framework.dir/modules/super_cap/super_cap.c.obj
+ .debug_ranges  0x00001210       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_trans_f32.o)
+ .debug_ranges  0x00001220       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_sub_f32.o)
+ .debug_ranges  0x00001230       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_mult_f32.o)
+ .debug_ranges  0x00001240       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_inverse_f32.o)
+ .debug_ranges  0x00001250       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_init_f32.o)
+ .debug_ranges  0x00001260       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_mat_add_f32.o)
+ .debug_ranges  0x00001270       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_sin_f32.o)
+ .debug_ranges  0x00001280       0x10 D:/RM/new_frame/Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a(arm_cos_f32.o)
 
 .debug_loclists
                 0x00000000      0x179

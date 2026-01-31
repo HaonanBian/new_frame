@@ -108,6 +108,13 @@ void GimbalInit()
     gimbal_sub = SubRegister("gimbal_cmd", sizeof(Gimbal_Ctrl_Cmd_s));
 }
 
+/**
+ * @brief 将角度转换为-π到π的范围
+ * @param angle 输入角度
+ * @return 转换后的角度
+ */
+
+
 /* 机器人云台控制核心任务,使用MIT模式控制 */
 void GimbalTask()
 {

@@ -45,10 +45,10 @@
 1097	1915	7913954230124949	CMakeFiles/basic_framework.dir/application/shoot/shoot.c.obj	fb2f584f33a8f4db
 2135	2731	7913954238251542	CMakeFiles/basic_framework.dir/modules/bluetooth/HC05.c.obj	32051632120b467c
 1553	1838	7913954229370264	CMakeFiles/basic_framework.dir/bsp/log/bsp_log.c.obj	c07e257542096dbe
-1073	1983	7913954230597073	CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj	6ed3774a9cc6f39e
+40	957	7915613309163177	CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj	6ed3774a9cc6f39e
 1385	2068	7913954231639776	CMakeFiles/basic_framework.dir/bsp/flash/bsp_flash.c.obj	5a6092bf3f93a0fb
 35	490	7913955827490739	CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj	2d6c5d7e0c1a3047
-37	467	7914636768479249	CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj	323eb99c286ab83b
+46	957	7915613309163177	CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj	323eb99c286ab83b
 2557	3275	7913954243709051	CMakeFiles/basic_framework.dir/modules/master_machine/seasky_protocol.c.obj	12844cd4fc2a28b2
 1089	2135	7913954232236888	CMakeFiles/basic_framework.dir/application/robot.c.obj	a0eeb063b8e05690
 1238	1993	7913954230792916	CMakeFiles/basic_framework.dir/bsp/can/bsp_can.c.obj	7d0ff8fd437fe208
@@ -58,7 +58,7 @@
 1496	2234	7913954232973160	CMakeFiles/basic_framework.dir/bsp/iic/bsp_iic.c.obj	6001d32222a17e7a
 1578	2336	7913954234319072	CMakeFiles/basic_framework.dir/bsp/pwm/bsp_pwm.c.obj	9e7130f6dda75862
 1838	2557	7913954236508978	CMakeFiles/basic_framework.dir/modules/TFminiPlus/tfminiplus.c.obj	2b35194e43787cb5
-26	770	7914674831839534	CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj	65e11c22c41fd70c
+31	1402	7914842683602932	CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj	65e11c22c41fd70c
 1678	2450	7913954235453728	CMakeFiles/basic_framework.dir/bsp/usb/bsp_usb.c.obj	cb8a8ec561bf5498
 1993	2563	7913954236493899	CMakeFiles/basic_framework.dir/modules/algorithm/crc16.c.obj	29bf7cdffd581b03
 1915	2692	7913954237766901	CMakeFiles/basic_framework.dir/modules/alarm/buzzer.c.obj	510cd82286571b44
@@ -125,7 +125,8 @@
 4482	5033	7913954261314937	cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c.obj	104eb2c27ce8d634
 4495	5067	7913954261655671	cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c.obj	e1ad5e0ed57ca8d5
 4558	5066	7913954261655671	cmake/stm32cubemx/CMakeFiles/USB_Device_Library.dir/__/__/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c.obj	3bdaab1eecc9b417
-770	1968	7914674843594076	basic_framework.elf	587d44f88c74d0ae
-27	1398	7914842683575454	CMakeFiles/basic_framework.dir/application/gimbal/gimbal.c.obj	323eb99c286ab83b
-31	1402	7914842683602932	CMakeFiles/basic_framework.dir/modules/motor/DMmotor/dmmotor.c.obj	65e11c22c41fd70c
-1402	2742	7914842696802099	basic_framework.elf	587d44f88c74d0ae
+958	2737	7915613326573586	basic_framework.elf	587d44f88c74d0ae
+39	471	7915628021021290	CMakeFiles/basic_framework.dir/application/cmd/robot_cmd.c.obj	2d6c5d7e0c1a3047
+35	473	7915628021036390	CMakeFiles/basic_framework.dir/application/chassis/chassis.c.obj	6ed3774a9cc6f39e
+42	552	7915628021828759	CMakeFiles/basic_framework.dir/application/robot.c.obj	a0eeb063b8e05690
+552	1319	7915628029230328	basic_framework.elf	587d44f88c74d0ae

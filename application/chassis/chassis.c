@@ -149,20 +149,19 @@ void ChassisInit()
 
 
 /**
- * @brief 计算每个轮毂电机的输出,正运动学解算
- *        用宏进行预替换减小开销,运动解算具体过程参考教程
+ * @brief 计算每个全向轮电机的输出,正运动学解算
+ *        X型布局全向轮解算公式，每个轮子与X轴成45度角
+ *        公式推导：v = vx*cos(theta) + vy*sin(theta) + wz*R
+ *        其中theta为轮子安装角度，R为轮子到中心距离
  */
-static void MecanumCalculate()
+static void OmniWheelCalculate()
 {
-    vt_lb = chassis_vx*my_sin(angle_to_rad_45) - chassis_vy*my_cos(angle_to_rad_45) - chassis_cmd_recv.wz * MOTOR_TO_CENTER;//0
-    vt_lf = -chassis_vx*my_sin(angle_to_rad_45) - chassis_vy*my_cos(angle_to_rad_45) - chassis_cmd_recv.wz * MOTOR_TO_CENTER;//3
-    vt_rb = chassis_vx*my_sin(angle_to_rad_45) + chassis_vy*my_cos(angle_to_rad_45) - chassis_cmd_recv.wz * MOTOR_TO_CENTER;//1
-    vt_rf = -chassis_vx*my_sin(angle_to_rad_45) + chassis_vy*my_cos(angle_to_rad_45) - chassis_cmd_recv.wz * MOTOR_TO_CENTER;//2
-
-    //vt_lf = -chassis_vx - chassis_vy - chassis_cmd_recv.wz * LF_CENTER;
-    //vt_rf = -chassis_vx + chassis_vy - chassis_cmd_recv.wz * RF_CENTER;
-    //vt_lb = chassis_vx - chassis_vy - chassis_cmd_recv.wz * LB_CENTER;
-    //vt_rb = chassis_vx + chassis_vy - chassis_cmd_recv.wz * RB_CENTER;
+    static const float k = 0.7071f; // sin(45°) = cos(45°) = √2/2 ≈ 0.7071
+    
+    vt_lf = (-chassis_vx - chassis_vy) * k - chassis_cmd_recv.wz * MOTOR_TO_CENTER;
+    vt_rf = (-chassis_vx + chassis_vy) * k - chassis_cmd_recv.wz * MOTOR_TO_CENTER;
+    vt_lb = (chassis_vx - chassis_vy) * k - chassis_cmd_recv.wz * MOTOR_TO_CENTER;
+    vt_rb = (chassis_vx + chassis_vy) * k - chassis_cmd_recv.wz * MOTOR_TO_CENTER;
 }
 /**
  * @brief 根据裁判系统和电容剩余容量对输出进行限制并设置电机参考值
@@ -249,7 +248,7 @@ void ChassisTask()
     chassis_vy = - chassis_cmd_recv.vx * sin_theta + chassis_cmd_recv.vy * cos_theta;
 
     // 根据控制模式进行正运动学解算,计算底盘输出
-    MecanumCalculate();
+    OmniWheelCalculate();
 
     // 根据裁判系统的反馈数据和电容数据对输出限幅并设定闭环参考值
     LimitChassisOutput();
