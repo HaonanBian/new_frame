@@ -189,7 +189,7 @@ void GimbalTask()
         DMMotorEnable(yaw_motor);
         DMMotorEnable(pitch_motor);
         
-        // 更新角度设定值(累加cmd下发的增量，cmd下发的是角度制)
+        // 更新角度设定值，是角度制
         yaw_pid_ref = gimbal_cmd_recv.yaw * deg2rad;
         pitch_pid_ref = gimbal_cmd_recv.pitch * deg2rad;
         
