@@ -1,4 +1,4 @@
-D:/RM/new_frame/modules/daemon/daemon.c:11:17:DaemonRegister	8	static
-D:/RM/new_frame/modules/daemon/daemon.c:27:6:DaemonReload	0	static
-D:/RM/new_frame/modules/daemon/daemon.c:32:9:DaemonIsOnline	0	static
-D:/RM/new_frame/modules/daemon/daemon.c:37:6:DaemonTask	8	static
+D:/RM/bubing/new_frame/modules/daemon/daemon.c:11:17:DaemonRegister	8	static
+D:/RM/bubing/new_frame/modules/daemon/daemon.c:27:6:DaemonReload	0	static
+D:/RM/bubing/new_frame/modules/daemon/daemon.c:32:9:DaemonIsOnline	0	static
+D:/RM/bubing/new_frame/modules/daemon/daemon.c:37:6:DaemonTask	8	static

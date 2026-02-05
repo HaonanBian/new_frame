@@ -83,5 +83,14 @@ void DMMotorControlInit();
  * @param kd 位置微分系数
  * @param torq 力矩指令
  */
-void DMMotorMITCtrl(DMMotorInstance *motor, float pos, float vel, float kp, float kd, float torq);
+//void DMMotorMITCtrl(DMMotorInstance *motor, float pos, float vel, float kp, float kd, float torq);
+
+/**
+ * @brief 纯力矩控制模式，与basic_framework-master一致
+ *        位置、速度、Kp、Kd均设为0，只发送力矩指令
+ * @param motor 电机实例指针
+ * @param torq 力矩指令
+ */
+void DMMotorTorqueCtrl(DMMotorInstance *motor, float torq);
+
 #endif // !DMMOTOR

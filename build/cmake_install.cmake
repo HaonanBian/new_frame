@@ -1,4 +1,4 @@
-# Install script for directory: D:/RM/new_frame
+# Install script for directory: D:/RM/bubing/new_frame
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("D:/RM/new_frame/build/cmake/stm32cubemx/cmake_install.cmake")
+  include("D:/RM/bubing/new_frame/build/cmake/stm32cubemx/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "D:/RM/new_frame/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "D:/RM/bubing/new_frame/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

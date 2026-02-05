@@ -1,4 +1,4 @@
-// app
+                                                                                                                    // app
 #include "robot_def.h"
 #include "robot_cmd.h"
 // module
@@ -49,6 +49,79 @@ static Robot_Status_e robot_state; // 机器人整体工作状态
 BMI088Instance *bmi088_test; // 云台IMU
 BMI088_Data_t bmi088_data;
 
+
+void RobotCMDInit()
+{
+    // BMI088_Init_Config_s bmi088_config = {
+    //     .cali_mode = BMI088_CALIBRATE_ONLINE_MODE,
+    //     .work_mode = BMI088_BLOCK_TRIGGER_MODE,
+    //     .spi_acc_config = {
+    //         .spi_handle = &hspi1,
+    //         .GPIOx = GPIOA,
+    //         .cs_pin = GPIO_PIN_4,
+    //         .spi_work_mode = SPI_DMA_MODE,
+    //     },
+    //     .acc_int_config = {
+    //         .GPIOx = GPIOC,
+    //         .GPIO_Pin = GPIO_PIN_4,
+    //         .exti_mode = GPIO_EXTI_MODE_RISING,
+    //     },
+    //     .spi_gyro_config = {
+    //         .spi_handle = &hspi1,
+    //         .GPIOx = GPIOB,
+    //         .cs_pin = GPIO_PIN_0,
+    //         .spi_work_mode = SPI_DMA_MODE,
+    //     },
+    //     .gyro_int_config = {
+    //         .GPIO_Pin = GPIO_PIN_5,
+    //         .GPIOx = GPIOC,
+    //         .exti_mode = GPIO_EXTI_MODE_RISING,
+    //     },
+    //     .heat_pwm_config = {
+    //         .htim = &htim10,
+    //         .channel = TIM_CHANNEL_1,
+    //         .period = 1,
+    //     },
+    //     .heat_pid_config = {
+    //         .Kp = 0.5,
+    //         .Ki = 0,
+    //         .Kd = 0,
+    //         .DeadBand = 0.1,
+    //         .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
+    //         .IntegralLimit = 100,
+    //         .MaxOut = 100,
+    //     },
+    // };
+    //bmi088_test = BMI088Register(&bmi088_config);
+   rc_data = RemoteControlInit(&huart3);   // 修改为对应串口,注意如果是自研板dbus协议串口需选用添加了反相器的那个
+    // vision_recv_data = VisionInit(&huart1); // 视觉通信串口
+
+    gimbal_cmd_pub = PubRegister("gimbal_cmd", sizeof(Gimbal_Ctrl_Cmd_s));
+    gimbal_feed_sub = SubRegister("gimbal_feed", sizeof(Gimbal_Upload_Data_s));
+    shoot_cmd_pub = PubRegister("shoot_cmd", sizeof(Shoot_Ctrl_Cmd_s));
+    shoot_feed_sub = SubRegister("shoot_feed", sizeof(Shoot_Upload_Data_s));
+
+#ifdef ONE_BOARD // 双板兼容
+    chassis_cmd_pub = PubRegister("chassis_cmd", sizeof(Chassis_Ctrl_Cmd_s));
+    chassis_feed_sub = SubRegister("chassis_feed", sizeof(Chassis_Upload_Data_s));
+#endif // ONE_BOARD
+#ifdef GIMBAL_BOARD
+    CANComm_Init_Config_s comm_conf = {
+        .can_config = {
+            .can_handle = &hcan1,
+            .tx_id = 0x312,
+            .rx_id = 0x311,
+        },
+        .recv_data_len = sizeof(Chassis_Upload_Data_s),
+        .send_data_len = sizeof(Chassis_Ctrl_Cmd_s),
+    };
+    cmd_can_comm = CANCommInit(&comm_conf);
+#endif // GIMBAL_BOARD
+    gimbal_cmd_send.pitch = 0;
+
+    robot_state = ROBOT_READY; // 启动时机器人进入工作模式,后续加入所有应用初始化完成之后再进入
+}
+
 /**
  * @brief 根据gimbal app传回的当前电机角度计算和零位的误差
  *        单圈绝对角度的范围是0~360,说明文档中有图示
@@ -58,7 +131,7 @@ static void CalcOffsetAngle()
 {
     // 别名angle提高可读性,不然太长了不好看,虽然基本不会动这个函数
     static float angle;
-    angle = ((float)gimbal_fetch_data.yaw_motor_single_round_angle) / 182.044444444f;
+    angle = ((float)gimbal_fetch_data.yaw_motor_single_round_angle) / 182.044444444f; // 0-360 deg
 #if YAW_ECD_GREATER_THAN_4096                               // 如果大于180度
     if (angle > YAW_ALIGN_ANGLE && angle <= 180.0f + YAW_ALIGN_ANGLE)
         chassis_cmd_send.offset_angle = angle - YAW_ALIGN_ANGLE;
@@ -82,8 +155,8 @@ static void CalcOffsetAngle()
  */
 static void RemoteControlSet()
 {
-    static gimbal_mode_e last_gimbal_mode = (gimbal_mode_e)0xff;
-    gimbal_mode_e next_gimbal_mode = gimbal_cmd_send.gimbal_mode;
+     static gimbal_mode_e last_gimbal_mode = (gimbal_mode_e)0xff;
+     gimbal_mode_e next_gimbal_mode = gimbal_cmd_send.gimbal_mode;
     // 控制底盘和云台运行模式,云台待添加,云台是否始终使用IMU数据?
     if (switch_is_down(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[下],底盘跟随云台
     {
@@ -96,13 +169,13 @@ static void RemoteControlSet()
         next_gimbal_mode = GIMBAL_FREE_MODE;
     }
 
-    if (next_gimbal_mode != last_gimbal_mode)
-    {
-        gimbal_cmd_send.yaw = gimbal_fetch_data.gimbal_imu_data.YawTotalAngle;
-        gimbal_cmd_send.pitch = gimbal_fetch_data.gimbal_imu_data.Pitch;
-        last_gimbal_mode = next_gimbal_mode;
-    }
-    gimbal_cmd_send.gimbal_mode = next_gimbal_mode;
+     if (next_gimbal_mode != last_gimbal_mode)
+     {
+         gimbal_cmd_send.yaw = gimbal_fetch_data.gimbal_imu_data.YawTotalAngle;
+         gimbal_cmd_send.pitch = gimbal_fetch_data.gimbal_imu_data.Pitch;
+         last_gimbal_mode = next_gimbal_mode;
+     }
+     gimbal_cmd_send.gimbal_mode = next_gimbal_mode;
 
     // 云台参数,确定云台控制数据
     if (switch_is_mid(rc_data[TEMP].rc.switch_left)) // 左侧开关状态为[中],视觉模式
@@ -113,8 +186,16 @@ static void RemoteControlSet()
     // 左侧开关状态为[下],或视觉未识别到目标,纯遥控器拨杆控制
     if (switch_is_down(rc_data[TEMP].rc.switch_left) || vision_recv_data->target_state == NO_TARGET)
     { // 按照摇杆的输出大小进行角度增量,增益系数需调整
-        gimbal_cmd_send.yaw += 0.00005f * (float)rc_data[TEMP].rc.rocker_l_;
-        gimbal_cmd_send.pitch += 0.00001f * (float)rc_data[TEMP].rc.rocker_l1;
+        int16_t yaw_ch = rc_data[TEMP].rc.rocker_l_;
+        int16_t pitch_ch = rc_data[TEMP].rc.rocker_l1;
+
+        if (yaw_ch < 10 && yaw_ch > -10)
+            yaw_ch = 0;
+        if (pitch_ch < 10 && pitch_ch > -10)
+            pitch_ch = 0;
+
+        gimbal_cmd_send.yaw -= 0.001f * (float)yaw_ch;
+        gimbal_cmd_send.pitch += 0.00005f * (float)pitch_ch;
     }
     // 云台软件限位
 

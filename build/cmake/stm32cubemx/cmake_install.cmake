@@ -1,4 +1,4 @@
-# Install script for directory: D:/RM/new_frame/cmake/stm32cubemx
+# Install script for directory: D:/RM/bubing/new_frame/cmake/stm32cubemx
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

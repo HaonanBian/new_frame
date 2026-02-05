@@ -1,4 +1,4 @@
-D:/RM/new_frame/application/chassis/chassis.c:157:13:OmniWheelCalculate	40	static
-D:/RM/new_frame/application/chassis/chassis.c:170:13:LimitChassisOutput	8	static
-D:/RM/new_frame/application/chassis/chassis.c:61:6:ChassisInit	256	static
-D:/RM/new_frame/application/chassis/chassis.c:198:6:ChassisTask	16	static
+D:/RM/bubing/new_frame/application/chassis/chassis.c:157:13:OmniWheelCalculate	40	static
+D:/RM/bubing/new_frame/application/chassis/chassis.c:170:13:LimitChassisOutput	8	static
+D:/RM/bubing/new_frame/application/chassis/chassis.c:61:6:ChassisInit	256	static
+D:/RM/bubing/new_frame/application/chassis/chassis.c:198:6:ChassisTask	24	static

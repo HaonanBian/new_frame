@@ -1,8 +1,8 @@
-D:/RM/new_frame/modules/motor/LKmotor/LK9025.c:47:13:LKMotorLostCallback	16	static
-D:/RM/new_frame/modules/motor/LKmotor/LK9025.c:18:13:LKMotorDecode	16	static
-D:/RM/new_frame/modules/motor/LKmotor/LK9025.c:93:6:LKMotorControl	16	static
-D:/RM/new_frame/modules/motor/LKmotor/LK9025.c:152:6:LKMotorStop	0	static
-D:/RM/new_frame/modules/motor/LKmotor/LK9025.c:157:6:LKMotorEnable	0	static
-D:/RM/new_frame/modules/motor/LKmotor/LK9025.c:53:18:LKMotorInit	32	static
-D:/RM/new_frame/modules/motor/LKmotor/LK9025.c:162:6:LKMotorSetRef	0	static
-D:/RM/new_frame/modules/motor/LKmotor/LK9025.c:167:9:LKMotorIsOnline	8	static
+D:/RM/bubing/new_frame/modules/motor/LKmotor/LK9025.c:47:13:LKMotorLostCallback	16	static
+D:/RM/bubing/new_frame/modules/motor/LKmotor/LK9025.c:18:13:LKMotorDecode	16	static
+D:/RM/bubing/new_frame/modules/motor/LKmotor/LK9025.c:93:6:LKMotorControl	16	static
+D:/RM/bubing/new_frame/modules/motor/LKmotor/LK9025.c:152:6:LKMotorStop	0	static
+D:/RM/bubing/new_frame/modules/motor/LKmotor/LK9025.c:157:6:LKMotorEnable	0	static
+D:/RM/bubing/new_frame/modules/motor/LKmotor/LK9025.c:53:18:LKMotorInit	32	static
+D:/RM/bubing/new_frame/modules/motor/LKmotor/LK9025.c:162:6:LKMotorSetRef	0	static
+D:/RM/bubing/new_frame/modules/motor/LKmotor/LK9025.c:167:9:LKMotorIsOnline	8	static

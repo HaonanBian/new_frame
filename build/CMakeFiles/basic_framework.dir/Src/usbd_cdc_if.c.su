@@ -1,7 +1,7 @@
-D:/RM/new_frame/Src/usbd_cdc_if.c:168:15:CDC_DeInit_FS	0	static
-D:/RM/new_frame/Src/usbd_cdc_if.c:182:15:CDC_Control_FS	0	static
-D:/RM/new_frame/Src/usbd_cdc_if.c:309:15:CDC_TransmitCplt_FS	0	static
-D:/RM/new_frame/Src/usbd_cdc_if.c:263:15:CDC_Receive_FS	8	static
-D:/RM/new_frame/Src/usbd_cdc_if.c:154:15:CDC_Init_FS	8	static
-D:/RM/new_frame/Src/usbd_cdc_if.c:283:9:CDC_Transmit_FS	8	static
-D:/RM/new_frame/Src/usbd_cdc_if.c:321:10:CDCInitRxbufferNcallback	0	static
+D:/RM/bubing/new_frame/Src/usbd_cdc_if.c:168:15:CDC_DeInit_FS	0	static
+D:/RM/bubing/new_frame/Src/usbd_cdc_if.c:182:15:CDC_Control_FS	0	static
+D:/RM/bubing/new_frame/Src/usbd_cdc_if.c:309:15:CDC_TransmitCplt_FS	0	static
+D:/RM/bubing/new_frame/Src/usbd_cdc_if.c:263:15:CDC_Receive_FS	8	static
+D:/RM/bubing/new_frame/Src/usbd_cdc_if.c:154:15:CDC_Init_FS	8	static
+D:/RM/bubing/new_frame/Src/usbd_cdc_if.c:283:9:CDC_Transmit_FS	8	static
+D:/RM/bubing/new_frame/Src/usbd_cdc_if.c:321:10:CDCInitRxbufferNcallback	0	static

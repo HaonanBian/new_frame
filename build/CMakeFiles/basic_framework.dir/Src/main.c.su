@@ -1,4 +1,4 @@
-D:/RM/new_frame/Src/main.c:205:6:HAL_TIM_PeriodElapsedCallback	8	static
-D:/RM/new_frame/Src/main.c:223:6:Error_Handler	0	static,ignoring_inline_asm
-D:/RM/new_frame/Src/main.c:152:6:SystemClock_Config	88	static
-D:/RM/new_frame/Src/main.c:79:5:main	16	static
+D:/RM/bubing/new_frame/Src/main.c:205:6:HAL_TIM_PeriodElapsedCallback	8	static
+D:/RM/bubing/new_frame/Src/main.c:223:6:Error_Handler	0	static,ignoring_inline_asm
+D:/RM/bubing/new_frame/Src/main.c:152:6:SystemClock_Config	88	static
+D:/RM/bubing/new_frame/Src/main.c:79:5:main	16	static

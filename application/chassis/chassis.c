@@ -241,8 +241,9 @@ void ChassisTask()
 
     // 根据云台和底盘的角度offset将控制量映射到底盘坐标系上
     // 底盘逆时针旋转为角度正方向;云台命令的方向以云台指向的方向为x,采用右手系(x指向正北时y在正东)
+    // offset_angle 单位为角度(°)，arm_sin/cos 需要弧度(rad)
     static float sin_theta, cos_theta;
-    float offset_rad = chassis_cmd_recv.offset_angle * 0.01745329252f;
+    float offset_rad = chassis_cmd_recv.offset_angle * 0.01745329252f; // deg -> rad
     cos_theta = arm_cos_f32(-offset_rad);
     sin_theta = arm_sin_f32(-offset_rad);
     chassis_vx = chassis_cmd_recv.vx * cos_theta + chassis_cmd_recv.vy * sin_theta;

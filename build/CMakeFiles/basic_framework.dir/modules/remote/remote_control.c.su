@@ -1,6 +1,6 @@
-D:/RM/new_frame/modules/remote/remote_control.c:23:13:RectifyRCjoystick	0	static
-D:/RM/new_frame/modules/remote/remote_control.c:35:13:sbus_to_rc	24	static
-D:/RM/new_frame/modules/remote/remote_control.c:104:13:RCLostCallback	16	static
-D:/RM/new_frame/modules/remote/remote_control.c:94:13:RemoteControlRxCallback	8	static
-D:/RM/new_frame/modules/remote/remote_control.c:111:12:RemoteControlInit	32	static
-D:/RM/new_frame/modules/remote/remote_control.c:131:9:RemoteControlIsOnline	8	static
+D:/RM/bubing/new_frame/modules/remote/remote_control.c:23:13:RectifyRCjoystick	0	static
+D:/RM/bubing/new_frame/modules/remote/remote_control.c:35:13:sbus_to_rc	24	static
+D:/RM/bubing/new_frame/modules/remote/remote_control.c:104:13:RCLostCallback	16	static
+D:/RM/bubing/new_frame/modules/remote/remote_control.c:94:13:RemoteControlRxCallback	8	static
+D:/RM/bubing/new_frame/modules/remote/remote_control.c:111:12:RemoteControlInit	32	static
+D:/RM/bubing/new_frame/modules/remote/remote_control.c:131:9:RemoteControlIsOnline	8	static
