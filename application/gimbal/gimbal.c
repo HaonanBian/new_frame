@@ -21,6 +21,14 @@ static Gimbal_Ctrl_Cmd_s gimbal_cmd_recv;         // 来自cmd的控制信息
 
 static BMI088Instance *bmi088; // 云台IMU
 
+static float WrapRadPi(float angle)
+{
+    while (angle > 3.14159265359f)
+        angle -= 6.28318530718f;
+    while (angle < -3.14159265359f)
+        angle += 6.28318530718f;
+    return angle;
+}
 
 void GimbalInit()
 {   
@@ -118,17 +126,49 @@ void GimbalInit()
 /* 机器人云台控制核心任务,使用MIT模式控制 */
 void GimbalTask()
 {
-    // 获取云台控制数据
-    SubGetMessage(gimbal_sub, &gimbal_cmd_recv);
+    static uint8_t first_msg_received = 0;
+    static gimbal_mode_e last_mode = GIMBAL_ZERO_FORCE;
 
-    // 计算当前姿态与目标姿态的误差
-    float yaw_error = gimbal_cmd_recv.yaw - gimba_IMU_data->YawTotalAngle;
-    float pitch_error = gimbal_cmd_recv.pitch - gimba_IMU_data->Pitch;
+    if (SubGetMessage(gimbal_sub, &gimbal_cmd_recv))
+    {
+        first_msg_received = 1;
+    }
+
+    if (!first_msg_received)
+    {
+        DMMotorStop(yaw_motor);
+        DMMotorStop(pitch_motor);
+
+        gimbal_feedback_data.gimbal_imu_data = *gimba_IMU_data;
+        gimbal_feedback_data.yaw_motor_single_round_angle = 0;
+        PubPushMessage(gimbal_pub, (void *)&gimbal_feedback_data);
+        return;
+    }
+
+    const float deg2rad = 0.01745329252f;
+    const float imu_yaw_rad = gimba_IMU_data->YawTotalAngle * deg2rad;
+    const float imu_pitch_rad = gimba_IMU_data->Pitch * deg2rad;
+
+    float cmd_yaw_rad = gimbal_cmd_recv.yaw * deg2rad;
+    float cmd_pitch_rad = gimbal_cmd_recv.pitch * deg2rad;
+
+    float yaw_error = WrapRadPi(cmd_yaw_rad - imu_yaw_rad);
+    float pitch_error = WrapRadPi(cmd_pitch_rad - imu_pitch_rad);
+
+    if (gimbal_cmd_recv.gimbal_mode != last_mode)
+    {
+        if (last_mode == GIMBAL_ZERO_FORCE)
+        {
+            yaw_error = 0.0f;
+            pitch_error = 0.0f;
+        }
+        last_mode = gimbal_cmd_recv.gimbal_mode;
+    }
     
     // 计算角速度参考值
     float yaw_vel_ref = yaw_error * 10.0f; // 简单的比例控制，将角度误差转换为角速度指令
     float pitch_vel_ref = pitch_error * 10.0f;
-    float pitch_gravity_ff = PITCH_GRAVITY_FF_COEFF * sinf(gimba_IMU_data->Pitch);
+    float pitch_gravity_ff = PITCH_GRAVITY_FF_COEFF * sinf(imu_pitch_rad);
     
     // 限制角速度
     LIMIT_MIN_MAX(yaw_vel_ref, -10.0f, 10.0f);
@@ -146,22 +186,27 @@ void GimbalTask()
     // 使用陀螺仪的反馈,底盘根据yaw电机的offset跟随云台或视觉模式采用
     case GIMBAL_GYRO_MODE: 
     case GIMBAL_FREE_MODE: 
-        // 使用MIT模式直接控制电机
-        // 参数说明：位置指令、速度指令、Kp、Kd、力矩指令
-        DMMotorMITCtrl(yaw_motor, 
-                      gimbal_cmd_recv.yaw,     // 目标位置
-                      yaw_vel_ref,              // 目标速度
-                      5.0f,                    // Kp
-                      0.5f,                     // Kd
-                      0.0f);                    // 力矩前馈
-        
-        DMMotorMITCtrl(pitch_motor, 
-                      gimbal_cmd_recv.pitch,    // 目标位置
-                      pitch_vel_ref,            // 目标速度
-                      15.0f,                    // Kp
-                      0.5f,                     // Kd
-                      pitch_gravity_ff);       // 力矩前馈
+    {
+        float yaw_target_pos = yaw_motor->measure.position + yaw_error;
+        float pitch_target_pos = pitch_motor->measure.position + pitch_error;
+        LIMIT_MIN_MAX(yaw_target_pos, DM_P_MIN, DM_P_MAX);
+        LIMIT_MIN_MAX(pitch_target_pos, DM_P_MIN, DM_P_MAX);
+
+        DMMotorMITCtrl(yaw_motor,
+                      yaw_target_pos,
+                      yaw_vel_ref,
+                      5.0f,
+                      0.5f,
+                      0.0f);
+
+        DMMotorMITCtrl(pitch_motor,
+                      pitch_target_pos,
+                      pitch_vel_ref,
+                      15.0f,
+                      0.5f,
+                      pitch_gravity_ff);
         break;
+    }
     default:
         break;
     }
