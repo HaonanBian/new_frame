@@ -1,8 +1,0 @@
-D:/RM/bubing/new_frame/bsp/can/bsp_can.c:51:13:CANServiceInit	8	static
-D:/RM/bubing/new_frame/bsp/can/bsp_can.c:29:13:CANAddFilter	48	static
-D:/RM/bubing/new_frame/bsp/can/bsp_can.c:149:13:CANFIFOxCallback	24	static
-D:/RM/bubing/new_frame/bsp/can/bsp_can.c:63:14:CANRegister	32	static
-D:/RM/bubing/new_frame/bsp/can/bsp_can.c:106:9:CANTransmit	24	static
-D:/RM/bubing/new_frame/bsp/can/bsp_can.c:131:6:CANSetDLC	16	static
-D:/RM/bubing/new_frame/bsp/can/bsp_can.c:184:6:HAL_CAN_RxFifo0MsgPendingCallback	8	static
-D:/RM/bubing/new_frame/bsp/can/bsp_can.c:194:6:HAL_CAN_RxFifo1MsgPendingCallback	8	static

@@ -1,4 +1,0 @@
-D:/RM/bubing/new_frame/modules/alarm/buzzer.c:14:6:BuzzerInit	32	static
-D:/RM/bubing/new_frame/modules/alarm/buzzer.c:25:18:BuzzerRegister	8	static
-D:/RM/bubing/new_frame/modules/alarm/buzzer.c:42:6:AlarmSetStatus	0	static
-D:/RM/bubing/new_frame/modules/alarm/buzzer.c:47:6:BuzzerTask	16	static

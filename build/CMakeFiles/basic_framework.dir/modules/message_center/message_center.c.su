@@ -1,6 +1,0 @@
-D:/RM/bubing/new_frame/modules/message_center/message_center.c:12:13:CheckName	16	static
-D:/RM/bubing/new_frame/modules/message_center/message_center.c:22:13:CheckLen	24	static
-D:/RM/bubing/new_frame/modules/message_center/message_center.c:32:14:PubRegister	24	static
-D:/RM/bubing/new_frame/modules/message_center/message_center.c:55:15:SubRegister	24	static
-D:/RM/bubing/new_frame/modules/message_center/message_center.c:84:9:SubGetMessage	8	static
-D:/RM/bubing/new_frame/modules/message_center/message_center.c:96:9:PubPushMessage	16	static

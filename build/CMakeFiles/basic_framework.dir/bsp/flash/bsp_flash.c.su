@@ -1,6 +1,0 @@
-D:/RM/bubing/new_frame/bsp/flash/bsp_flash.c:167:17:ger_sector	0	static
-D:/RM/bubing/new_frame/bsp/flash/bsp_flash.c:19:6:flash_erase_address	32	static
-D:/RM/bubing/new_frame/bsp/flash/bsp_flash.c:102:8:flash_write_muli_address	24	static
-D:/RM/bubing/new_frame/bsp/flash/bsp_flash.c:151:6:flash_read	8	static
-D:/RM/bubing/new_frame/bsp/flash/bsp_flash.c:236:10:get_next_flash_address	0	static
-D:/RM/bubing/new_frame/bsp/flash/bsp_flash.c:48:8:flash_write_single_address	16	static

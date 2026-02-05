@@ -1,6 +1,0 @@
-D:/RM/bubing/new_frame/modules/referee/crc_ref.c:79:9:Get_CRC8_Check_Sum	0	static
-D:/RM/bubing/new_frame/modules/referee/crc_ref.c:97:10:Verify_CRC8_Check_Sum	16	static
-D:/RM/bubing/new_frame/modules/referee/crc_ref.c:117:6:Append_CRC8_Check_Sum	16	static
-D:/RM/bubing/new_frame/modules/referee/crc_ref.c:137:10:Get_CRC16_Check_Sum	4	static
-D:/RM/bubing/new_frame/modules/referee/crc_ref.c:159:10:Verify_CRC16_Check_Sum	16	static
-D:/RM/bubing/new_frame/modules/referee/crc_ref.c:179:6:Append_CRC16_Check_Sum	16	static

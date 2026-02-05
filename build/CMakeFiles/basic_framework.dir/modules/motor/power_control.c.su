@@ -1,6 +1,0 @@
-D:/RM/bubing/new_frame/modules/motor/power_control.c:170:13:DJIMotorLostCallback	24	static
-D:/RM/bubing/new_frame/modules/motor/power_control.c:60:13:MotorSenderGrouping	32	static
-D:/RM/bubing/new_frame/modules/motor/power_control.c:141:13:DecodeDJIMotor	16	static
-D:/RM/bubing/new_frame/modules/motor/power_control.c:51:6:SetPowerLimit	0	static
-D:/RM/bubing/new_frame/modules/motor/power_control.c:178:19:PowerControlInit	32	static
-D:/RM/bubing/new_frame/modules/motor/power_control.c:220:6:PowerControl	48	static
