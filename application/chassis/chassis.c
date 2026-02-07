@@ -167,7 +167,7 @@ void ChassisInit()
 static void OmniWheelCalculate()
 {
     static const float k = 0.7071f; // sin(45°) = cos(45°) = √2/2 ≈ 0.7071
-    
+
     vt_lf = (-chassis_vx - chassis_vy) * k - chassis_cmd_recv.wz * MOTOR_TO_CENTER;
     vt_rf = (-chassis_vx + chassis_vy) * k - chassis_cmd_recv.wz * MOTOR_TO_CENTER;
     vt_lb = (chassis_vx - chassis_vy) * k - chassis_cmd_recv.wz * MOTOR_TO_CENTER;

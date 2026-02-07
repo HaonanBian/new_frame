@@ -17,10 +17,12 @@
 // 私有宏,自动将编码器转换成角度值
 #define YAW_ALIGN_ANGLE ((float)YAW_CHASSIS_ALIGN_ECD) // 对齐时的角度,0-360
 #define PTICH_HORIZON_ANGLE ((float)PITCH_HORIZON_ECD) // pitch水平时电机的角度,0-360
+//帮助检测编码器值是否正确转换为角度,以及云台的旋转方向是否正确
 float tast_angle=0;
 float tast_angle_signed=0;
 float tast_delta=0;
 float tast_angle_total=0;
+//
 /* cmd应用包含的模块实例指针和交互信息存储*/
 #ifdef GIMBAL_BOARD // 对双板的兼容,条件编译
 #include "can_comm.h"
@@ -194,7 +196,7 @@ static void RemoteControlSet()
      if (next_gimbal_mode != last_gimbal_mode)
      {
          gimbal_cmd_send.yaw = gimbal_fetch_data.gimbal_imu_data.YawTotalAngle;
-         gimbal_cmd_send.pitch = gimbal_fetch_data.gimbal_imu_data.Pitch;
+         gimbal_cmd_send.pitch = gimbal_fetch_data.pitch_motor_position;
          last_gimbal_mode = next_gimbal_mode;
      }
      gimbal_cmd_send.gimbal_mode = next_gimbal_mode;
@@ -217,13 +219,17 @@ static void RemoteControlSet()
             pitch_ch = 0;
 
         gimbal_cmd_send.yaw -= 0.001f * (float)yaw_ch;
-        gimbal_cmd_send.pitch += 0.00005f * (float)pitch_ch;
+        gimbal_cmd_send.pitch -= 0.00005f * (float)pitch_ch;
     }
     // 云台软件限位
+    if (gimbal_cmd_send.pitch < -1.223f)
+        gimbal_cmd_send.pitch = -1.223f;
+    if (gimbal_cmd_send.pitch > 0.0455586f)
+        gimbal_cmd_send.pitch = 0.0455586f;
 
     // 底盘参数,目前没有加入小陀螺(调试似乎暂时没有必要),系数需要调整
-    chassis_cmd_send.vx = 10.0f * (float)rc_data[TEMP].rc.rocker_r_; // _水平方向
-    chassis_cmd_send.vy = 10.0f * (float)rc_data[TEMP].rc.rocker_r1; // 1数值方向
+    chassis_cmd_send.vx = 10.0f * (float)rc_data[TEMP].rc.rocker_r_; // 前后(底盘解算中vx=前后)
+    chassis_cmd_send.vy = 10.0f * (float)rc_data[TEMP].rc.rocker_r1; // 左右(底盘解算中vy=左右)
 
     // 发射参数
     if (switch_is_up(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[上],弹舱打开

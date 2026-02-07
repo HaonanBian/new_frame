@@ -27,16 +27,16 @@ void ShootInit()
         },
         .controller_param_init_config = {
             .speed_PID = {
-                .Kp = 0, // 20
-                .Ki = 0, // 1
+                .Kp = 20, // 20
+                .Ki = 1, // 1
                 .Kd = 0,
                 .Improve = PID_Integral_Limit,
                 .IntegralLimit = 10000,
                 .MaxOut = 15000,
             },
             .current_PID = {
-                .Kp = 0, // 0.7
-                .Ki = 0, // 0.1
+                .Kp = 0.7, // 0.7
+                .Ki = 0.1, // 0.1
                 .Kd = 0,
                 .Improve = PID_Integral_Limit,
                 .IntegralLimit = 10000,
@@ -49,41 +49,41 @@ void ShootInit()
 
             .outer_loop_type = SPEED_LOOP,
             .close_loop_type = SPEED_LOOP | CURRENT_LOOP,
-            .motor_reverse_flag = MOTOR_DIRECTION_NORMAL,
+            .motor_reverse_flag = MOTOR_DIRECTION_REVERSE,
         },
         .motor_type = M3508};
     friction_config.can_init_config.tx_id = 1,
     friction_l = DJIMotorInit(&friction_config);
 
     friction_config.can_init_config.tx_id = 2; // 右摩擦轮,改txid和方向就行
-    friction_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_REVERSE;
+    friction_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_NORMAL;
     friction_r = DJIMotorInit(&friction_config);
 
     // 拨盘电机
     Motor_Init_Config_s loader_config = {
         .can_init_config = {
             .can_handle = &hcan2,
-            .tx_id = 3,
+            .tx_id = 7,
         },
         .controller_param_init_config = {
             .angle_PID = {
                 // 如果启用位置环来控制发弹,需要较大的I值保证输出力矩的线性度否则出现接近拨出的力矩大幅下降
-                .Kp = 0, // 10
+                .Kp = 10, // 10
                 .Ki = 0,
                 .Kd = 0,
                 .MaxOut = 200,
             },
             .speed_PID = {
-                .Kp = 0, // 10
-                .Ki = 0, // 1
+                .Kp = 10, // 10
+                .Ki = 1, // 1
                 .Kd = 0,
                 .Improve = PID_Integral_Limit,
                 .IntegralLimit = 5000,
                 .MaxOut = 5000,
             },
             .current_PID = {
-                .Kp = 0, // 0.7
-                .Ki = 0, // 0.1
+                .Kp = 0.7, // 0.7
+                .Ki = 0.1, // 0.1
                 .Kd = 0,
                 .Improve = PID_Integral_Limit,
                 .IntegralLimit = 5000,
@@ -94,7 +94,7 @@ void ShootInit()
             .angle_feedback_source = MOTOR_FEED, .speed_feedback_source = MOTOR_FEED,
             .outer_loop_type = SPEED_LOOP, // 初始化成SPEED_LOOP,让拨盘停在原地,防止拨盘上电时乱转
             .close_loop_type = CURRENT_LOOP | SPEED_LOOP,
-            .motor_reverse_flag = MOTOR_DIRECTION_NORMAL, // 注意方向设置为拨盘的拨出的击发方向
+            .motor_reverse_flag = MOTOR_DIRECTION_REVERSE, // 注意方向设置为拨盘的拨出的击发方向
         },
         .motor_type = M2006 // 英雄使用m3508
     };
