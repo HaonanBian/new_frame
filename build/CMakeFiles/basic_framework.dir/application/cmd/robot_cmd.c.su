@@ -1,6 +1,0 @@
-D:/RM/new_frame/application/cmd/robot_cmd.c:130:13:CalcOffsetAngle	0	static
-D:/RM/new_frame/application/cmd/robot_cmd.c:156:13:RemoteControlSet	0	static
-D:/RM/new_frame/application/cmd/robot_cmd.c:215:13:MouseKeySet	4	static
-D:/RM/new_frame/application/cmd/robot_cmd.c:302:13:EmergencyHandler	16	static
-D:/RM/new_frame/application/cmd/robot_cmd.c:53:6:RobotCMDInit	8	static
-D:/RM/new_frame/application/cmd/robot_cmd.c:325:6:RobotCMDTask	8	static

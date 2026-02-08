@@ -86,7 +86,7 @@ void DMMotorCaliEncoder(DMMotorInstance *motor) // 电机的零点设置
     
     // 然后控制电机回到零点位置（使用MIT模式）
     // 参数：目标位置(0)、目标速度(0)、位置增益、速度增益、力矩前馈
-    DMMotorMITCtrl(motor, 0.0f, 0.0f, 5.0f, 0.1f, 0.0f);
+    // DMMotorMITCtrl(motor, 0.0f, 0.0f, 5.0f, 0.1f, 0.0f);
     DWT_Delay(0.5); // 给电机足够时间回到零点
 }
 
@@ -263,6 +263,52 @@ void DMMotorMITCtrl(DMMotorInstance *motor, float pos, float vel, float kp, floa
     motor_send_mailbox.torque_des = float_to_uint(torq, DM_T_MIN, DM_T_MAX, 12);
     motor_send_mailbox.Kp = float_to_uint(kp, 0.0f, 500.0f, 12);
     motor_send_mailbox.Kd = float_to_uint(kd, 0.0f, 5.0f, 12);
+    
+    // 填充CAN发送缓冲区
+    motor->motor_can_instace->tx_buff[0] = (uint8_t)(motor_send_mailbox.position_des >> 8);
+    motor->motor_can_instace->tx_buff[1] = (uint8_t)(motor_send_mailbox.position_des);
+    motor->motor_can_instace->tx_buff[2] = (uint8_t)(motor_send_mailbox.velocity_des >> 4);
+    motor->motor_can_instace->tx_buff[3] = (uint8_t)(((motor_send_mailbox.velocity_des & 0xF) << 4) | (motor_send_mailbox.Kp >> 8));
+    motor->motor_can_instace->tx_buff[4] = (uint8_t)(motor_send_mailbox.Kp);
+    motor->motor_can_instace->tx_buff[5] = (uint8_t)(motor_send_mailbox.Kd >> 4);
+    motor->motor_can_instace->tx_buff[6] = (uint8_t)(((motor_send_mailbox.Kd & 0xF) << 4) | (motor_send_mailbox.torque_des >> 8));
+    motor->motor_can_instace->tx_buff[7] = (uint8_t)(motor_send_mailbox.torque_des);
+    
+    // 发送CAN数据
+    CANTransmit(motor->motor_can_instace, 1);
+}
+
+/**
+ * @brief 纯力矩控制模式，与basic_framework-master一致
+ *        位置、速度、Kp、Kd均设为0，只发送力矩指令
+ * @param motor 电机实例指针
+ * @param torq 力矩指令
+ */
+void DMMotorTorqueCtrl(DMMotorInstance *motor, float torq)
+{
+    DMMotor_Send_s motor_send_mailbox;
+    
+    // 处理电机方向反转
+    if (motor->motor_settings.motor_reverse_flag == MOTOR_DIRECTION_REVERSE)
+    {
+        torq *= -1;
+    }
+    
+    // 电机停止处理
+    if (motor->stop_flag == MOTOR_STOP)
+    {
+        torq = 0;
+    }
+    
+    // 限幅
+    LIMIT_MIN_MAX(torq, DM_T_MIN, DM_T_MAX);
+    
+    // 填充CAN发送数据 - 纯力矩模式：pos=0, vel=0, Kp=0, Kd=0
+    motor_send_mailbox.position_des = float_to_uint(0, DM_P_MIN, DM_P_MAX, 16);
+    motor_send_mailbox.velocity_des = float_to_uint(0, DM_V_MIN, DM_V_MAX, 12);
+    motor_send_mailbox.torque_des = float_to_uint(torq, DM_T_MIN, DM_T_MAX, 12);
+    motor_send_mailbox.Kp = 0;
+    motor_send_mailbox.Kd = 0;
     
     // 填充CAN发送缓冲区
     motor->motor_can_instace->tx_buff[0] = (uint8_t)(motor_send_mailbox.position_des >> 8);

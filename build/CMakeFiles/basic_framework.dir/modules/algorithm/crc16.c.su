@@ -1,4 +1,0 @@
-D:/RM/new_frame/modules/algorithm/crc16.c:80:6:init_crc16_tab	0	static
-D:/RM/new_frame/modules/algorithm/crc16.c:14:10:crc_16	16	static
-D:/RM/new_frame/modules/algorithm/crc16.c:39:10:crc_modbus	16	static
-D:/RM/new_frame/modules/algorithm/crc16.c:65:10:update_crc_16	16	static

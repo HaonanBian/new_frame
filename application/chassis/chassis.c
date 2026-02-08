@@ -45,14 +45,12 @@ static Chassis_Ctrl_Cmd_s chassis_cmd_recv;         // 底盘接收到的控制�
 static Chassis_Upload_Data_s chassis_feedback_data; // 底盘回传的反馈数据
 
 static PIDInstance buffer_PID;             // 用于底盘的缓冲能量PID
+static PIDInstance angle_PID;
 static referee_info_t *referee_data;       // 用于获取裁判系统的数据
 static Referee_Interactive_info_t ui_data; // UI数据，将底盘中的数据传入此结构体的对应变量中，UI会自动检测是否变化，对应显示UI
 
 static SuperCapInstance *cap;                                       // 超级电容
 static DJIMotorInstance *motor_lf, *motor_rf, *motor_lb, *motor_rb; // left right forward back
-
-/* 用于自旋变速策略的时间变量 */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
-// static float t;
 
 /* 私有函数计算的中介变量,设为静态避免参数传递的开销 */
 static float chassis_vx, chassis_vy;                      // 将云台系的速度投影到底盘
@@ -112,6 +110,19 @@ void ChassisInit()
         .MaxOut = 1000,
     };
     PIDInit(&buffer_PID, &Buffer_pid_conf); // 缓冲能量PID初始化
+
+    PID_Init_Config_s Angle_pid_conf = {
+        .Kp = 1000.0f,
+        .Ki = 0.0f,
+        .Kd = 0.2f,
+        .IntegralLimit = 2000.0f,
+        .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement | PID_DerivativeFilter,
+        .Derivative_LPF_RC = 0.03f,
+        .MaxOut = 6000.0f,
+        .DeadBand = 1.0f,
+    };
+    PIDInit(&angle_PID, &Angle_pid_conf);
+
     SuperCap_Init_Config_s cap_conf = {
         .can_config = {
             .can_handle = &hcan2,
@@ -157,7 +168,7 @@ void ChassisInit()
 static void OmniWheelCalculate()
 {
     static const float k = 0.7071f; // sin(45°) = cos(45°) = √2/2 ≈ 0.7071
-    
+
     vt_lf = (-chassis_vx - chassis_vy) * k - chassis_cmd_recv.wz * MOTOR_TO_CENTER;
     vt_rf = (-chassis_vx + chassis_vy) * k - chassis_cmd_recv.wz * MOTOR_TO_CENTER;
     vt_lb = (chassis_vx - chassis_vy) * k - chassis_cmd_recv.wz * MOTOR_TO_CENTER;
@@ -230,7 +241,7 @@ void ChassisTask()
         chassis_cmd_recv.wz = 0;
         break;
     case CHASSIS_FOLLOW_GIMBAL_YAW: // 跟随云台,不单独设置pid,以误差角度平方为速度输出
-        chassis_cmd_recv.wz = -1.5f * chassis_cmd_recv.offset_angle * abs(chassis_cmd_recv.offset_angle);
+        chassis_cmd_recv.wz = -PIDCalculate(&angle_PID, chassis_cmd_recv.offset_angle, 0.0f);
         break;
     case CHASSIS_ROTATE: // 自旋,同时保持全向机动;当前wz维持定值,后续增加不规则的变速策略
         chassis_cmd_recv.wz = 6000;
@@ -241,11 +252,17 @@ void ChassisTask()
 
     // 根据云台和底盘的角度offset将控制量映射到底盘坐标系上
     // 底盘逆时针旋转为角度正方向;云台命令的方向以云台指向的方向为x,采用右手系(x指向正北时y在正东)
+    // offset_angle 单位为角度(°)，arm_sin/cos 需要弧度(rad)
     static float sin_theta, cos_theta;
-    cos_theta = arm_cos_f32(-chassis_cmd_recv.offset_angle );
-    sin_theta = arm_sin_f32(-chassis_cmd_recv.offset_angle );
+    float offset_rad = chassis_cmd_recv.offset_angle * 0.01745329252f; // deg -> rad
+    if (chassis_cmd_recv.chassis_mode == CHASSIS_FOLLOW_GIMBAL_YAW)
+    {
+        offset_rad = -offset_rad;
+    }
+    cos_theta = arm_cos_f32(offset_rad);
+    sin_theta = arm_sin_f32(offset_rad);
     chassis_vx = chassis_cmd_recv.vx * cos_theta + chassis_cmd_recv.vy * sin_theta;
-    chassis_vy = - chassis_cmd_recv.vx * sin_theta + chassis_cmd_recv.vy * cos_theta;
+    chassis_vy = -chassis_cmd_recv.vx * sin_theta + chassis_cmd_recv.vy * cos_theta;
 
     // 根据控制模式进行正运动学解算,计算底盘输出
     OmniWheelCalculate();

@@ -1,4 +1,4 @@
-// app
+                                                                                                                    // app
 #include "robot_def.h"
 #include "robot_cmd.h"
 // module
@@ -12,11 +12,17 @@
 // bsp
 #include "bsp_dwt.h"
 #include "bsp_log.h"
+#include <math.h>
 
 // 私有宏,自动将编码器转换成角度值
-#define YAW_ALIGN_ANGLE (YAW_CHASSIS_ALIGN_ECD * ECD_ANGLE_COEF_DJI) // 对齐时的角度,0-360
-#define PTICH_HORIZON_ANGLE (PITCH_HORIZON_ECD * ECD_ANGLE_COEF_DJI) // pitch水平时电机的角度,0-360
-
+#define YAW_ALIGN_ANGLE ((float)YAW_CHASSIS_ALIGN_ECD) // 对齐时的角度,0-360
+#define PTICH_HORIZON_ANGLE ((float)PITCH_HORIZON_ECD) // pitch水平时电机的角度,0-360
+//帮助检测编码器值是否正确转换为角度,以及云台的旋转方向是否正确
+float tast_angle=0;
+float tast_angle_signed=0;
+float tast_delta=0;
+float tast_angle_total=0;
+//
 /* cmd应用包含的模块实例指针和交互信息存储*/
 #ifdef GIMBAL_BOARD // 对双板的兼容,条件编译
 #include "can_comm.h"
@@ -131,22 +137,40 @@ static void CalcOffsetAngle()
 {
     // 别名angle提高可读性,不然太长了不好看,虽然基本不会动这个函数
     static float angle;
-    angle = gimbal_fetch_data.yaw_motor_single_round_angle; // 从云台获取的当前yaw电机单圈角度
-#if YAW_ECD_GREATER_THAN_4096                               // 如果大于180度
-    if (angle > YAW_ALIGN_ANGLE && angle <= 180.0f + YAW_ALIGN_ANGLE)
-        chassis_cmd_send.offset_angle = angle - YAW_ALIGN_ANGLE;
-    else if (angle > 180.0f + YAW_ALIGN_ANGLE)
-        chassis_cmd_send.offset_angle = angle - YAW_ALIGN_ANGLE - 360.0f;
-    else
-        chassis_cmd_send.offset_angle = angle - YAW_ALIGN_ANGLE;
-#else // 小于180度
-    if (angle > YAW_ALIGN_ANGLE)
-        chassis_cmd_send.offset_angle = angle - YAW_ALIGN_ANGLE;
-    else if (angle <= YAW_ALIGN_ANGLE && angle >= YAW_ALIGN_ANGLE - 180.0f)
-        chassis_cmd_send.offset_angle = angle - YAW_ALIGN_ANGLE;
-    else
-        chassis_cmd_send.offset_angle = angle - YAW_ALIGN_ANGLE + 360.0f;
-#endif
+    angle = ((float)gimbal_fetch_data.yaw_motor_single_round_angle) / 182.044444444f; // 0-360 deg
+
+    float angle_signed = angle;
+    if (angle_signed > 180.0f)
+        angle_signed -= 360.0f;
+
+    float yaw_align_signed = YAW_ALIGN_ANGLE;
+    if (yaw_align_signed > 180.0f)
+        yaw_align_signed -= 360.0f;
+
+    static uint8_t angle_inited = 0;
+    static float last_angle = 0.0f;
+    static float angle_total = 0.0f;
+
+    if (!angle_inited)
+    {
+        angle_total = angle_signed;
+        last_angle = angle_signed;
+        angle_inited = 1;
+    }
+
+    float delta = angle_signed - last_angle;
+    while (delta > 180.0f)
+        delta -= 360.0f;
+    while (delta < -180.0f)
+        delta += 360.0f;
+    angle_total += delta;
+    last_angle = angle_signed;
+
+    chassis_cmd_send.offset_angle = angle_total - yaw_align_signed;
+    tast_angle = angle;
+    tast_angle_signed = angle_signed;
+    tast_delta = delta;
+    tast_angle_total = angle_total;
 }
 
 /**
@@ -155,17 +179,27 @@ static void CalcOffsetAngle()
  */
 static void RemoteControlSet()
 {
+     static gimbal_mode_e last_gimbal_mode = (gimbal_mode_e)0xff;
+     gimbal_mode_e next_gimbal_mode = gimbal_cmd_send.gimbal_mode;
     // 控制底盘和云台运行模式,云台待添加,云台是否始终使用IMU数据?
-    if (switch_is_down(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[下],底盘跟随云台
+    if (switch_is_mid(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[中],底盘跟随云台
+    {
+        chassis_cmd_send.chassis_mode = CHASSIS_FOLLOW_GIMBAL_YAW;
+        next_gimbal_mode = GIMBAL_GYRO_MODE;
+    }
+    else if (switch_is_down(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[下],小陀螺模式
     {
         chassis_cmd_send.chassis_mode = CHASSIS_ROTATE;
-        gimbal_cmd_send.gimbal_mode = GIMBAL_GYRO_MODE;
+        next_gimbal_mode = GIMBAL_GYRO_MODE;
     }
-    else if (switch_is_mid(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[中],底盘和云台分离,底盘保持不转动
-    {
-        chassis_cmd_send.chassis_mode = CHASSIS_NO_FOLLOW;
-        gimbal_cmd_send.gimbal_mode = GIMBAL_FREE_MODE;
-    }
+
+     if (next_gimbal_mode != last_gimbal_mode)
+     {
+         gimbal_cmd_send.yaw = gimbal_fetch_data.gimbal_imu_data.YawTotalAngle;
+         gimbal_cmd_send.pitch = gimbal_fetch_data.pitch_motor_position;
+         last_gimbal_mode = next_gimbal_mode;
+     }
+     gimbal_cmd_send.gimbal_mode = next_gimbal_mode;
 
     // 云台参数,确定云台控制数据
     if (switch_is_mid(rc_data[TEMP].rc.switch_left)) // 左侧开关状态为[中],视觉模式
@@ -176,14 +210,26 @@ static void RemoteControlSet()
     // 左侧开关状态为[下],或视觉未识别到目标,纯遥控器拨杆控制
     if (switch_is_down(rc_data[TEMP].rc.switch_left) || vision_recv_data->target_state == NO_TARGET)
     { // 按照摇杆的输出大小进行角度增量,增益系数需调整
-        gimbal_cmd_send.yaw += 0.00005f * (float)rc_data[TEMP].rc.rocker_l_;
-        gimbal_cmd_send.pitch += 0.00001f * (float)rc_data[TEMP].rc.rocker_l1;
+        int16_t yaw_ch = rc_data[TEMP].rc.rocker_l_;
+        int16_t pitch_ch = rc_data[TEMP].rc.rocker_l1;
+
+        if (yaw_ch < 10 && yaw_ch > -10)
+            yaw_ch = 0;
+        if (pitch_ch < 10 && pitch_ch > -10)
+            pitch_ch = 0;
+
+        gimbal_cmd_send.yaw -= 0.001f * (float)yaw_ch;
+        gimbal_cmd_send.pitch -= 0.00005f * (float)pitch_ch;
     }
     // 云台软件限位
+    if (gimbal_cmd_send.pitch < -1.223f)
+        gimbal_cmd_send.pitch = -1.223f;
+    if (gimbal_cmd_send.pitch > 0.0455586f)
+        gimbal_cmd_send.pitch = 0.0455586f;
 
     // 底盘参数,目前没有加入小陀螺(调试似乎暂时没有必要),系数需要调整
-    chassis_cmd_send.vx = 10.0f * (float)rc_data[TEMP].rc.rocker_r_; // _水平方向
-    chassis_cmd_send.vy = 10.0f * (float)rc_data[TEMP].rc.rocker_r1; // 1数值方向
+    chassis_cmd_send.vx = 10.0f * (float)rc_data[TEMP].rc.rocker_r_; // 前后(底盘解算中vx=前后)
+    chassis_cmd_send.vy = 10.0f * (float)rc_data[TEMP].rc.rocker_r1; // 左右(底盘解算中vy=左右)
 
     // 发射参数
     if (switch_is_up(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[上],弹舱打开

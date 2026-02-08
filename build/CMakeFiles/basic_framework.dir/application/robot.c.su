@@ -1,9 +1,0 @@
-D:/RM/new_frame/application/robot_task.h:67:32:StartINSTASK	16	static
-D:/RM/new_frame/application/robot_task.h:86:32:StartMOTORTASK	16	static
-D:/RM/new_frame/bsp/bsp_init.h:16:6:BSPInit	8	static
-D:/RM/new_frame/application/robot_task.h:39:6:OSTaskInit	96	static
-D:/RM/new_frame/application/robot_task.h:102:32:StartDAEMONTASK	16	static
-D:/RM/new_frame/application/robot_task.h:138:32:StartUITASK	16	static
-D:/RM/new_frame/application/robot.c:23:6:RobotInit	8	static,ignoring_inline_asm
-D:/RM/new_frame/application/robot.c:48:6:RobotTask	8	static
-D:/RM/new_frame/application/robot_task.h:121:32:StartROBOTTASK	16	static

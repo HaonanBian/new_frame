@@ -1,7 +1,0 @@
-D:/RM/new_frame/modules/can_comm/can_comm.c:13:13:CANCommResetRx	8	static
-D:/RM/new_frame/modules/can_comm/can_comm.c:73:13:CANCommLostCallback	16	static
-D:/RM/new_frame/modules/can_comm/can_comm.c:26:13:CANCommRxCallback	16	static
-D:/RM/new_frame/modules/can_comm/can_comm.c:80:18:CANCommInit	32	static
-D:/RM/new_frame/modules/can_comm/can_comm.c:106:6:CANCommSend	16	static
-D:/RM/new_frame/modules/can_comm/can_comm.c:125:7:CANCommGet	0	static
-D:/RM/new_frame/modules/can_comm/can_comm.c:131:9:CANCommIsOnline	8	static

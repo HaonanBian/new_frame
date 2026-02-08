@@ -9,7 +9,6 @@
 #include "bmi088.h"
 #include <assert.h>
 
-
 static attitude_t *gimba_IMU_data; // 云台IMU数据
 static DMMotorInstance *yaw_motor;
 static DMMotorInstance *pitch_motor;
@@ -21,6 +20,14 @@ static Gimbal_Ctrl_Cmd_s gimbal_cmd_recv;         // 来自cmd的控制信息
 
 static BMI088Instance *bmi088; // 云台IMU
 
+// static float WrapRadPi(float angle)
+// {
+//     while (angle > 3.14159265359f)
+//         angle -= 6.28318530718f;
+//     while (angle < -3.14159265359f)
+//         angle += 6.28318530718f;
+//     return angle;
+// }
 
 void GimbalInit()
 {   
@@ -44,12 +51,12 @@ void GimbalInit()
                 .MaxOut = 500,
             },
             .speed_PID = {
-                .Kp = 50,  // 50
-                .Ki = 200, // 200
+                .Kp = 1.0f,  // 力矩控制模式下需要重新调参
+                .Ki = 0.1f,
                 .Kd = 0,
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
-                .IntegralLimit = 3000,
-                .MaxOut = 20000,
+                .IntegralLimit = 5,
+                .MaxOut = 10,  // DM电机力矩范围[-10, 10]
             },
             .other_angle_feedback_ptr = &gimba_IMU_data->YawTotalAngle,
             // 还需要增加角速度额外反馈指针,注意方向,ins_task.md中有c板的bodyframe坐标系说明
@@ -61,31 +68,33 @@ void GimbalInit()
             .outer_loop_type = ANGLE_LOOP,
             .close_loop_type = ANGLE_LOOP | SPEED_LOOP,
             .motor_reverse_flag = MOTOR_DIRECTION_NORMAL,
+            .feedback_reverse_flag = FEEDBACK_DIRECTION_REVERSE,
         },
         .motor_type = DM4310};
     // PITCH
     Motor_Init_Config_s pitch_config = {
         .can_init_config = {
             .can_handle = &hcan2,
-            .tx_id = 0x01,
-            .rx_id = 0x03,
+            .tx_id = 0x03,
+            .rx_id = 0x06,
         },
         .controller_param_init_config = {
             .angle_PID = {
-                .Kp = 10, // 10
+                .Kp = 5, // 10->5 降低增益减少抖动
                 .Ki = 0,
                 .Kd = 0,
+                .DeadBand = 0.01,
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
                 .IntegralLimit = 100,
                 .MaxOut = 500,
             },
             .speed_PID = {
-                .Kp = 50,  // 50
-                .Ki = 350, // 350
-                .Kd = 0,   // 0
+                .Kp = 0.5f,  // 1.0->0.5 降低力矩对速度误差的敏感度
+                .Ki = 0.05f, // 0.1->0.05 减小积分避免振荡
+                .Kd = 0,
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
-                .IntegralLimit = 2500,
-                .MaxOut = 20000,
+                .IntegralLimit = 5,
+                .MaxOut = 10,  // DM电机力矩范围[-10, 10]
             },
             .other_angle_feedback_ptr = &gimba_IMU_data->Pitch,
             // 还需要增加角速度额外反馈指针,注意方向,ins_task.md中有c板的bodyframe坐标系说明
@@ -115,25 +124,52 @@ void GimbalInit()
  */
 
 
-/* 机器人云台控制核心任务,使用MIT模式控制 */
+/* 机器人云台控制核心任务,使用力矩控制模式(与basic_framework-master一致) */
 void GimbalTask()
 {
-    // 获取云台控制数据
-    SubGetMessage(gimbal_sub, &gimbal_cmd_recv);
+    // 获取云台控制数据，检查是否收到新消息
+    static uint8_t first_msg_received = 0;
+    static gimbal_mode_e last_mode = GIMBAL_ZERO_FORCE;
+    static float yaw_pid_ref = 0;   // yaw角度环设定值
+    static float pitch_pid_ref = 0; // pitch角度环设定值
+    
+    if (SubGetMessage(gimbal_sub, &gimbal_cmd_recv))
+    {
+        first_msg_received = 1;
+    }
+    
+    // 如果还没收到过消息，保持停止状态
+    if (!first_msg_received)
+    {
+        DMMotorStop(yaw_motor);
+        DMMotorStop(pitch_motor);
+        DMMotorTorqueCtrl(yaw_motor, 0);
+        DMMotorTorqueCtrl(pitch_motor, 0);
+        // 仍然需要推送反馈数据
+        gimbal_feedback_data.gimbal_imu_data = *gimba_IMU_data;
+        gimbal_feedback_data.yaw_motor_single_round_angle = 0;
+        PubPushMessage(gimbal_pub, (void *)&gimbal_feedback_data);
+        return;
+    }
 
-    // 计算当前姿态与目标姿态的误差
-    float yaw_error = gimbal_cmd_recv.yaw - gimba_IMU_data->YawTotalAngle;
-    float pitch_error = gimbal_cmd_recv.pitch - gimba_IMU_data->Pitch;
+    const float deg2rad = 0.01745329252f;
     
-    // 计算角速度参考值
-    float yaw_vel_ref = yaw_error * 10.0f; // 简单的比例控制，将角度误差转换为角速度指令
-    float pitch_vel_ref = pitch_error * 10.0f;
-    float pitch_gravity_ff = PITCH_GRAVITY_FF_COEFF * sinf(gimba_IMU_data->Pitch);
+    // 获取IMU反馈数据(角度制转弧度制)
+    float imu_yaw_feedback = gimba_IMU_data->YawTotalAngle * deg2rad;   // 陀螺仪yaw角度反馈(rad)
+    float imu_yaw_gyro = gimba_IMU_data->Gyro[2];                       // 陀螺仪yaw角速度反馈(rad/s)
+    // pitch轴使用电机编码器反馈(IMU装在yaw轴上,无法反馈pitch)
+    float motor_pitch_feedback = pitch_motor->measure.position;          // 电机位置反馈(rad)
+    float motor_pitch_velocity = pitch_motor->measure.velocity;          // 电机速度反馈(rad/s)
+
+    // 模式切换时初始化pid_ref，避免突变
+    if (gimbal_cmd_recv.gimbal_mode != last_mode)
+    {
+        yaw_pid_ref = imu_yaw_feedback;
+        pitch_pid_ref = motor_pitch_feedback;
+        gimbal_cmd_recv.pitch = motor_pitch_feedback;
+        last_mode = gimbal_cmd_recv.gimbal_mode;
+    }
     
-    // 限制角速度
-    LIMIT_MIN_MAX(yaw_vel_ref, -10.0f, 10.0f);
-    LIMIT_MIN_MAX(pitch_vel_ref, -20.0f, 20.0f);
-    LIMIT_MIN_MAX(pitch_gravity_ff, -100.0f, 100.0f);
     // 根据控制模式进行处理
     switch (gimbal_cmd_recv.gimbal_mode)
     {
@@ -141,33 +177,60 @@ void GimbalTask()
     case GIMBAL_ZERO_FORCE:        
         DMMotorStop(yaw_motor);
         DMMotorStop(pitch_motor);
-        
+        DMMotorTorqueCtrl(yaw_motor, 0);
+        DMMotorTorqueCtrl(pitch_motor, 0);
         break;
+        
     // 使用陀螺仪的反馈,底盘根据yaw电机的offset跟随云台或视觉模式采用
     case GIMBAL_GYRO_MODE: 
     case GIMBAL_FREE_MODE: 
-        // 使用MIT模式直接控制电机
-        // 参数说明：位置指令、速度指令、Kp、Kd、力矩指令
-        DMMotorMITCtrl(yaw_motor, 
-                      gimbal_cmd_recv.yaw,     // 目标位置
-                      yaw_vel_ref,              // 目标速度
-                      5.0f,                    // Kp
-                      0.5f,                     // Kd
-                      0.0f);                    // 力矩前馈
+    {
+        DMMotorEnable(yaw_motor);
+        DMMotorEnable(pitch_motor);
         
-        DMMotorMITCtrl(pitch_motor, 
-                      gimbal_cmd_recv.pitch,    // 目标位置
-                      pitch_vel_ref,            // 目标速度
-                      15.0f,                    // Kp
-                      0.5f,                     // Kd
-                      pitch_gravity_ff);       // 力矩前馈
+        // 更新角度设定值
+        yaw_pid_ref = gimbal_cmd_recv.yaw * deg2rad;
+        pitch_pid_ref = gimbal_cmd_recv.pitch;  // pitch已经是弧度(由cmd直接累加弧度增量)
+        
+        // ============ YAW轴串级PID控制(角度环→速度环→力矩输出) ============
+        // 角度环：输入为角度目标值，用陀螺仪的角度，输出为速度设定值
+        float yaw_speed_ref = PIDCalculate(&yaw_motor->angle_PID, imu_yaw_feedback, yaw_pid_ref);
+        LIMIT_MIN_MAX(yaw_speed_ref, DM_V_MIN, DM_V_MAX);
+        // 速度环：输入为速度环pid值，用陀螺仪角速度，输出为力矩
+        float yaw_torque = PIDCalculate(&yaw_motor->speed_PID, imu_yaw_gyro, yaw_speed_ref);
+        if (yaw_motor->motor_settings.feedback_reverse_flag == FEEDBACK_DIRECTION_REVERSE)
+            yaw_torque *= -1;//反转
+        LIMIT_MIN_MAX(yaw_torque, DM_T_MIN, DM_T_MAX);
+        // 发送力矩控制指令
+        DMMotorTorqueCtrl(yaw_motor, yaw_torque);
+        
+        // ============ PITCH轴串级PID控制(角度环→速度环→力矩输出) ============
+        // pitch软件限位: 最低0.0455586rad, 最高-1.223rad
+        #define PITCH_MIN_RAD (-1.223f)   // 最高位置(向上)
+        #define PITCH_MAX_RAD (0.0455586f) // 最低位置(向下)
+        LIMIT_MIN_MAX(pitch_pid_ref, PITCH_MIN_RAD, PITCH_MAX_RAD);
+        float pitch_speed_ref = PIDCalculate(&pitch_motor->angle_PID, motor_pitch_feedback, pitch_pid_ref);
+        LIMIT_MIN_MAX(pitch_speed_ref, DM_V_MIN, DM_V_MAX);
+        float pitch_torque = PIDCalculate(&pitch_motor->speed_PID, motor_pitch_velocity, pitch_speed_ref);
+        
+        // TODO: 重力补偿前馈,需根据云台实际重力力矩测定系数和方向后启用
+        // pitch_torque += GRAVITY_COEFF * cosf(motor_pitch_feedback - GRAVITY_ANGLE_OFFSET);
+        if (pitch_motor->motor_settings.feedback_reverse_flag == FEEDBACK_DIRECTION_REVERSE)
+            pitch_torque *= -1;
+        // 限幅
+        LIMIT_MIN_MAX(pitch_torque, DM_T_MIN, DM_T_MAX);
+        // 发送力矩控制指令
+        DMMotorTorqueCtrl(pitch_motor, pitch_torque);
+        //可以mit的速度和位置有点问题，不是很建议使用，mit就是用力矩好了
         break;
+    }
     default:
         break;
     }
 
     // 设置反馈数据,主要是imu和yaw电机的单圈角度
     gimbal_feedback_data.gimbal_imu_data = *gimba_IMU_data;
+    gimbal_feedback_data.pitch_motor_position = pitch_motor->measure.position;
     
     // 计算yaw电机的单圈角度
     // DM_Motor_Measure_s结构体中的position字段范围是[-2π, 2π]弧度

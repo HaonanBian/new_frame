@@ -1,6 +1,0 @@
-D:/RM/new_frame/bsp/gpio/bsp_gpio.c:15:6:HAL_GPIO_EXTI_Callback	8	static
-D:/RM/new_frame/bsp/gpio/bsp_gpio.c:30:15:GPIORegister	8	static
-D:/RM/new_frame/bsp/gpio/bsp_gpio.c:48:6:GPIOToggel	8	static
-D:/RM/new_frame/bsp/gpio/bsp_gpio.c:53:6:GPIOSet	8	static
-D:/RM/new_frame/bsp/gpio/bsp_gpio.c:58:6:GPIOReset	8	static
-D:/RM/new_frame/bsp/gpio/bsp_gpio.c:63:15:GPIORead	8	static

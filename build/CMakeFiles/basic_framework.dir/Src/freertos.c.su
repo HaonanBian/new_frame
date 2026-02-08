@@ -1,3 +1,0 @@
-D:/RM/new_frame/Src/freertos.c:122:6:StartDefaultTask	8	static
-D:/RM/new_frame/Src/freertos.c:69:6:vApplicationGetIdleTaskMemory	0	static
-D:/RM/new_frame/Src/freertos.c:83:6:MX_FREERTOS_Init	40	static

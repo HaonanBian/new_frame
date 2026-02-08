@@ -1,5 +1,0 @@
-D:/RM/new_frame/Src/usart.c:38:6:MX_USART1_UART_Init	8	static
-D:/RM/new_frame/Src/usart.c:67:6:MX_USART3_UART_Init	8	static
-D:/RM/new_frame/Src/usart.c:96:6:MX_USART6_UART_Init	8	static
-D:/RM/new_frame/Src/usart.c:124:6:HAL_UART_MspInit	72	static
-D:/RM/new_frame/Src/usart.c:318:6:HAL_UART_MspDeInit	8	static

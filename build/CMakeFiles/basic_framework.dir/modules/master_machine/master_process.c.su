@@ -1,6 +1,0 @@
-D:/RM/new_frame/modules/master_machine/master_process.c:42:13:VisionOfflineCallback	16	static
-D:/RM/new_frame/modules/master_machine/master_process.c:118:13:DecodeVision	16	static
-D:/RM/new_frame/modules/master_machine/master_process.c:21:6:VisionSetFlag	0	static
-D:/RM/new_frame/modules/master_machine/master_process.c:28:6:VisionSetAltitude	0	static
-D:/RM/new_frame/modules/master_machine/master_process.c:126:16:VisionInit	32	static
-D:/RM/new_frame/modules/master_machine/master_process.c:143:6:VisionSend	24	static
