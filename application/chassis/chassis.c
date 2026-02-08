@@ -112,11 +112,12 @@ void ChassisInit()
     PIDInit(&buffer_PID, &Buffer_pid_conf); // 缓冲能量PID初始化
 
     PID_Init_Config_s Angle_pid_conf = {
-        .Kp = 40.0f,
+        .Kp = 1000.0f,
         .Ki = 0.0f,
-        .Kd = 0.0f,
+        .Kd = 0.2f,
         .IntegralLimit = 2000.0f,
-        .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
+        .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement | PID_DerivativeFilter,
+        .Derivative_LPF_RC = 0.03f,
         .MaxOut = 6000.0f,
         .DeadBand = 1.0f,
     };
@@ -240,7 +241,7 @@ void ChassisTask()
         chassis_cmd_recv.wz = 0;
         break;
     case CHASSIS_FOLLOW_GIMBAL_YAW: // 跟随云台,不单独设置pid,以误差角度平方为速度输出
-        chassis_cmd_recv.wz = PIDCalculate(&angle_PID, chassis_cmd_recv.offset_angle, 0.0f);
+        chassis_cmd_recv.wz = -PIDCalculate(&angle_PID, chassis_cmd_recv.offset_angle, 0.0f);
         break;
     case CHASSIS_ROTATE: // 自旋,同时保持全向机动;当前wz维持定值,后续增加不规则的变速策略
         chassis_cmd_recv.wz = 6000;
@@ -254,10 +255,14 @@ void ChassisTask()
     // offset_angle 单位为角度(°)，arm_sin/cos 需要弧度(rad)
     static float sin_theta, cos_theta;
     float offset_rad = chassis_cmd_recv.offset_angle * 0.01745329252f; // deg -> rad
+    if (chassis_cmd_recv.chassis_mode == CHASSIS_FOLLOW_GIMBAL_YAW)
+    {
+        offset_rad = -offset_rad;
+    }
     cos_theta = arm_cos_f32(offset_rad);
     sin_theta = arm_sin_f32(offset_rad);
     chassis_vx = chassis_cmd_recv.vx * cos_theta + chassis_cmd_recv.vy * sin_theta;
-    chassis_vy = - chassis_cmd_recv.vx * sin_theta + chassis_cmd_recv.vy * cos_theta;
+    chassis_vy = -chassis_cmd_recv.vx * sin_theta + chassis_cmd_recv.vy * cos_theta;
 
     // 根据控制模式进行正运动学解算,计算底盘输出
     OmniWheelCalculate();

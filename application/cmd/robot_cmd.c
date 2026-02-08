@@ -182,15 +182,15 @@ static void RemoteControlSet()
      static gimbal_mode_e last_gimbal_mode = (gimbal_mode_e)0xff;
      gimbal_mode_e next_gimbal_mode = gimbal_cmd_send.gimbal_mode;
     // 控制底盘和云台运行模式,云台待添加,云台是否始终使用IMU数据?
-    if (switch_is_down(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[下],底盘跟随云台
+    if (switch_is_mid(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[中],底盘跟随云台
     {
         chassis_cmd_send.chassis_mode = CHASSIS_FOLLOW_GIMBAL_YAW;
         next_gimbal_mode = GIMBAL_GYRO_MODE;
     }
-    else if (switch_is_mid(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[中],底盘和云台分离,底盘保持不转动
+    else if (switch_is_down(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[下],小陀螺模式
     {
-        chassis_cmd_send.chassis_mode = CHASSIS_NO_FOLLOW;
-        next_gimbal_mode = GIMBAL_FREE_MODE;
+        chassis_cmd_send.chassis_mode = CHASSIS_ROTATE;
+        next_gimbal_mode = GIMBAL_GYRO_MODE;
     }
 
      if (next_gimbal_mode != last_gimbal_mode)

@@ -20,14 +20,14 @@ static Gimbal_Ctrl_Cmd_s gimbal_cmd_recv;         // 来自cmd的控制信息
 
 static BMI088Instance *bmi088; // 云台IMU
 
-static float WrapRadPi(float angle)
-{
-    while (angle > 3.14159265359f)
-        angle -= 6.28318530718f;
-    while (angle < -3.14159265359f)
-        angle += 6.28318530718f;
-    return angle;
-}
+// static float WrapRadPi(float angle)
+// {
+//     while (angle > 3.14159265359f)
+//         angle -= 6.28318530718f;
+//     while (angle < -3.14159265359f)
+//         angle += 6.28318530718f;
+//     return angle;
+// }
 
 void GimbalInit()
 {   
@@ -193,14 +193,13 @@ void GimbalTask()
         pitch_pid_ref = gimbal_cmd_recv.pitch;  // pitch已经是弧度(由cmd直接累加弧度增量)
         
         // ============ YAW轴串级PID控制(角度环→速度环→力矩输出) ============
-        // 角度环：输入为角度设定值和陀螺仪角度反馈，输出为速度设定值
+        // 角度环：输入为角度目标值，用陀螺仪的角度，输出为速度设定值
         float yaw_speed_ref = PIDCalculate(&yaw_motor->angle_PID, imu_yaw_feedback, yaw_pid_ref);
         LIMIT_MIN_MAX(yaw_speed_ref, DM_V_MIN, DM_V_MAX);
-        // 速度环：输入为速度设定值和陀螺仪角速度反馈，输出为力矩
+        // 速度环：输入为速度环pid值，用陀螺仪角速度，输出为力矩
         float yaw_torque = PIDCalculate(&yaw_motor->speed_PID, imu_yaw_gyro, yaw_speed_ref);
         if (yaw_motor->motor_settings.feedback_reverse_flag == FEEDBACK_DIRECTION_REVERSE)
-            yaw_torque *= -1;
-        // 限幅
+            yaw_torque *= -1;//反转
         LIMIT_MIN_MAX(yaw_torque, DM_T_MIN, DM_T_MAX);
         // 发送力矩控制指令
         DMMotorTorqueCtrl(yaw_motor, yaw_torque);
@@ -210,11 +209,10 @@ void GimbalTask()
         #define PITCH_MIN_RAD (-1.223f)   // 最高位置(向上)
         #define PITCH_MAX_RAD (0.0455586f) // 最低位置(向下)
         LIMIT_MIN_MAX(pitch_pid_ref, PITCH_MIN_RAD, PITCH_MAX_RAD);
-        // 角度环：输入为角度设定值和电机位置反馈，输出为速度设定值
         float pitch_speed_ref = PIDCalculate(&pitch_motor->angle_PID, motor_pitch_feedback, pitch_pid_ref);
         LIMIT_MIN_MAX(pitch_speed_ref, DM_V_MIN, DM_V_MAX);
-        // 速度环：输入为速度设定值和电机速度反馈，输出为力矩
         float pitch_torque = PIDCalculate(&pitch_motor->speed_PID, motor_pitch_velocity, pitch_speed_ref);
+        
         // TODO: 重力补偿前馈,需根据云台实际重力力矩测定系数和方向后启用
         // pitch_torque += GRAVITY_COEFF * cosf(motor_pitch_feedback - GRAVITY_ANGLE_OFFSET);
         if (pitch_motor->motor_settings.feedback_reverse_flag == FEEDBACK_DIRECTION_REVERSE)
@@ -223,6 +221,7 @@ void GimbalTask()
         LIMIT_MIN_MAX(pitch_torque, DM_T_MIN, DM_T_MAX);
         // 发送力矩控制指令
         DMMotorTorqueCtrl(pitch_motor, pitch_torque);
+        //可以mit的速度和位置有点问题，不是很建议使用，mit就是用力矩好了
         break;
     }
     default:
