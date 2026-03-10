@@ -213,9 +213,9 @@ static void RemoteControlSet()
         int16_t yaw_ch = rc_data[TEMP].rc.rocker_l_;
         int16_t pitch_ch = rc_data[TEMP].rc.rocker_l1;
 
-        if (yaw_ch < 10 && yaw_ch > -10)
+        if (yaw_ch < 3 && yaw_ch > -3)
             yaw_ch = 0;
-        if (pitch_ch < 10 && pitch_ch > -10)
+        if (pitch_ch < 3 && pitch_ch > -3)
             pitch_ch = 0;
 
         gimbal_cmd_send.yaw -= 0.001f * (float)yaw_ch;

@@ -56,6 +56,15 @@ static DJIMotorInstance *motor_lf, *motor_rf, *motor_lb, *motor_rb; // left righ
 static float chassis_vx, chassis_vy;                      // 将云台系的速度投影到底盘
 static float vt_lf, vt_rf, vt_lb, vt_rb;                  // 底盘速度解算后的临时输出,待进行限幅
 
+static float WrapAngle180Deg(float deg)
+{
+    while (deg > 180.0f)
+        deg -= 360.0f;
+    while (deg < -180.0f)
+        deg += 360.0f;
+    return deg;
+}
+
 void ChassisInit()
 {
     // 四个轮子的参数一样,改tx_id和反转标志位即可
@@ -114,7 +123,7 @@ void ChassisInit()
     PID_Init_Config_s Angle_pid_conf = {
         .Kp = 1000.0f,
         .Ki = 0.0f,
-        .Kd = 0.2f,
+        .Kd = 0.4f,
         .IntegralLimit = 2000.0f,
         .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement | PID_DerivativeFilter,
         .Derivative_LPF_RC = 0.03f,
@@ -234,6 +243,8 @@ void ChassisTask()
         DJIMotorEnable(motor_rb);
     }
 
+    static chassis_mode_e last_chassis_mode = (chassis_mode_e)0xff;
+
     // 根据控制模式设定旋转速度
     switch (chassis_cmd_recv.chassis_mode)
     {
@@ -241,20 +252,38 @@ void ChassisTask()
         chassis_cmd_recv.wz = 0;
         break;
     case CHASSIS_FOLLOW_GIMBAL_YAW: // 跟随云台,不单独设置pid,以误差角度平方为速度输出
-        chassis_cmd_recv.wz = -PIDCalculate(&angle_PID, chassis_cmd_recv.offset_angle, 0.0f);
+    {
+        if (last_chassis_mode != CHASSIS_FOLLOW_GIMBAL_YAW)
+        {
+            angle_PID.Iout = 0.0f;
+            angle_PID.ITerm = 0.0f;
+            angle_PID.Err = 0.0f;
+            angle_PID.Last_Err = 0.0f;
+            angle_PID.Dout = 0.0f;
+            angle_PID.Last_Dout = 0.0f;
+            angle_PID.Output = 0.0f;
+            angle_PID.Last_Output = 0.0f;
+        }
+
+        float follow_err_deg = WrapAngle180Deg(chassis_cmd_recv.offset_angle);
+        chassis_cmd_recv.wz = -PIDCalculate(&angle_PID, follow_err_deg, 0.0f);
+    }
         break;
     case CHASSIS_ROTATE: // 自旋,同时保持全向机动;当前wz维持定值,后续增加不规则的变速策略
         chassis_cmd_recv.wz = 6000;
         break;
+
     default:
         break;
     }
+
+    last_chassis_mode = chassis_cmd_recv.chassis_mode;
 
     // 根据云台和底盘的角度offset将控制量映射到底盘坐标系上
     // 底盘逆时针旋转为角度正方向;云台命令的方向以云台指向的方向为x,采用右手系(x指向正北时y在正东)
     // offset_angle 单位为角度(°)，arm_sin/cos 需要弧度(rad)
     static float sin_theta, cos_theta;
-    float offset_rad = chassis_cmd_recv.offset_angle * 0.01745329252f; // deg -> rad
+    float offset_rad = WrapAngle180Deg(chassis_cmd_recv.offset_angle) * 0.01745329252f; // deg -> rad
     if (chassis_cmd_recv.chassis_mode == CHASSIS_FOLLOW_GIMBAL_YAW)
     {
         offset_rad = -offset_rad;
