@@ -101,8 +101,16 @@ Vision_Recv_s *VisionInit(UART_HandleTypeDef *_handle)
  */
 void VisionSend()
 {
-    // buff和txlen必须为static,才能保证在函数退出后不被释放,使得DMA正确完成发送
-    // 析构后的陷阱需要特别注意!
+    // 广播发送：固定周期主动上报姿态，不依赖上位机请求
+    // 使用IT发送，避免和DMA接收互相影响
+    static uint32_t last_send_ms = 0;
+    const uint32_t now_ms = HAL_GetTick();
+    if ((now_ms - last_send_ms) < 5u) // 200Hz
+        return;
+    if (!USARTIsReady(vision_usart_instance))
+        return;
+
+    // buff必须为static，确保异步发送期间内存有效
     static uint8_t send_buff[VISION_SEND_SIZE];
     Infantry_Feedback_Packet_s feedback_packet = {
         .mode = (uint8_t)send_data.work_mode,
@@ -112,10 +120,8 @@ void VisionSend()
     };
 
     InfantryProtocolEncodeFeedback(&feedback_packet, send_buff);
-    USARTSend(vision_usart_instance, send_buff, VISION_SEND_SIZE, USART_TRANSFER_DMA); // 和视觉通信使用IT,防止和接收使用的DMA冲突
-    // 此处为HAL设计的缺陷,DMASTOP会停止发送和接收,导致再也无法进入接收中断.
-    // 也可在发送完成中断中重新启动DMA接收,但较为复杂.因此,此处使用IT发送.
-    // 若使用了daemon,则也可以使用DMA发送.
+    USARTSend(vision_usart_instance, send_buff, VISION_SEND_SIZE, USART_TRANSFER_IT);
+    last_send_ms = now_ms;
 }
 
 #endif // VISION_USE_UART
