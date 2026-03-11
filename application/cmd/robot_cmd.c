@@ -12,6 +12,7 @@
 // bsp
 #include "bsp_dwt.h"
 #include "bsp_log.h"
+#include "usart.h"
 #include <math.h>
 
 // 私有宏,自动将编码器转换成角度值

@@ -1,4 +1,4 @@
-#include "gimbal.h"
+﻿#include "gimbal.h"
 #include "motor_def.h"
 #include "robot_def.h"
 #include "dji_motor.h"
@@ -20,12 +20,6 @@ static Gimbal_Upload_Data_s gimbal_feedback_data; // 回传给cmd的云台状态
 static Gimbal_Ctrl_Cmd_s gimbal_cmd_recv;         // 来自cmd的控制信息
 
 static BMI088Instance *bmi088; // 云台IMU
-
-static float PitchGravityCompensation(float pitch_angle)
-{
-    return PITCH_GRAVITY_COMP_DIR *
-           (PITCH_GRAVITY_COMP_COEFF * cosf(pitch_angle - PITCH_GRAVITY_COMP_OFFSET) + PITCH_GRAVITY_COMP_BIAS);
-}
 
 void GimbalInit()
 {   
@@ -213,8 +207,8 @@ void GimbalTask()
         LIMIT_MIN_MAX(pitch_speed_ref, DM_V_MIN, DM_V_MAX);
         float pitch_torque = PIDCalculate(&pitch_motor->speed_PID, motor_pitch_velocity, pitch_speed_ref);
         
-        // 重力补偿前馈
-        pitch_torque += PitchGravityCompensation(motor_pitch_feedback);
+        // 重力补偿前馈（已注释）
+        // pitch_torque += PitchGravityCompensation(motor_pitch_feedback);
 
         if (pitch_motor->motor_settings.feedback_reverse_flag == FEEDBACK_DIRECTION_REVERSE)
             pitch_torque *= -1;
