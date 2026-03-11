@@ -128,6 +128,8 @@ __attribute__((noreturn)) void StartROBOTTASK(void const *argument)
     {
         robot_start = DWT_GetTimeline_ms();
         RobotTask();
+        // Keep vision uplink alive even if INS task is delayed or blocked during init.
+        VisionSend();
         robot_dt = DWT_GetTimeline_ms() - robot_start;
         if (robot_dt > 5)
             LOGERROR("[freeRTOS] ROBOT core Task is being DELAY! dt = [%f]", &robot_dt);
