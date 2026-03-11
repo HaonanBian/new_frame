@@ -2,10 +2,10 @@
 #define MASTER_PROCESS_H
 
 #include "bsp_usart.h"
-#include "seasky_protocol.h"
+#include "infantry_protocol.h"
 
-#define VISION_RECV_SIZE 18u // 当前为固定值,36字节
-#define VISION_SEND_SIZE 36u
+#define VISION_RECV_SIZE INFANTRY_FRAME_LEN
+#define VISION_SEND_SIZE INFANTRY_FRAME_LEN
 
 #pragma pack(1)
 typedef enum
@@ -43,6 +43,7 @@ typedef struct
 
 	float pitch;
 	float yaw;
+	float distance;
 } Vision_Recv_s;
 
 typedef enum
