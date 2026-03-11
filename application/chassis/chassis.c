@@ -72,7 +72,7 @@ void ChassisInit()
         .can_init_config.can_handle = &hcan1,
         .controller_param_init_config = {
             .speed_PID = {
-                .Kp = 6, // 4.5
+                .Kp = 8, // 4.5
                 .Ki = 0,   // 0
                 .Kd = 0,   // 0
                 .IntegralLimit = 3000,
@@ -121,14 +121,14 @@ void ChassisInit()
     PIDInit(&buffer_PID, &Buffer_pid_conf); // 缓冲能量PID初始化
 
     PID_Init_Config_s Angle_pid_conf = {
-        .Kp = 1000.0f,
+        .Kp = 700.0f,
         .Ki = 0.0f,
-        .Kd = 0.4f,
+        .Kd = 0.25f,
         .IntegralLimit = 2000.0f,
         .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement | PID_DerivativeFilter,
-        .Derivative_LPF_RC = 0.03f,
-        .MaxOut = 6000.0f,
-        .DeadBand = 1.0f,
+        .Derivative_LPF_RC = 0.08f,
+        .MaxOut = 5000.0f,
+        .DeadBand = 2.5f,
     };
     PIDInit(&angle_PID, &Angle_pid_conf);
 
@@ -227,7 +227,7 @@ void ChassisTask()
 #endif // CHASSIS_BOARD
 
     // SetPowerLimit(referee_data->GameRobotState.chassis_power_limit);//设置功率限制
-    SetPowerLimit(80);//设置功率限制
+    SetPowerLimit(150);//设置功率限制
     if (chassis_cmd_recv.chassis_mode == CHASSIS_ZERO_FORCE)
     { // 如果出现重要模块离线或遥控器设置为急停,让电机停止
         DJIMotorStop(motor_lf);

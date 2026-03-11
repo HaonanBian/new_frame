@@ -8,6 +8,7 @@
 #include "general_def.h"
 #include "bmi088.h"
 #include <assert.h>
+#include <math.h>
 
 static attitude_t *gimba_IMU_data; // 云台IMU数据
 static DMMotorInstance *yaw_motor;
@@ -20,14 +21,11 @@ static Gimbal_Ctrl_Cmd_s gimbal_cmd_recv;         // 来自cmd的控制信息
 
 static BMI088Instance *bmi088; // 云台IMU
 
-// static float WrapRadPi(float angle)
-// {
-//     while (angle > 3.14159265359f)
-//         angle -= 6.28318530718f;
-//     while (angle < -3.14159265359f)
-//         angle += 6.28318530718f;
-//     return angle;
-// }
+static float PitchGravityCompensation(float pitch_angle)
+{
+    return PITCH_GRAVITY_COMP_DIR *
+           (PITCH_GRAVITY_COMP_COEFF * cosf(pitch_angle - PITCH_GRAVITY_COMP_OFFSET) + PITCH_GRAVITY_COMP_BIAS);
+}
 
 void GimbalInit()
 {   
@@ -80,7 +78,8 @@ void GimbalInit()
         },
         .controller_param_init_config = {
             .angle_PID = {
-                .Kp = 5, // 10->5 降低增益减少抖动
+                .Kp = 6, // 10->5 降低增益减少抖动
+
                 .Ki = 0,
                 .Kd = 0,
                 .DeadBand = 0.01,
@@ -89,8 +88,9 @@ void GimbalInit()
                 .MaxOut = 500,
             },
             .speed_PID = {
-                .Kp = 0.5f,  // 1.0->0.5 降低力矩对速度误差的敏感度
-                .Ki = 0.05f, // 0.1->0.05 减小积分避免振荡
+                .Kp = 0.6f,  // 1.0->0.5 降低力矩对速度误差的敏感度
+                .Ki = 0.08f, // 0.1->0.05 减小积分避免振荡
+
                 .Kd = 0,
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
                 .IntegralLimit = 5,
@@ -213,8 +213,9 @@ void GimbalTask()
         LIMIT_MIN_MAX(pitch_speed_ref, DM_V_MIN, DM_V_MAX);
         float pitch_torque = PIDCalculate(&pitch_motor->speed_PID, motor_pitch_velocity, pitch_speed_ref);
         
-        // TODO: 重力补偿前馈,需根据云台实际重力力矩测定系数和方向后启用
-        // pitch_torque += GRAVITY_COEFF * cosf(motor_pitch_feedback - GRAVITY_ANGLE_OFFSET);
+        // 重力补偿前馈
+        pitch_torque += PitchGravityCompensation(motor_pitch_feedback);
+
         if (pitch_motor->motor_settings.feedback_reverse_flag == FEEDBACK_DIRECTION_REVERSE)
             pitch_torque *= -1;
         // 限幅

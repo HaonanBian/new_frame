@@ -55,6 +55,16 @@ static Robot_Status_e robot_state; // 机器人整体工作状态
 BMI088Instance *bmi088_test; // 云台IMU
 BMI088_Data_t bmi088_data;
 
+static uint8_t offset_angle_inited = 0;
+static float offset_last_angle = 0.0f;
+static float offset_angle_total = 0.0f;
+static uint8_t offset_reset_req = 0;
+
+static void RequestOffsetAngleReset(void)
+{
+    offset_reset_req = 1;
+}
+
 
 void RobotCMDInit()
 {
@@ -147,30 +157,27 @@ static void CalcOffsetAngle()
     if (yaw_align_signed > 180.0f)
         yaw_align_signed -= 360.0f;
 
-    static uint8_t angle_inited = 0;
-    static float last_angle = 0.0f;
-    static float angle_total = 0.0f;
-
-    if (!angle_inited)
+    if (!offset_angle_inited || offset_reset_req)
     {
-        angle_total = angle_signed;
-        last_angle = angle_signed;
-        angle_inited = 1;
+        offset_angle_total = angle_signed;
+        offset_last_angle = angle_signed;
+        offset_angle_inited = 1;
+        offset_reset_req = 0;
     }
 
-    float delta = angle_signed - last_angle;
+    float delta = angle_signed - offset_last_angle;
     while (delta > 180.0f)
         delta -= 360.0f;
     while (delta < -180.0f)
         delta += 360.0f;
-    angle_total += delta;
-    last_angle = angle_signed;
+    offset_angle_total += delta;
+    offset_last_angle = angle_signed;
 
-    chassis_cmd_send.offset_angle = angle_total - yaw_align_signed;
+    chassis_cmd_send.offset_angle = offset_angle_total - yaw_align_signed;
     tast_angle = angle;
     tast_angle_signed = angle_signed;
     tast_delta = delta;
-    tast_angle_total = angle_total;
+    tast_angle_total = offset_angle_total;
 }
 
 /**
@@ -179,8 +186,9 @@ static void CalcOffsetAngle()
  */
 static void RemoteControlSet()
 {
-     static gimbal_mode_e last_gimbal_mode = (gimbal_mode_e)0xff;
-     gimbal_mode_e next_gimbal_mode = gimbal_cmd_send.gimbal_mode;
+    static gimbal_mode_e last_gimbal_mode = (gimbal_mode_e)0xff;
+    static chassis_mode_e last_chassis_mode = (chassis_mode_e)0xff;
+    gimbal_mode_e next_gimbal_mode = gimbal_cmd_send.gimbal_mode;
     // 控制底盘和云台运行模式,云台待添加,云台是否始终使用IMU数据?
     if (switch_is_mid(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[中],底盘跟随云台
     {
@@ -193,13 +201,20 @@ static void RemoteControlSet()
         next_gimbal_mode = GIMBAL_GYRO_MODE;
     }
 
-     if (next_gimbal_mode != last_gimbal_mode)
-     {
-         gimbal_cmd_send.yaw = gimbal_fetch_data.gimbal_imu_data.YawTotalAngle;
-         gimbal_cmd_send.pitch = gimbal_fetch_data.pitch_motor_position;
-         last_gimbal_mode = next_gimbal_mode;
-     }
-     gimbal_cmd_send.gimbal_mode = next_gimbal_mode;
+    if (last_chassis_mode == CHASSIS_ROTATE &&
+        chassis_cmd_send.chassis_mode == CHASSIS_FOLLOW_GIMBAL_YAW)
+    {
+        RequestOffsetAngleReset();
+    }
+    last_chassis_mode = chassis_cmd_send.chassis_mode;
+
+    if (next_gimbal_mode != last_gimbal_mode)
+    {
+        gimbal_cmd_send.yaw = gimbal_fetch_data.gimbal_imu_data.YawTotalAngle;
+        gimbal_cmd_send.pitch = gimbal_fetch_data.pitch_motor_position;
+        last_gimbal_mode = next_gimbal_mode;
+    }
+    gimbal_cmd_send.gimbal_mode = next_gimbal_mode;
 
     // 云台参数,确定云台控制数据
     if (switch_is_mid(rc_data[TEMP].rc.switch_left)) // 左侧开关状态为[中],视觉模式
