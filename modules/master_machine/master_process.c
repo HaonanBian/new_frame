@@ -9,7 +9,7 @@
  *
  */
 #include "master_process.h"
-#include "seasky_protocol.h"
+#include "infantry_protocol.h"
 #include "daemon.h"
 #include "bsp_log.h"
 #include "robot_def.h"
@@ -17,6 +17,9 @@
 static Vision_Recv_s recv_data;
 static Vision_Send_s send_data;
 static DaemonInstance *vision_daemon_instance;
+#ifdef VISION_USE_UART
+static USARTInstance *vision_usart_instance;
+#endif
 
 void VisionSetFlag(Enemy_Color_e enemy_color, Work_Mode_e work_mode, Bullet_Speed_e bullet_speed)
 {
@@ -51,8 +54,6 @@ static void VisionOfflineCallback(void *id)
 
 #include "bsp_usart.h"
 
-static USARTInstance *vision_usart_instance;
-
 /**
  * @brief 接收解包回调函数,将在bsp_usart.c中被usart rx callback调用
  * @todo  1.提高可读性,将get_protocol_info的第四个参数增加一个float类型buffer
@@ -60,10 +61,17 @@ static USARTInstance *vision_usart_instance;
  */
 static void DecodeVision()
 {
-    uint16_t flag_register;
+    Infantry_Cmd_Packet_s cmd_packet;
     DaemonReload(vision_daemon_instance); // 喂狗
-    get_protocol_info(vision_usart_instance->recv_buff, &flag_register, (uint8_t *)&recv_data.pitch);
-    // TODO: code to resolve flag_register;
+    if (!InfantryProtocolDecodeCmd(vision_usart_instance->recv_buff, VISION_RECV_SIZE, &cmd_packet))
+        return;
+
+    recv_data.fire_mode = cmd_packet.fire ? AUTO_FIRE : NO_FIRE;
+    recv_data.target_state = cmd_packet.fire ? READY_TO_FIRE : NO_TARGET;
+    recv_data.target_type = NO_TARGET_NUM;
+    recv_data.pitch = cmd_packet.pitch_diff;
+    recv_data.yaw = cmd_packet.yaw_diff;
+    recv_data.distance = cmd_packet.distance;
 }
 
 Vision_Recv_s *VisionInit(UART_HandleTypeDef *_handle)
@@ -95,14 +103,16 @@ void VisionSend()
 {
     // buff和txlen必须为static,才能保证在函数退出后不被释放,使得DMA正确完成发送
     // 析构后的陷阱需要特别注意!
-    static uint16_t flag_register;
     static uint8_t send_buff[VISION_SEND_SIZE];
-    static uint16_t tx_len;
-    // TODO: code to set flag_register
-    flag_register = 30 << 8 | 0b00000001;
-    // 将数据转化为seasky协议的数据包
-    get_protocol_send_data(0x02, flag_register, &send_data.yaw, 3, send_buff, &tx_len);
-    USARTSend(vision_usart_instance, send_buff, tx_len, USART_TRANSFER_DMA); // 和视觉通信使用IT,防止和接收使用的DMA冲突
+    Infantry_Feedback_Packet_s feedback_packet = {
+        .mode = (uint8_t)send_data.work_mode,
+        .roll = send_data.roll,
+        .pitch = send_data.pitch,
+        .yaw = send_data.yaw,
+    };
+
+    InfantryProtocolEncodeFeedback(&feedback_packet, send_buff);
+    USARTSend(vision_usart_instance, send_buff, VISION_SEND_SIZE, USART_TRANSFER_DMA); // 和视觉通信使用IT,防止和接收使用的DMA冲突
     // 此处为HAL设计的缺陷,DMASTOP会停止发送和接收,导致再也无法进入接收中断.
     // 也可在发送完成中断中重新启动DMA接收,但较为复杂.因此,此处使用IT发送.
     // 若使用了daemon,则也可以使用DMA发送.
@@ -117,9 +127,16 @@ static uint8_t *vis_recv_buff;
 
 static void DecodeVision(uint16_t recv_len)
 {
-    uint16_t flag_register;
-    get_protocol_info(vis_recv_buff, &flag_register, (uint8_t *)&recv_data.pitch);
-    // TODO: code to resolve flag_register;
+    Infantry_Cmd_Packet_s cmd_packet;
+    if (!InfantryProtocolDecodeCmd(vis_recv_buff, recv_len, &cmd_packet))
+        return;
+
+    recv_data.fire_mode = cmd_packet.fire ? AUTO_FIRE : NO_FIRE;
+    recv_data.target_state = cmd_packet.fire ? READY_TO_FIRE : NO_TARGET;
+    recv_data.target_type = NO_TARGET_NUM;
+    recv_data.pitch = cmd_packet.pitch_diff;
+    recv_data.yaw = cmd_packet.yaw_diff;
+    recv_data.distance = cmd_packet.distance;
 }
 
 /* 视觉通信初始化 */
@@ -142,14 +159,16 @@ Vision_Recv_s *VisionInit(UART_HandleTypeDef *_handle)
 
 void VisionSend()
 {
-    static uint16_t flag_register;
     static uint8_t send_buff[VISION_SEND_SIZE];
-    static uint16_t tx_len;
-    // TODO: code to set flag_register
-    flag_register = 30 << 8 | 0b00000001;
-    // 将数据转化为seasky协议的数据包
-    get_protocol_send_data(0x02, flag_register, &send_data.yaw, 3, send_buff, &tx_len);
-    USBTransmit(send_buff, tx_len);
+    Infantry_Feedback_Packet_s feedback_packet = {
+        .mode = (uint8_t)send_data.work_mode,
+        .roll = send_data.roll,
+        .pitch = send_data.pitch,
+        .yaw = send_data.yaw,
+    };
+
+    InfantryProtocolEncodeFeedback(&feedback_packet, send_buff);
+    USBTransmit(send_buff, VISION_SEND_SIZE);
 }
 
 #endif // VISION_USE_VCP
