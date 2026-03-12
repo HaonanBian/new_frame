@@ -1,10 +1,30 @@
 #include "infantry_protocol.h"
 
+#include <math.h>
 #include <string.h>
 
 static uint8_t is_valid_frame(const uint8_t *frame)
 {
-    return (frame[0] == INFANTRY_FRAME_HEAD) && (frame[INFANTRY_FRAME_LEN - 1] == INFANTRY_FRAME_TAIL);
+    return (frame[0] == INFANTRY_FRAME_HEAD) &&
+           (frame[INFANTRY_FRAME_LEN - 2] == INFANTRY_CMD_RESERVED) &&
+           (frame[INFANTRY_FRAME_LEN - 1] == INFANTRY_FRAME_TAIL);
+}
+
+static uint8_t is_reasonable_cmd(const Infantry_Cmd_Packet_s *cmd)
+{
+    if (cmd->fire > 1u)
+        return 0;
+
+    if (!isfinite(cmd->pitch_diff) || !isfinite(cmd->yaw_diff) || !isfinite(cmd->distance))
+        return 0;
+
+    if (fabsf(cmd->pitch_diff) > 90.0f || fabsf(cmd->yaw_diff) > 180.0f)
+        return 0;
+
+    if (cmd->distance < 0.0f || cmd->distance > 100.0f)
+        return 0;
+
+    return 1;
 }
 
 uint8_t InfantryProtocolDecodeCmd(const uint8_t *rx_buf, uint16_t rx_len, Infantry_Cmd_Packet_s *cmd_out)
@@ -18,10 +38,16 @@ uint8_t InfantryProtocolDecodeCmd(const uint8_t *rx_buf, uint16_t rx_len, Infant
         if (!is_valid_frame(frame))
             continue;
 
-        cmd_out->fire = frame[1];
-        memcpy(&cmd_out->pitch_diff, frame + 2, sizeof(float));
-        memcpy(&cmd_out->yaw_diff, frame + 6, sizeof(float));
-        memcpy(&cmd_out->distance, frame + 10, sizeof(float));
+        Infantry_Cmd_Packet_s tmp_cmd;
+        tmp_cmd.fire = frame[1];
+        memcpy(&tmp_cmd.pitch_diff, frame + 2, sizeof(float));
+        memcpy(&tmp_cmd.yaw_diff, frame + 6, sizeof(float));
+        memcpy(&tmp_cmd.distance, frame + 10, sizeof(float));
+
+        if (!is_reasonable_cmd(&tmp_cmd))
+            continue;
+
+        *cmd_out = tmp_cmd;
         return 1;
     }
 
@@ -39,6 +65,6 @@ void InfantryProtocolEncodeFeedback(const Infantry_Feedback_Packet_s *feedback, 
     memcpy(tx_buf + 2, &feedback->roll, sizeof(float));
     memcpy(tx_buf + 6, &feedback->pitch, sizeof(float));
     memcpy(tx_buf + 10, &feedback->yaw, sizeof(float));
-    tx_buf[INFANTRY_FRAME_LEN - 2] = 0;
+    tx_buf[INFANTRY_FRAME_LEN - 2] = INFANTRY_FEEDBACK_RESERVED;
     tx_buf[INFANTRY_FRAME_LEN - 1] = INFANTRY_FRAME_TAIL;
 }

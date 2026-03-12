@@ -220,11 +220,28 @@ static void RemoteControlSet()
     // 云台参数,确定云台控制数据
     if (switch_is_mid(rc_data[TEMP].rc.switch_left)) // 左侧开关状态为[中],视觉模式
     {
-        // 待添加,视觉会发来和目标的误差,同样将其转化为total angle的增量进行控制
-        // ...
+        // 仅在视觉有新数据时累加diff,防止同一diff在200Hz任务中被重复累加
+        if (vision_recv_data->target_state != NO_TARGET && vision_recv_data->data_updated)
+        {
+            gimbal_cmd_send.yaw += vision_recv_data->yaw;
+            gimbal_cmd_send.pitch += vision_recv_data->pitch;
+            VisionDataConsumed();
+        }
+        else
+        {
+            int16_t yaw_ch = rc_data[TEMP].rc.rocker_l_;
+            int16_t pitch_ch = rc_data[TEMP].rc.rocker_l1;
+
+            if (yaw_ch < 3 && yaw_ch > -3)
+                yaw_ch = 0;
+            if (pitch_ch < 3 && pitch_ch > -3)
+                pitch_ch = 0;
+
+            gimbal_cmd_send.yaw -= 0.001f * (float)yaw_ch;
+            gimbal_cmd_send.pitch -= 0.00005f * (float)pitch_ch;
+        }
     }
-    // 左侧开关状态为[下],或视觉未识别到目标,纯遥控器拨杆控制
-    if (switch_is_down(rc_data[TEMP].rc.switch_left) || vision_recv_data->target_state == NO_TARGET)
+    else if (switch_is_down(rc_data[TEMP].rc.switch_left))
     { // 按照摇杆的输出大小进行角度增量,增益系数需调整
         int16_t yaw_ch = rc_data[TEMP].rc.rocker_l_;
         int16_t pitch_ch = rc_data[TEMP].rc.rocker_l1;
@@ -404,11 +421,21 @@ void RobotCMDTask()
         RemoteControlSet();
     else if (switch_is_up(rc_data[TEMP].rc.switch_left)) // 遥控器左侧开关状态为[上],键盘控制
         MouseKeySet();
+    else if (switch_is_mid(rc_data[TEMP].rc.switch_left)) // 遥控器左侧开关状态为[中],视觉模式
+        RemoteControlSet();
 
     EmergencyHandler(); // 处理模块离线和遥控器急停等紧急情况
 
-    // 设置视觉发送数据,还需增加加速度和角速度数据
-    // VisionSetFlag(chassis_fetch_data.enemy_color,,chassis_fetch_data.bullet_speed)
+    // 更新视觉发送数据（仅在机器人正常工作时更新，实际发送由DecodeVision回调触发）
+    if (robot_state == ROBOT_READY)
+    {
+        VisionSetFlag(chassis_fetch_data.enemy_color, VISION_MODE_AIM, chassis_fetch_data.bullet_speed);
+        // IMU输出为度,上位机setRPY()需要弧度,此处转换
+        #define DEG2RAD_VISION 0.01745329252f
+        VisionSetAltitude(gimbal_fetch_data.gimbal_imu_data.Yaw   * DEG2RAD_VISION, 
+                          gimbal_fetch_data.gimbal_imu_data.Pitch * DEG2RAD_VISION, 
+                          gimbal_fetch_data.gimbal_imu_data.Roll  * DEG2RAD_VISION);
+    }
 
     // 推送消息,双板通信,视觉通信等
     // 其他应用所需的控制数据在remotecontrolsetmode和mousekeysetmode中完成设置

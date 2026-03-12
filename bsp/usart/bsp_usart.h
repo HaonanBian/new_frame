@@ -9,6 +9,7 @@
 
 // 模块回调函数,用于解析协议
 typedef void (*usart_module_callback)();
+typedef void (*usart_tx_cplt_callback)();
 
 /* 发送模式枚举 */
 typedef enum
@@ -25,8 +26,10 @@ typedef struct
 {
     uint8_t recv_buff[USART_RXBUFF_LIMIT]; // 预先定义的最大buff大小,如果太小请修改USART_RXBUFF_LIMIT
     uint8_t recv_buff_size;                // 模块接收一包数据的大小
+    uint16_t last_recv_size;               // 最近一次回调接收到的字节数
     UART_HandleTypeDef *usart_handle;      // 实例对应的usart_handle
     usart_module_callback module_callback; // 解析收到的数据的回调函数
+    usart_tx_cplt_callback tx_cplt_callback;
 } USARTInstance;
 
 /* usart 初始化配置结构体 */
@@ -71,5 +74,21 @@ void USARTSend(USARTInstance *_instance, uint8_t *send_buf, uint16_t send_size,U
  * @return uint8_t ready 1, busy 0
  */
 uint8_t USARTIsReady(USARTInstance *_instance);
+
+/**
+ * @brief 获取该串口实例最近一次接收回调的字节数
+ *
+ * @param _instance 串口实例
+ * @return uint16_t 最近一次接收长度
+ */
+uint16_t USARTGetLastRecvSize(USARTInstance *_instance);
+
+/**
+ * @brief 为串口实例注册发送完成回调
+ *
+ * @param _instance 串口实例
+ * @param callback 发送完成回调
+ */
+void USARTRegisterTxCpltCallback(USARTInstance *_instance, usart_tx_cplt_callback callback);
 
 #endif

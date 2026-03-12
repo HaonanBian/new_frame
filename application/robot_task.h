@@ -78,7 +78,7 @@ __attribute__((noreturn)) void StartINSTASK(void const *argument)
         ins_dt = DWT_GetTimeline_ms() - ins_start;
         if (ins_dt > 1)
             LOGERROR("[freeRTOS] INS Task is being DELAY! dt = [%f]", &ins_dt);
-        VisionSend(); // 解算完成后发送视觉数据,但是当前的实现不太优雅,后续若添加硬件触发需要重新考虑结构的组织
+        // VisionSend(); // 已改为请求-应答模式，由DecodeVision回调触发发送
         osDelay(1);
     }
 }
@@ -129,7 +129,7 @@ __attribute__((noreturn)) void StartROBOTTASK(void const *argument)
         robot_start = DWT_GetTimeline_ms();
         RobotTask();
         // Keep vision uplink alive even if INS task is delayed or blocked during init.
-        VisionSend();
+        // VisionSend(); // 已改为请求-应答模式，由DecodeVision回调触发发送
         robot_dt = DWT_GetTimeline_ms() - robot_start;
         if (robot_dt > 5)
             LOGERROR("[freeRTOS] ROBOT core Task is being DELAY! dt = [%f]", &robot_dt);

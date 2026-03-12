@@ -88,6 +88,20 @@ uint8_t USARTIsReady(USARTInstance *_instance)
     return (_instance->usart_handle->gState == HAL_UART_STATE_READY) ? 1 : 0;
 }
 
+uint16_t USARTGetLastRecvSize(USARTInstance *_instance)
+{
+    if (_instance == NULL)
+        return 0;
+    return _instance->last_recv_size;
+}
+
+void USARTRegisterTxCpltCallback(USARTInstance *_instance, usart_tx_cplt_callback callback)
+{
+    if (_instance == NULL)
+        return;
+    _instance->tx_cplt_callback = callback;
+}
+
 /**
  * @brief 每次dma/idle中断发生时，都会调用此函数.对于每个uart实例会调用对应的回调进行进一步的处理
  *        例如:视觉协议解析/遥控器解析/裁判系统解析
@@ -105,6 +119,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     { // find the instance which is being handled
         if (huart == usart_instance[i]->usart_handle)
         { // call the callback function if it is not NULL
+            usart_instance[i]->last_recv_size = Size;
             if (usart_instance[i]->module_callback != NULL)
             {
                 usart_instance[i]->module_callback();
@@ -133,6 +148,19 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
             HAL_UARTEx_ReceiveToIdle_DMA(usart_instance[i]->usart_handle, usart_instance[i]->recv_buff, usart_instance[i]->recv_buff_size);
             __HAL_DMA_DISABLE_IT(usart_instance[i]->usart_handle->hdmarx, DMA_IT_HT);
             LOGWARNING("[bsp_usart] USART error callback triggered, instance idx [%d]", i);
+            return;
+        }
+    }
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+    for (uint8_t i = 0; i < idx; ++i)
+    {
+        if (huart == usart_instance[i]->usart_handle)
+        {
+            if (usart_instance[i]->tx_cplt_callback != NULL)
+                usart_instance[i]->tx_cplt_callback();
             return;
         }
     }

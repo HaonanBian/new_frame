@@ -44,6 +44,7 @@ typedef struct
 	float pitch;
 	float yaw;
 	float distance;
+	volatile uint8_t data_updated; // 新数据标志,diff值被消费后清零,防止重复累加
 } Vision_Recv_s;
 
 typedef enum
@@ -111,5 +112,10 @@ void VisionSetFlag(Enemy_Color_e enemy_color, Work_Mode_e work_mode, Bullet_Spee
  * @param pitch
  */
 void VisionSetAltitude(float yaw, float pitch, float roll);
+
+/**
+ * @brief 标记视觉数据已被消费,防止diff值被重复累加
+ */
+void VisionDataConsumed(void);
 
 #endif // !MASTER_PROCESS_H
