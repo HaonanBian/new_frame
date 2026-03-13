@@ -64,14 +64,17 @@ static uint32_t rx_valid_cnt = 0;
 static uint32_t tx_reply_cnt = 0;
 static uint32_t tx_cplt_cnt = 0;
 
-static void VisionTrySendPending(void)
+void VisionTrySendPending(void)
 {
-    if (vision_reply_pending > 0u)
-    {
-        VisionSend();
-        vision_reply_pending--;
-        tx_reply_cnt++;
-    }
+    if (vision_reply_pending == 0u)
+        return;
+
+    if (!USARTIsReady(vision_usart_instance))
+        return;
+
+    VisionSend();
+    vision_reply_pending = 0u;
+    tx_reply_cnt++;
 }
 
 static void VisionTxCpltCallback(void)
@@ -162,6 +165,7 @@ static void DecodeVision()
             // 严格一发一收：pending最大为1，防止累积导致连续发送
             if (vision_reply_pending == 0u)
                 vision_reply_pending = 1u;
+            VisionTrySendPending();
             memmove(vision_rx_stream, vision_rx_stream + INFANTRY_FRAME_LEN, vision_rx_stream_len - INFANTRY_FRAME_LEN);
             vision_rx_stream_len -= INFANTRY_FRAME_LEN;
         }
@@ -172,8 +176,7 @@ static void DecodeVision()
         }
     }
 
-    if (USARTIsReady(vision_usart_instance))
-        VisionTrySendPending();
+    VisionTrySendPending();
 }
 
 Vision_Recv_s *VisionInit(UART_HandleTypeDef *_handle)

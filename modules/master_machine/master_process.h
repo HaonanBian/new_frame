@@ -117,5 +117,5 @@ void VisionSetAltitude(float yaw, float pitch, float roll);
  * @brief 标记视觉数据已被消费,防止diff值被重复累加
  */
 void VisionDataConsumed(void);
-
+void VisionTrySendPending(void);
 #endif // !MASTER_PROCESS_H

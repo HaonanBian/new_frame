@@ -82,12 +82,13 @@ void GimbalInit()
                 .MaxOut = 500,
             },
             .speed_PID = {
-                .Kp = 0.6f,  // 1.0->0.5 降低力矩对速度误差的敏感度
-                .Ki = 0.08f, // 0.1->0.05 减小积分避免振荡
-
+                .Kp = 0.58f,
+                .Ki = 0.07f,
                 .Kd = 0,
-                .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
-                .IntegralLimit = 5,
+                .DeadBand = 0.0f,
+                .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_OutputFilter,
+                .IntegralLimit = 8,
+                .Output_LPF_RC = 0.008f,
                 .MaxOut = 10,  // DM电机力矩范围[-10, 10]
             },
             .other_angle_feedback_ptr = &gimba_IMU_data->Pitch,
@@ -154,6 +155,9 @@ void GimbalTask()
     // pitch轴使用电机编码器反馈(IMU装在yaw轴上,无法反馈pitch)
     float motor_pitch_feedback = pitch_motor->measure.position;          // 电机位置反馈(rad)
     float motor_pitch_velocity = pitch_motor->measure.velocity;          // 电机速度反馈(rad/s)
+    static float pitch_vel_fdb_lpf = 0.0f;
+    const float pitch_vel_lpf_alpha = 0.20f;
+    pitch_vel_fdb_lpf += pitch_vel_lpf_alpha * (motor_pitch_velocity - pitch_vel_fdb_lpf);
 
     // 模式切换时初始化pid_ref，避免突变
     if (gimbal_cmd_recv.gimbal_mode != last_mode)
@@ -204,8 +208,17 @@ void GimbalTask()
         #define PITCH_MAX_RAD (0.0455586f) // 最低位置(向下)
         LIMIT_MIN_MAX(pitch_pid_ref, PITCH_MIN_RAD, PITCH_MAX_RAD);
         float pitch_speed_ref = PIDCalculate(&pitch_motor->angle_PID, motor_pitch_feedback, pitch_pid_ref);
+        float pitch_pos_err = pitch_pid_ref - motor_pitch_feedback;
+        if (fabsf(pitch_pos_err) < 0.005f && fabsf(pitch_vel_fdb_lpf) < 0.12f)
+        {
+            float near_factor = fabsf(pitch_pos_err) / 0.005f;
+            if (near_factor < 0.5f)
+                near_factor = 0.5f;
+            pitch_speed_ref *= near_factor;
+        }
         LIMIT_MIN_MAX(pitch_speed_ref, DM_V_MIN, DM_V_MAX);
-        float pitch_torque = PIDCalculate(&pitch_motor->speed_PID, motor_pitch_velocity, pitch_speed_ref);
+        
+        float pitch_torque = PIDCalculate(&pitch_motor->speed_PID, pitch_vel_fdb_lpf, pitch_speed_ref);
         
         // 重力补偿前馈（已注释）
         // pitch_torque += PitchGravityCompensation(motor_pitch_feedback);

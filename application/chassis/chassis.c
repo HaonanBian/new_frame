@@ -121,13 +121,13 @@ void ChassisInit()
     PIDInit(&buffer_PID, &Buffer_pid_conf); // 缓冲能量PID初始化
 
     PID_Init_Config_s Angle_pid_conf = {
-        .Kp = 700.0f,
+        .Kp = 1000.0f,
         .Ki = 0.0f,
         .Kd = 0.25f,
         .IntegralLimit = 2000.0f,
         .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement | PID_DerivativeFilter,
         .Derivative_LPF_RC = 0.08f,
-        .MaxOut = 5000.0f,
+        .MaxOut = 12000.0f,
         .DeadBand = 2.5f,
     };
     PIDInit(&angle_PID, &Angle_pid_conf);
@@ -227,7 +227,8 @@ void ChassisTask()
 #endif // CHASSIS_BOARD
 
     // SetPowerLimit(referee_data->GameRobotState.chassis_power_limit);//设置功率限制
-    SetPowerLimit(150);//设置功率限制
+    SetPowerLimit(200);//设置功率限制
+
     if (chassis_cmd_recv.chassis_mode == CHASSIS_ZERO_FORCE)
     { // 如果出现重要模块离线或遥控器设置为急停,让电机停止
         DJIMotorStop(motor_lf);
@@ -290,8 +291,8 @@ void ChassisTask()
     }
     cos_theta = arm_cos_f32(offset_rad);
     sin_theta = arm_sin_f32(offset_rad);
-    chassis_vx = chassis_cmd_recv.vx * cos_theta + chassis_cmd_recv.vy * sin_theta;
-    chassis_vy = -chassis_cmd_recv.vx * sin_theta + chassis_cmd_recv.vy * cos_theta;
+    chassis_vx = chassis_cmd_recv.vx_target * cos_theta + chassis_cmd_recv.vy_target * sin_theta;
+    chassis_vy = -chassis_cmd_recv.vx_target * sin_theta + chassis_cmd_recv.vy_target * cos_theta;
 
     // 根据控制模式进行正运动学解算,计算底盘输出
     OmniWheelCalculate();

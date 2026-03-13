@@ -60,6 +60,28 @@ static uint8_t offset_angle_inited = 0;
 static float offset_last_angle = 0.0f;
 static float offset_angle_total = 0.0f;
 static uint8_t offset_reset_req = 0;
+#define CHASSIS_VEL_ACCEL_STEP 600.0f
+#define CHASSIS_VEL_DECEL_STEP 45.0f
+#define PITCH_RC_DEADBAND 5
+
+static float RampFollow(float input, float current, float accel_step, float decel_step)
+{
+    float delta = input - current;
+    float step = decel_step;
+    if (current == 0.0f || current * delta > 0.0f)
+        step = accel_step;
+    if (delta > step)
+        delta = step;
+    else if (delta < -step)
+        delta = -step;
+    return current + delta;
+}
+
+static void UpdateChassisVelTarget(void)
+{
+    chassis_cmd_send.vx_target = RampFollow(chassis_cmd_send.vx, chassis_cmd_send.vx_target, CHASSIS_VEL_ACCEL_STEP, CHASSIS_VEL_DECEL_STEP);
+    chassis_cmd_send.vy_target = RampFollow(chassis_cmd_send.vy, chassis_cmd_send.vy_target, CHASSIS_VEL_ACCEL_STEP, CHASSIS_VEL_DECEL_STEP);
+}
 
 static void RequestOffsetAngleReset(void)
 {
@@ -234,7 +256,7 @@ static void RemoteControlSet()
 
             if (yaw_ch < 3 && yaw_ch > -3)
                 yaw_ch = 0;
-            if (pitch_ch < 3 && pitch_ch > -3)
+            if (pitch_ch < PITCH_RC_DEADBAND && pitch_ch > -PITCH_RC_DEADBAND)
                 pitch_ch = 0;
 
             gimbal_cmd_send.yaw -= 0.001f * (float)yaw_ch;
@@ -248,10 +270,10 @@ static void RemoteControlSet()
 
         if (yaw_ch < 3 && yaw_ch > -3)
             yaw_ch = 0;
-        if (pitch_ch < 3 && pitch_ch > -3)
+        if (pitch_ch < PITCH_RC_DEADBAND && pitch_ch > -PITCH_RC_DEADBAND)
             pitch_ch = 0;
 
-        gimbal_cmd_send.yaw -= 0.001f * (float)yaw_ch;
+        gimbal_cmd_send.yaw -= 0.0015f * (float)yaw_ch;
         gimbal_cmd_send.pitch -= 0.00005f * (float)pitch_ch;
     }
     // 云台软件限位
@@ -425,6 +447,7 @@ void RobotCMDTask()
         RemoteControlSet();
 
     EmergencyHandler(); // 处理模块离线和遥控器急停等紧急情况
+    UpdateChassisVelTarget();
 
     // 更新视觉发送数据（仅在机器人正常工作时更新，实际发送由DecodeVision回调触发）
     if (robot_state == ROBOT_READY)

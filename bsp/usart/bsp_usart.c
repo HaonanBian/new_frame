@@ -12,7 +12,6 @@
 #include "bsp_log.h"
 #include "stdlib.h"
 #include "memory.h"
-
 /* usart service instance, modules' info would be recoreded here using USARTRegister() */
 /* usart服务实例,所有注册了usart的模块信息会被保存在这里 */
 static uint8_t idx;
@@ -108,7 +107,7 @@ void USARTRegisterTxCpltCallback(USARTInstance *_instance, usart_tx_cplt_callbac
  *
  * @note  通过__HAL_DMA_DISABLE_IT(huart->hdmarx,DMA_IT_HT)关闭dma half transfer中断防止两次进入HAL_UARTEx_RxEventCallback()
  *        这是HAL库的一个设计失误,发生DMA传输完成/半完成以及串口IDLE中断都会触发HAL_UARTEx_RxEventCallback()
- *        我们只希望处理，因此直接关闭DMA半传输中断第一种和第三种情况
+ *        我们只希望处理第一种和第三种情况,因此直接关闭DMA半传输中断第一种和第三种情况
  *
  * @param huart 发生中断的串口
  * @param Size 此次接收到的总数居量,暂时没用
