@@ -2,49 +2,36 @@
 #define MASTER_PROCESS_H
 
 #include "bsp_usart.h"
-#include "infantry_protocol.h"
+#include <stdint.h>
 
-#define VISION_RECV_SIZE INFANTRY_FRAME_LEN
-#define VISION_SEND_SIZE INFANTRY_FRAME_LEN
+#define VISION_FRAME_HEAD_0 0x5Au
+#define VISION_FRAME_HEAD_1 0xA5u
+#define VISION_FRAME_TAIL_0 0x7Fu
+#define VISION_FRAME_TAIL_1 0xFEu
+
+#define VISION_RECV_SIZE 29u
+#define VISION_SEND_SIZE 43u
 
 #pragma pack(1)
 typedef enum
 {
-	NO_FIRE = 0,
-	AUTO_FIRE = 1,
-	AUTO_AIM = 2
-} Fire_Mode_e;
-
-typedef enum
-{
-	NO_TARGET = 0,
-	TARGET_CONVERGING = 1,
-	READY_TO_FIRE = 2
-} Target_State_e;
-
-typedef enum
-{
-	NO_TARGET_NUM = 0,
-	HERO1 = 1,
-	ENGINEER2 = 2,
-	INFANTRY3 = 3,
-	INFANTRY4 = 4,
-	INFANTRY5 = 5,
-	OUTPOST = 6,
-	SENTRY = 7,
-	BASE = 8
-} Target_Type_e;
+	VISION_MODE_IDLE = 0,
+	VISION_MODE_AUTO_AIM = 1,
+	VISION_MODE_SMALL_BUFF = 2,
+	VISION_MODE_BIG_BUFF = 3,
+} Vision_Mode_e;
 
 typedef struct
 {
-	Fire_Mode_e fire_mode;
-	Target_State_e target_state;
-	Target_Type_e target_type;
-
-	float pitch;
+	uint8_t control;
+	uint8_t shoot;
 	float yaw;
-	float distance;
-	volatile uint8_t data_updated; // 新数据标志,diff值被消费后清零,防止重复累加
+	float yaw_vel;
+	float yaw_acc;
+	float pitch;
+	float pitch_vel;
+	float pitch_acc;
+	volatile uint8_t data_updated;
 } Vision_Recv_s;
 
 typedef enum
@@ -53,13 +40,6 @@ typedef enum
 	COLOR_BLUE = 1,
 	COLOR_RED = 2,
 } Enemy_Color_e;
-
-typedef enum
-{
-	VISION_MODE_AIM = 0,
-	VISION_MODE_SMALL_BUFF = 1,
-	VISION_MODE_BIG_BUFF = 2
-} Work_Mode_e;
 
 typedef enum
 {
@@ -73,13 +53,14 @@ typedef enum
 
 typedef struct
 {
-	Enemy_Color_e enemy_color;
-	Work_Mode_e work_mode;
-	Bullet_Speed_e bullet_speed;
-
+	uint8_t mode;
+	float q[4];
 	float yaw;
+	float yaw_vel;
 	float pitch;
-	float roll;
+	float pitch_vel;
+	float bullet_speed;
+	uint16_t bullet_count;
 } Vision_Send_s;
 #pragma pack()
 
@@ -97,25 +78,27 @@ Vision_Recv_s *VisionInit(UART_HandleTypeDef *_handle);
 void VisionSend();
 
 /**
- * @brief 设置视觉发送标志位
- *
- * @param enemy_color
- * @param work_mode
- * @param bullet_speed
+ * @brief 设置发送数据的四元数
  */
-void VisionSetFlag(Enemy_Color_e enemy_color, Work_Mode_e work_mode, Bullet_Speed_e bullet_speed);
+void VisionSetQuaternion(const float *q);
 
 /**
- * @brief 设置发送数据的姿态部分
- *
- * @param yaw
- * @param pitch
+ * @brief 设置发送数据的姿态和角速度
  */
-void VisionSetAltitude(float yaw, float pitch, float roll);
+void VisionSetAltitude(float yaw, float pitch, float yaw_vel, float pitch_vel);
+
+/**
+ * @brief 设置发送状态
+ */
+void VisionSetStatus(Vision_Mode_e mode, float bullet_speed, uint16_t bullet_count);
+
+/**
+ * @brief 判断视觉通信是否在线
+ */
+uint8_t VisionIsOnline(void);
 
 /**
  * @brief 标记视觉数据已被消费,防止diff值被重复累加
  */
 void VisionDataConsumed(void);
-void VisionTrySendPending(void);
 #endif // !MASTER_PROCESS_H

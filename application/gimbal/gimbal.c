@@ -1,4 +1,4 @@
-﻿#include "gimbal.h"
+#include "gimbal.h"
 #include "motor_def.h"
 #include "robot_def.h"
 #include "dji_motor.h"
@@ -13,6 +13,12 @@
 static attitude_t *gimba_IMU_data; // 云台IMU数据
 static DMMotorInstance *yaw_motor;
 static DMMotorInstance *pitch_motor;
+
+/**
+ * @brief 全局变量：Pitch轴角度(度)，供其他任务读取
+ *        在GimbalTask()每周期更新
+ */
+float gimbal_pitch_angle_deg = 0.0f;
 
 static Publisher_t *gimbal_pub;                   // 云台应用消息发布者(云台反馈给cmd)
 static Subscriber_t *gimbal_sub;                  // cmd控制消息订阅者
@@ -72,24 +78,23 @@ void GimbalInit()
         },
         .controller_param_init_config = {
             .angle_PID = {
-                .Kp = 6, // 10->5 降低增益减少抖动
-
-                .Ki = 0,
-                .Kd = 0,
+                .Kp = 29,
+                .Ki = 0.15f,
+                .Kd = 0.3f,
                 .DeadBand = 0.01,
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
-                .IntegralLimit = 100,
-                .MaxOut = 500,
+                .IntegralLimit = 80,
+                .MaxOut = 650,
             },
             .speed_PID = {
-                .Kp = 0.58f,
+                .Kp = 1.2f,
                 .Ki = 0.07f,
-                .Kd = 0,
+                .Kd = 0.03f,
                 .DeadBand = 0.0f,
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_OutputFilter,
-                .IntegralLimit = 8,
-                .Output_LPF_RC = 0.008f,
-                .MaxOut = 10,  // DM电机力矩范围[-10, 10]
+                .IntegralLimit = 5,
+                .Output_LPF_RC = 0.035f,
+                .MaxOut = 12,
             },
             .other_angle_feedback_ptr = &gimba_IMU_data->Pitch,
             // 还需要增加角速度额外反馈指针,注意方向,ins_task.md中有c板的bodyframe坐标系说明
@@ -127,6 +132,8 @@ void GimbalTask()
     static gimbal_mode_e last_mode = GIMBAL_ZERO_FORCE;
     static float yaw_pid_ref = 0;   // yaw角度环设定值
     static float pitch_pid_ref = 0; // pitch角度环设定值
+    static float last_yaw_target = 0;  // 上一次 yaw 目标值
+    static float last_pitch_target = 0; // 上一次 pitch 目标值
     
     if (SubGetMessage(gimbal_sub, &gimbal_cmd_recv))
     {
@@ -155,6 +162,8 @@ void GimbalTask()
     // pitch轴使用电机编码器反馈(IMU装在yaw轴上,无法反馈pitch)
     float motor_pitch_feedback = pitch_motor->measure.position;          // 电机位置反馈(rad)
     float motor_pitch_velocity = pitch_motor->measure.velocity;          // 电机速度反馈(rad/s)
+    // 更新全局变量：pitch轴角度(度)
+    gimbal_pitch_angle_deg = motor_pitch_feedback * 57.295779513f;
     static float pitch_vel_fdb_lpf = 0.0f;
     const float pitch_vel_lpf_alpha = 0.20f;
     pitch_vel_fdb_lpf += pitch_vel_lpf_alpha * (motor_pitch_velocity - pitch_vel_fdb_lpf);
@@ -186,9 +195,51 @@ void GimbalTask()
         DMMotorEnable(yaw_motor);
         DMMotorEnable(pitch_motor);
         
-        // 更新角度设定值
-        yaw_pid_ref = gimbal_cmd_recv.yaw * deg2rad;
-        pitch_pid_ref = gimbal_cmd_recv.pitch;  // pitch已经是弧度(由cmd直接累加弧度增量)
+        // 获取原始目标值
+        float target_yaw = gimbal_cmd_recv.yaw * deg2rad;
+        float target_pitch = gimbal_cmd_recv.pitch;
+        
+        // ============ 斜坡函数 - 避免目标突变引起震荡 ============
+        // 斜坡变化率(rad/控制周期,约2ms)
+        const float yaw_ramp_rate = 0.06f;   // ~1700°/s
+        const float pitch_ramp_rate = 0.03f; // ~860°/s
+        
+        // YAW斜坡 (已禁用)
+        yaw_pid_ref = target_yaw;
+        
+        // PITCH斜坡
+        float pitch_delta = target_pitch - pitch_pid_ref;
+        if (fabsf(pitch_delta) > pitch_ramp_rate) {
+            pitch_pid_ref += (pitch_delta > 0) ? pitch_ramp_rate : -pitch_ramp_rate;
+        } else {
+            pitch_pid_ref = target_pitch;
+        }
+        
+        // ============ 积分衰减 & 目标大幅变化清零积分 ============
+        float yaw_err = fabsf(yaw_pid_ref - imu_yaw_feedback);
+        float pitch_err = fabsf(pitch_pid_ref - motor_pitch_feedback);
+        
+        // 接近目标时衰减积分项(防止过零震荡)
+        if (yaw_err < 0.1f) {
+            yaw_motor->angle_PID.ITerm *= 0.92f;
+            yaw_motor->speed_PID.ITerm *= 0.92f;
+        }
+        if (pitch_err < 0.1f) {
+            pitch_motor->angle_PID.ITerm *= 0.92f;
+            pitch_motor->speed_PID.ITerm *= 0.92f;
+        }
+        
+        // 目标值大幅变化时清零积分(防止overshoot)
+        if (fabsf(yaw_pid_ref - last_yaw_target) > 0.15f) {
+            yaw_motor->angle_PID.ITerm = 0;
+            yaw_motor->speed_PID.ITerm = 0;
+            last_yaw_target = yaw_pid_ref;
+        }
+        if (fabsf(pitch_pid_ref - last_pitch_target) > 0.15f) {
+            pitch_motor->angle_PID.ITerm = 0;
+            pitch_motor->speed_PID.ITerm = 0;
+            last_pitch_target = pitch_pid_ref;
+        }
         
         // ============ YAW轴串级PID控制(角度环→速度环→力矩输出) ============
         // 角度环：输入为角度目标值，用陀螺仪的角度，输出为速度设定值
@@ -203,9 +254,7 @@ void GimbalTask()
         DMMotorTorqueCtrl(yaw_motor, yaw_torque);
         
         // ============ PITCH轴串级PID控制(角度环→速度环→力矩输出) ============
-        // pitch软件限位: 最低0.0455586rad, 最高-1.223rad
-        #define PITCH_MIN_RAD (-1.223f)   // 最高位置(向上)
-        #define PITCH_MAX_RAD (0.0455586f) // 最低位置(向下)
+        // pitch软件限位: 最低PITCH_MAX_RAD, 最高PITCH_MIN_RAD
         LIMIT_MIN_MAX(pitch_pid_ref, PITCH_MIN_RAD, PITCH_MAX_RAD);
         float pitch_speed_ref = PIDCalculate(&pitch_motor->angle_PID, motor_pitch_feedback, pitch_pid_ref);
         float pitch_pos_err = pitch_pid_ref - motor_pitch_feedback;

@@ -9,7 +9,6 @@
  *
  */
 #include "master_process.h"
-#include "infantry_protocol.h"
 #include "daemon.h"
 #include "bsp_log.h"
 #include "robot_def.h"
@@ -22,23 +21,73 @@ static DaemonInstance *vision_daemon_instance;
 static USARTInstance *vision_usart_instance;
 static uint8_t vision_rx_stream[USART_RXBUFF_LIMIT];
 static uint16_t vision_rx_stream_len;
-static uint16_t vision_reply_pending;
-static uint8_t vision_last_tx_frame[VISION_SEND_SIZE];
-static uint8_t vision_last_tx_valid;
 #endif
 
-void VisionSetFlag(Enemy_Color_e enemy_color, Work_Mode_e work_mode, Bullet_Speed_e bullet_speed)
+void VisionSetQuaternion(const float *q)
 {
-    send_data.enemy_color = enemy_color;
-    send_data.work_mode = work_mode;
-    send_data.bullet_speed = bullet_speed;
+    send_data.q[0] = q[0];
+    send_data.q[1] = q[1];
+    send_data.q[2] = q[2];
+    send_data.q[3] = q[3];
 }
 
-void VisionSetAltitude(float yaw, float pitch, float roll)
+void VisionSetAltitude(float yaw, float pitch, float yaw_vel, float pitch_vel)
 {
     send_data.yaw = yaw;
     send_data.pitch = pitch;
-    send_data.roll = roll;
+    send_data.yaw_vel = yaw_vel;
+    send_data.pitch_vel = pitch_vel;
+}
+
+void VisionSetStatus(Vision_Mode_e mode, float bullet_speed, uint16_t bullet_count)
+{
+    send_data.mode = (uint8_t)mode;
+    send_data.bullet_speed = bullet_speed;
+    send_data.bullet_count = bullet_count;
+}
+
+uint8_t VisionIsOnline(void)
+{
+    return DaemonIsOnline(vision_daemon_instance);
+}
+
+static void PackGimbalToVision(uint8_t *buf)
+{
+    buf[0] = VISION_FRAME_HEAD_0;
+    buf[1] = VISION_FRAME_HEAD_1;
+    buf[2] = send_data.mode;
+    memcpy(&buf[3], send_data.q, 16);
+    memcpy(&buf[19], &send_data.yaw, 4);
+    memcpy(&buf[23], &send_data.yaw_vel, 4);
+    memcpy(&buf[27], &send_data.pitch, 4);
+    memcpy(&buf[31], &send_data.pitch_vel, 4);
+    memcpy(&buf[35], &send_data.bullet_speed, 4);
+    buf[39] = (uint8_t)(send_data.bullet_count & 0xFFu);
+    buf[40] = (uint8_t)(send_data.bullet_count >> 8);
+    buf[41] = VISION_FRAME_TAIL_0;
+    buf[42] = VISION_FRAME_TAIL_1;
+}
+
+static uint8_t UnpackVisionToGimbal(const uint8_t *buf)
+{
+    if (buf[0] != VISION_FRAME_HEAD_0 || buf[1] != VISION_FRAME_HEAD_1)
+        return 0;
+
+    if (buf[VISION_RECV_SIZE - 2] != VISION_FRAME_TAIL_0 ||
+        buf[VISION_RECV_SIZE - 1] != VISION_FRAME_TAIL_1)
+        return 0;
+
+    uint8_t mode = buf[2];
+    recv_data.control = (mode >= 1u) ? 1u : 0u;
+    recv_data.shoot = (mode == 2u) ? 1u : 0u;
+    memcpy(&recv_data.yaw, &buf[3], 4);
+    memcpy(&recv_data.yaw_vel, &buf[7], 4);
+    memcpy(&recv_data.yaw_acc, &buf[11], 4);
+    memcpy(&recv_data.pitch, &buf[15], 4);
+    memcpy(&recv_data.pitch_vel, &buf[19], 4);
+    memcpy(&recv_data.pitch_acc, &buf[23], 4);
+    recv_data.data_updated = 1u;
+    return 1;
 }
 
 /**
@@ -61,27 +110,6 @@ static void VisionOfflineCallback(void *id)
 #include "bsp_usart.h"
 
 static uint32_t rx_valid_cnt = 0;
-static uint32_t tx_reply_cnt = 0;
-static uint32_t tx_cplt_cnt = 0;
-
-void VisionTrySendPending(void)
-{
-    if (vision_reply_pending == 0u)
-        return;
-
-    if (!USARTIsReady(vision_usart_instance))
-        return;
-
-    VisionSend();
-    vision_reply_pending = 0u;
-    tx_reply_cnt++;
-}
-
-static void VisionTxCpltCallback(void)
-{
-    tx_cplt_cnt++;
-    VisionTrySendPending();
-}
 
 /**
  * @brief 接收解包回调函数,将在bsp_usart.c中被usart rx callback调用
@@ -91,7 +119,6 @@ static void VisionTxCpltCallback(void)
 static void DecodeVision()
 {
     uint16_t recv_size;
-    DaemonReload(vision_daemon_instance); // 喂狗
 
     recv_size = USARTGetLastRecvSize(vision_usart_instance);
     if (recv_size == 0)
@@ -123,51 +150,30 @@ static void DecodeVision()
         vision_rx_stream_len = (uint16_t)(vision_rx_stream_len + recv_size);
     }
 
-    // 流式逐帧解析：每收到一帧合法请求，记录一次待应答
-    while (vision_rx_stream_len >= INFANTRY_FRAME_LEN)
+    while (vision_rx_stream_len >= VISION_RECV_SIZE)
     {
-        uint8_t *frame = vision_rx_stream;
-        Infantry_Cmd_Packet_s cmd_packet;
-        if (frame[0] != INFANTRY_FRAME_HEAD ||
-            frame[INFANTRY_FRAME_LEN - 2] != INFANTRY_CMD_RESERVED ||
-            frame[INFANTRY_FRAME_LEN - 1] != INFANTRY_FRAME_TAIL)
+        if (vision_rx_stream[0] != VISION_FRAME_HEAD_0 ||
+            vision_rx_stream[1] != VISION_FRAME_HEAD_1)
         {
             memmove(vision_rx_stream, vision_rx_stream + 1, vision_rx_stream_len - 1);
             vision_rx_stream_len--;
             continue;
         }
 
-        if (vision_last_tx_valid && memcmp(frame, vision_last_tx_frame, INFANTRY_FRAME_LEN) == 0)
+        if (vision_rx_stream[VISION_RECV_SIZE - 2] != VISION_FRAME_TAIL_0 ||
+            vision_rx_stream[VISION_RECV_SIZE - 1] != VISION_FRAME_TAIL_1)
         {
-            memmove(vision_rx_stream, vision_rx_stream + INFANTRY_FRAME_LEN, vision_rx_stream_len - INFANTRY_FRAME_LEN);
-            vision_rx_stream_len -= INFANTRY_FRAME_LEN;
+            memmove(vision_rx_stream, vision_rx_stream + 1, vision_rx_stream_len - 1);
+            vision_rx_stream_len--;
             continue;
         }
 
-        if (InfantryProtocolDecodeCmd(frame, INFANTRY_FRAME_LEN, &cmd_packet))
+        if (UnpackVisionToGimbal(vision_rx_stream))
         {
             rx_valid_cnt++;
-            recv_data.fire_mode = cmd_packet.fire ? AUTO_FIRE : NO_FIRE;
-            // 判断是否有目标: pitch_diff/yaw_diff 任一非零说明有目标
-            // fire字段仅表示是否建议开火,不代表是否有目标
-            uint8_t has_target = (cmd_packet.pitch_diff != 0.0f || cmd_packet.yaw_diff != 0.0f) ? 1 : 0;
-            if (!has_target)
-                recv_data.target_state = NO_TARGET;
-            else if (cmd_packet.fire)
-                recv_data.target_state = READY_TO_FIRE;
-            else
-                recv_data.target_state = TARGET_CONVERGING;
-            recv_data.target_type = NO_TARGET_NUM;
-            recv_data.pitch = cmd_packet.pitch_diff;
-            recv_data.yaw = cmd_packet.yaw_diff;
-            recv_data.distance = cmd_packet.distance;
-            recv_data.data_updated = 1;
-            // 严格一发一收：pending最大为1，防止累积导致连续发送
-            if (vision_reply_pending == 0u)
-                vision_reply_pending = 1u;
-            VisionTrySendPending();
-            memmove(vision_rx_stream, vision_rx_stream + INFANTRY_FRAME_LEN, vision_rx_stream_len - INFANTRY_FRAME_LEN);
-            vision_rx_stream_len -= INFANTRY_FRAME_LEN;
+            DaemonReload(vision_daemon_instance);
+            memmove(vision_rx_stream, vision_rx_stream + VISION_RECV_SIZE, vision_rx_stream_len - VISION_RECV_SIZE);
+            vision_rx_stream_len -= VISION_RECV_SIZE;
         }
         else
         {
@@ -176,7 +182,6 @@ static void DecodeVision()
         }
     }
 
-    VisionTrySendPending();
 }
 
 Vision_Recv_s *VisionInit(UART_HandleTypeDef *_handle)
@@ -186,7 +191,6 @@ Vision_Recv_s *VisionInit(UART_HandleTypeDef *_handle)
     conf.recv_buff_size = VISION_RECV_SIZE;
     conf.usart_handle = _handle;
     vision_usart_instance = USARTRegister(&conf);
-    USARTRegisterTxCpltCallback(vision_usart_instance, VisionTxCpltCallback);
 
     // 为master process注册daemon,用于判断视觉通信是否离线
     Daemon_Init_Config_s daemon_conf = {
@@ -207,20 +211,10 @@ Vision_Recv_s *VisionInit(UART_HandleTypeDef *_handle)
  */
 void VisionSend()
 {
-    // 应答发送：收到视觉请求并验证帧头帧尾后立即发送
-    // 使用IT发送，避免和DMA接收互相影响
-    // buff必须为static，确保异步发送期间内存有效
     static uint8_t send_buff[VISION_SEND_SIZE];
-    Infantry_Feedback_Packet_s feedback_packet = {
-        .mode = (uint8_t)send_data.work_mode,
-        .roll = send_data.roll,
-        .pitch = send_data.pitch,
-        .yaw = send_data.yaw,
-    };
-
-    InfantryProtocolEncodeFeedback(&feedback_packet, send_buff);
-    memcpy(vision_last_tx_frame, send_buff, VISION_SEND_SIZE);
-    vision_last_tx_valid = 1u;
+    if (!USARTIsReady(vision_usart_instance))
+        return;
+    PackGimbalToVision(send_buff);
     USARTSend(vision_usart_instance, send_buff, VISION_SEND_SIZE, USART_TRANSFER_IT);
 }
 
@@ -233,23 +227,11 @@ static uint8_t *vis_recv_buff;
 
 static void DecodeVision(uint16_t recv_len)
 {
-    Infantry_Cmd_Packet_s cmd_packet;
-    if (!InfantryProtocolDecodeCmd(vis_recv_buff, recv_len, &cmd_packet))
+    if (recv_len < VISION_RECV_SIZE)
         return;
 
-    recv_data.fire_mode = cmd_packet.fire ? AUTO_FIRE : NO_FIRE;
-    uint8_t has_target = (cmd_packet.pitch_diff != 0.0f || cmd_packet.yaw_diff != 0.0f) ? 1 : 0;
-    if (!has_target)
-        recv_data.target_state = NO_TARGET;
-    else if (cmd_packet.fire)
-        recv_data.target_state = READY_TO_FIRE;
-    else
-        recv_data.target_state = TARGET_CONVERGING;
-    recv_data.target_type = NO_TARGET_NUM;
-    recv_data.pitch = cmd_packet.pitch_diff;
-    recv_data.yaw = cmd_packet.yaw_diff;
-    recv_data.distance = cmd_packet.distance;
-    recv_data.data_updated = 1;
+    if (UnpackVisionToGimbal(vis_recv_buff))
+        DaemonReload(vision_daemon_instance);
 }
 
 /* 视觉通信初始化 */
@@ -273,14 +255,7 @@ Vision_Recv_s *VisionInit(UART_HandleTypeDef *_handle)
 void VisionSend()
 {
     static uint8_t send_buff[VISION_SEND_SIZE];
-    Infantry_Feedback_Packet_s feedback_packet = {
-        .mode = (uint8_t)send_data.work_mode,
-        .roll = send_data.roll,
-        .pitch = send_data.pitch,
-        .yaw = send_data.yaw,
-    };
-
-    InfantryProtocolEncodeFeedback(&feedback_packet, send_buff);
+    PackGimbalToVision(send_buff);
     USBTransmit(send_buff, VISION_SEND_SIZE);
 }
 
