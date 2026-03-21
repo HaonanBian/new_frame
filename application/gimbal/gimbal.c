@@ -173,6 +173,7 @@ void GimbalTask()
     {
         yaw_pid_ref = imu_yaw_feedback;
         pitch_pid_ref = motor_pitch_feedback;
+        gimbal_cmd_recv.yaw = imu_yaw_feedback / deg2rad;    // 同步cmd的yaw目标值
         gimbal_cmd_recv.pitch = motor_pitch_feedback;
         last_mode = gimbal_cmd_recv.gimbal_mode;
     }

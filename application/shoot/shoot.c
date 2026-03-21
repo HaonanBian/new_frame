@@ -55,7 +55,7 @@ void ShootInit()
     friction_config.can_init_config.tx_id = 1,
     friction_l = DJIMotorInit(&friction_config);
 
-    friction_config.can_init_config.tx_id = 2; // 右摩擦轮,改txid和方向就行
+    friction_config.can_init_config.tx_id = 2; // 右摩擦轮,改txid
     friction_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_NORMAL;
     friction_r = DJIMotorInit(&friction_config);
 
@@ -68,7 +68,7 @@ void ShootInit()
         .controller_param_init_config = {
             .angle_PID = {
                 // 如果启用位置环来控制发弹,需要较大的I值保证输出力矩的线性度否则出现接近拨出的力矩大幅下降
-                .Kp = 10, // 10
+                .Kp =20, // 10
                 .Ki = 0,
                 .Kd = 0,
                 .MaxOut = 200,
@@ -79,10 +79,10 @@ void ShootInit()
                 .Kd = 0,
                 .Improve = PID_Integral_Limit,
                 .IntegralLimit = 5000,
-                .MaxOut = 5000,
+                .MaxOut = 8000,
             },
             .current_PID = {
-                .Kp = 0.7, // 0.7
+                .Kp = 0.95, // 0.7
                 .Ki = 0.1, // 0.1
                 .Kd = 0,
                 .Improve = PID_Integral_Limit,
@@ -175,21 +175,21 @@ void ShootTask()
         switch (shoot_cmd_recv.bullet_speed)
         {
         case SMALL_AMU_15:
-            DJIMotorSetRef(friction_l, 0);
-            DJIMotorSetRef(friction_r, 0);
+            DJIMotorSetRef(friction_l, 35000); // 15m/s弹速对应的摩擦轮速度
+            DJIMotorSetRef(friction_r, 35000);
             break;
         case SMALL_AMU_18:
-            DJIMotorSetRef(friction_l, 0);
-            DJIMotorSetRef(friction_r, 0);
+            DJIMotorSetRef(friction_l, 40000); // 18m/s弹速对应的摩擦轮速度
+            DJIMotorSetRef(friction_r, 40000);
             break;
         case SMALL_AMU_30:
-            DJIMotorSetRef(friction_l, 0);
-            DJIMotorSetRef(friction_r, 0);
+            DJIMotorSetRef(friction_l, 60000); // 30m/s弹速对应的摩擦轮速度
+            DJIMotorSetRef(friction_r, 60000);
             break;
-        default: // 当前为了调试设定的默认值4000,因为还没有加入裁判系统无法读取弹速.
-            DJIMotorSetRef(friction_l, 30000);
-            DJIMotorSetRef(friction_r, 30000);
-            break;
+        // default: // 当前为了调试设定的默认值
+        //     DJIMotorSetRef(friction_l, 3500);
+        //     DJIMotorSetRef(friction_r, 3500);
+        //     break;
         }
     }
     else // 关闭摩擦轮
