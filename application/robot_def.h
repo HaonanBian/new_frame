@@ -26,11 +26,11 @@
 
 /* 机器人重要参数定义,注意根据不同机器人进行修改,浮点数需要以.0或f结尾,无符号以u结尾 */
 // 云台参数
-#define YAW_CHASSIS_ALIGN_ECD 349.172974f  // 云台和底盘对齐指向相同方向时的电机编码器值,若对云台有机械改动需要修改
+#define YAW_CHASSIS_ALIGN_ECD 129.869385f  // 云台和底盘对齐指向相同方向时的电机编码器值,若对云台有机械改动需要修改
 #define YAW_ECD_GREATER_THAN_4096 0 // ALIGN_ECD值是否大于4096,是为1,否为0;用于计算云台偏转角度
 #define PITCH_HORIZON_ECD 3412      // 云台处于水平位置时编码器值,若对云台有机械改动需要修改
-#define PITCH_MIN_RAD (-1.213f)     // pitch最高位置(向上),单位rad
-#define PITCH_MAX_RAD (0.14245f)    // pitch最低位置(向下),单位rad
+#define PITCH_MIN_RAD (-7.3386f)     // pitch最高位置(向上),单位rad
+#define PITCH_MAX_RAD (0.105f)    // pitch最低位置(向下),单位rad
 #define PITCH_MAX_ANGLE 0           // 云台竖直方向最大角度 (注意反馈如果是陀螺仪，则填写陀螺仪的角度)
 #define PITCH_MIN_ANGLE 0           // 云台竖直方向最小角度 (注意反馈如果是陀螺仪，则填写陀螺仪的角度)
 // #define PITCH_GRAVITY_COMP_COEFF 3.724f 重力补偿系数,根据机械设计和重心位置计算得到,需要修改
@@ -38,7 +38,7 @@
 // #define PITCH_GRAVITY_COMP_BIAS 0.0f
 // #define PITCH_GRAVITY_COMP_DIR 1.0f
 // 发射参数
-#define ONE_BULLET_DELTA_ANGLE 36    // 发射一发弹丸拨盘转动的距离,由机械设计图纸给出
+#define ONE_BULLET_DELTA_ANGLE 45    // 发射一发弹丸拨盘转动的距离,由机械设计图纸给出
 #define REDUCTION_RATIO_LOADER 36.0f // 2006拨盘电机的减速比,英雄需要修改为3508的19.0f
 #define NUM_PER_CIRCLE 10            // 拨盘一圈的装载量
 // 机器人底盘修改的参数,单位为mm(毫米)
@@ -111,6 +111,13 @@ typedef enum
     SHOOT_OFF = 0,
     SHOOT_ON,
 } shoot_mode_e;
+
+// 热量限制状态
+typedef enum
+{
+    HEAT_OK = 0,           // 热量正常，可以发射
+    HEAT_LIMITED,          // 热量受限，禁止发射
+} heat_limit_status_e;
 typedef enum
 {
     FRICTION_OFF = 0, // 摩擦轮关闭
@@ -216,6 +223,9 @@ typedef struct
 {
     // code to go here
     // ...
+    heat_limit_status_e heat_status;      // 热量限制状态
+    uint16_t rest_heat;                   // 剩余可用热量
+    int16_t bullet_count;                  // ★剩余弹量★ (无裁判系统时由射弹计数器维护)
 } Shoot_Upload_Data_s;
 
 #pragma pack() // 开启字节对齐,结束前面的#pragma pack(1)

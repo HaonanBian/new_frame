@@ -22,6 +22,14 @@
 #include "daemon.h"
 #include "dji_motor.h"
 
+/**
+ * @brief 裁判系统数据接口类型
+ */
+typedef struct {
+    float chassis_power;       // 底盘实时功率
+    float chassis_power_buffer; // 缓冲能量
+    uint16_t chassis_power_limit; // 功率上限
+} PowerControl_RefereeData_s;
 
 DJIMotorInstance *PowerControlInit(Motor_Init_Config_s *config);
 
@@ -39,4 +47,43 @@ void PowerControl(void);
  * @param power_limit 功率限制值
  */
 void SetPowerLimit(float power_limit);
+
+/**
+ * @brief 设置缓冲能量PID参数
+ *
+ * @param kp 比例系数
+ * @param ki 积分系数
+ * @param kd 微分系数
+ */
+void SetBufferPID(float kp, float ki, float kd);
+
+/**
+ * @brief 更新裁判系统功率数据
+ *
+ * @param power 当前底盘功率
+ * @param buffer 当前缓冲能量
+ * @param limit 功率上限
+ */
+void UpdatePowerControlRefereeData(float power, float buffer, uint16_t limit);
+
+/**
+ * @brief 获取底盘最大功率限制
+ *
+ * @return uint16_t 功率限制值
+ */
+uint16_t GetChassisPowerLimit(void);
+
+/**
+ * @brief 获取底盘当前功率
+ *
+ * @return float 当前功率值
+ */
+float GetChassisPower(void);
+
+/**
+ * @brief 获取底盘缓冲能量
+ *
+ * @return float 缓冲能量值
+ */
+float GetChassisPowerBuffer(void);
 #endif // !DJI_MOTOR_H

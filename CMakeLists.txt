@@ -92,6 +92,10 @@ file(GLOB_RECURSE SOURCES
     
 )
 
+list(FILTER SOURCES EXCLUDE REGEX ".*/modules/algorithm/fuzzy_pid\\.c$")
+list(FILTER SOURCES EXCLUDE REGEX ".*/application/gimbal/gimbal_fuzzy_pid\\.c$")
+list(FILTER SOURCES EXCLUDE REGEX ".*/application/gimbal/vofa_task\\.c$")
+
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     ${SOURCES}

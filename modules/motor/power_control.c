@@ -9,6 +9,12 @@ const float K1[4] = {1.23e-07, 1.23e-07, 1.23e-07, 1.23e-07};
 const float K2[4] = {1.453e-07, 1.453e-07, 1.453e-07, 1.453e-07};
 const float constant[4] = {4.081f, 4.081f, 4.081f, 4.081f};
 
+// 功率控制相关宏定义
+#define WARNING_POWER         40.0f       // 警告功率阈值
+#define WARNING_POWER_BUFF    50.0f       // 警告功率缓冲阈值
+#define BUFFER_TARGET        30.0f       // 缓冲能量目标值
+#define POWER_SCALE_MIN      0.1f        // 最小功率缩放系数
+
 static uint8_t idx = 0; // register idx,是该文件的全局电机索引,在注册时使用
 /* DJI电机的实例,此处仅保存指针,内存的分配将通过电机实例初始化时通过malloc()进行 */
 static DJIMotorInstance *dji_motor_instance[DJI_MOTOR_CNT] = {NULL}; // 会在control任务中遍历该指针数组进行pid计算
@@ -16,6 +22,14 @@ static float initial_torque[4];                                      // 电机�
 static float A, B, C;                                                // 测试用
 static float power_control_out[4], initial_give_power[4];            // 电机输出功率
 static float chassis_max_power, chassis_power, initial_total_power = 0.0f;
+
+// 缓冲能量PID
+static PIDInstance buffer_PID;
+// 裁判系统数据
+static PowerControl_RefereeData_s referee_power_data = {0};
+
+// 缓冲能量PID参数
+static float buffer_kp = 0.1f, buffer_ki = 0.0f, buffer_kd = 0.0f;
 /**
  * @brief 由于DJI电机发送以四个一组的形式进行,故对其进行特殊处理,用6个(2can*3group)can_instance专门负责发送
  *        该变量将在 DJIMotorControl() 中使用,分组在 MotorSenderGrouping()中进行
@@ -51,6 +65,7 @@ static uint8_t sender_enable_flag[6] = {0};
 void SetPowerLimit(float power_limit)
 {
     chassis_max_power = power_limit;
+    referee_power_data.chassis_power_limit = (uint16_t)power_limit;
 }
 
 /**
@@ -213,6 +228,20 @@ DJIMotorInstance *PowerControlInit(Motor_Init_Config_s *config)
 
     DJIMotorEnable(instance);
     dji_motor_instance[idx++] = instance;
+    
+    // 初始化缓冲能量PID(仅在第一个电机初始化时执行)
+    if (idx == 1) {
+        PID_Init_Config_s buffer_pid_config = {
+            .Kp = buffer_kp,
+            .Ki = buffer_ki,
+            .Kd = buffer_kd,
+            .IntegralLimit = 1000,
+            .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
+            .MaxOut = 1000,
+        };
+        PIDInit(&buffer_PID, &buffer_pid_config);
+    }
+    
     return instance;
 }
 
@@ -226,7 +255,24 @@ void PowerControl()
     Motor_Control_Setting_s *motor_setting; // 电机控制参数
     Motor_Controller_s *motor_controller;   // 电机控制器
     DJI_Motor_Measure_s *measure;           // 电机测量值
-    float pid_measure, pid_ref;             // 电机PID测量值和设定值
+     float pid_measure, pid_ref;             // 电机PID测量值和设定值
+     
+     // 缓冲能量PID计算
+    float buffer_pid_out = 0.0f;
+    float available_power = chassis_max_power; // 默认使用底盘最大功率限制
+    
+    // 只有当裁判系统已连接（chassis_power_limit > 0）且有有效数据时才使用裁判系统数据
+    if (referee_power_data.chassis_power_limit > 0 && chassis_max_power > 0) {
+        PIDCalculate(&buffer_PID, referee_power_data.chassis_power_buffer, BUFFER_TARGET);
+        buffer_pid_out = buffer_PID.Output;
+        
+        // 计算实际可用功率限制
+        available_power = referee_power_data.chassis_power_limit - buffer_pid_out;
+        if (available_power < referee_power_data.chassis_power_limit * POWER_SCALE_MIN) {
+            available_power = referee_power_data.chassis_power_limit * POWER_SCALE_MIN;
+        }
+    }
+    
     initial_total_power = 0.0f;
     // 遍历所有电机实例,进行串级PID的计算并设置发送报文的值
     for (size_t i = 0; i < idx; ++i) // idx实际上是4个
@@ -268,6 +314,8 @@ void PowerControl()
         // 获取最终输出
         power_control_out[i] = pid_ref;
     }
+    
+    // 计算总功率
     for (uint8_t i = 0; i < idx; i++)
     {
         if (initial_give_power[i] < 0)
@@ -276,9 +324,11 @@ void PowerControl()
         }
         initial_total_power += initial_give_power[i];
     }
-    if (initial_total_power > chassis_max_power)
+    
+    // 功率限制核心算法
+    if (initial_total_power > available_power)
     {
-        float ratio = chassis_max_power / initial_total_power; // 根据允许的最大功率进行放缩
+        float ratio = available_power / initial_total_power; // 根据允许的最大功率进行放缩
         for (uint8_t i = 0; i < idx; i++)
         {
             motor = dji_motor_instance[i];
@@ -292,20 +342,38 @@ void PowerControl()
             float a = K1[i];
             float b = TORQUE_COEF * POWER_COEF * pid_measure;
             float c = K2[i] * pid_measure * pid_measure - initial_give_power[i] + constant[i];
+            
+            // 根据原始输出方向选择计算公式
             if (power_control_out[i] > 0)
             {
-                power_control_out[i] = (-b + sqrt(b * b - 4 * a * c)) / (2 * a);
-                if (power_control_out[i] > 15000)
+                float discriminant = b * b - 4 * a * c;
+                if (discriminant >= 0)
                 {
-                    power_control_out[i] = 15000;
+                    power_control_out[i] = (-b + sqrt(discriminant)) / (2 * a);
+                    if (power_control_out[i] > 15000)
+                    {
+                        power_control_out[i] = 15000;
+                    }
+                }
+                else
+                {
+                    power_control_out[i] = 0;
                 }
             }
             else
             {
-                power_control_out[i] = (-b - sqrt(b * b - 4 * a * c)) / (2 * a);
-                if (power_control_out[i] < -15000)
+                float discriminant = b * b - 4 * a * c;
+                if (discriminant >= 0)
                 {
-                    power_control_out[i] = -15000;
+                    power_control_out[i] = (-b - sqrt(discriminant)) / (2 * a);
+                    if (power_control_out[i] < -15000)
+                    {
+                        power_control_out[i] = -15000;
+                    }
+                }
+                else
+                {
+                    power_control_out[i] = 0;
                 }
             }
         }
@@ -333,4 +401,67 @@ void PowerControl()
             CANTransmit(&sender_assignment[i], 1);
         }
     }
+}
+
+/**
+ * @brief 设置缓冲能量PID参数
+ *
+ * @param kp 比例系数
+ * @param ki 积分系数
+ * @param kd 微分系数
+ */
+void SetBufferPID(float kp, float ki, float kd)
+{
+    buffer_kp = kp;
+    buffer_ki = ki;
+    buffer_kd = kd;
+    
+    // 更新PID参数
+    buffer_PID.Kp = kp;
+    buffer_PID.Ki = ki;
+    buffer_PID.Kd = kd;
+}
+
+/**
+ * @brief 更新裁判系统功率数据
+ *
+ * @param power 当前底盘功率
+ * @param buffer 当前缓冲能量
+ * @param limit 功率上限
+ */
+void UpdatePowerControlRefereeData(float power, float buffer, uint16_t limit)
+{
+    referee_power_data.chassis_power = power;
+    referee_power_data.chassis_power_buffer = buffer;
+    referee_power_data.chassis_power_limit = limit;
+}
+
+/**
+ * @brief 获取底盘最大功率限制
+ *
+ * @return uint16_t 功率限制值
+ */
+uint16_t GetChassisPowerLimit(void)
+{
+    return referee_power_data.chassis_power_limit;
+}
+
+/**
+ * @brief 获取底盘当前功率
+ *
+ * @return float 当前功率值
+ */
+float GetChassisPower(void)
+{
+    return referee_power_data.chassis_power;
+}
+
+/**
+ * @brief 获取底盘缓冲能量
+ *
+ * @return float 缓冲能量值
+ */
+float GetChassisPowerBuffer(void)
+{
+    return referee_power_data.chassis_power_buffer;
 }

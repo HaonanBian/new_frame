@@ -26,10 +26,10 @@ static float uint_to_float(int x_int, float x_min, float x_max, int bits)
     return ((float)x_int) * span / ((float)((1 << bits) - 1)) + offset;
 }
 
-static void DMMotorSetMode(DMMotor_Mode_e cmd, DMMotorInstance *motor)
+void DMMotorSetMode(DMMotor_Mode_e cmd, DMMotorInstance *motor)
 {
-    memset(motor->motor_can_instace->tx_buff, 0xff, 7);  // 发送电机指令的时候前面7bytes都是0xff
-    motor->motor_can_instace->tx_buff[7] = (uint8_t)cmd; // 最后一位是命令id
+    memset(motor->motor_can_instace->tx_buff, 0xff, 7);
+    motor->motor_can_instace->tx_buff[7] = (uint8_t)cmd;
     CANTransmit(motor->motor_can_instace, 1);
 }
 

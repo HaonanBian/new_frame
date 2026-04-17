@@ -28,6 +28,7 @@
 #include "rng.h"
 #include "rtc.h"
 #include "spi.h"
+#include "stm32f4xx_hal.h"
 #include "tim.h"
 #include "usart.h"
 #include "usb_device.h"
@@ -122,6 +123,7 @@ int main(void)
   MX_CRC_Init();
   MX_DAC_Init();
   /* USER CODE BEGIN 2 */
+  //HAL_Delay(10000);// 上电后等待10秒,给开发者足够的时间打开串口调试助手查看日志,确认系统正常启动
   RobotInit(); // 唯一的初始化函数
   LOGINFO("[main] SystemInit() and RobotInit() done");
   /* USER CODE END 2 */

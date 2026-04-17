@@ -93,4 +93,6 @@ void DMMotorControlInit();
  */
 void DMMotorTorqueCtrl(DMMotorInstance *motor, float torq);
 
+void DMMotorSetMode(DMMotor_Mode_e cmd, DMMotorInstance *motor);
+
 #endif // !DMMOTOR

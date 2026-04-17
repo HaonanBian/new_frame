@@ -14,11 +14,36 @@
 #include "referee_UI.h"
 #include "string.h"
 #include "cmsis_os.h"
+#include "bsp_dwt.h"
+#include "bsp_log.h"
 
 static Referee_Interactive_info_t *Interactive_data; // UI绘制需要的机器人状态数据
 static referee_info_t *referee_recv_info;            // 接收到的裁判系统数据
 uint8_t UI_Seq;                                      // 包序号，供整个referee文件使用
 // @todo 不应该使用全局变量
+
+/**
+ * @brief 裁判系统数据初始化（不包含UI）
+ *        适用于不需要UI显示，但需要获取裁判系统功率/热量数据的场景
+ *
+ * @param referee_usart_handle 裁判系统串口句柄
+ * @return referee_info_t* 裁判系统数据指针
+ */
+referee_info_t *RefereeDataInit(UART_HandleTypeDef *referee_usart_handle)
+{
+    referee_recv_info = RefereeInit(referee_usart_handle); // 初始化裁判系统的串口,并返回裁判系统反馈数据指针
+    return referee_recv_info;
+}
+
+/**
+ * @brief 获取裁判系统数据指针，供其他模块使用
+ *
+ * @return referee_info_t* 裁判系统数据指针
+ */
+referee_info_t *GetRefereeData(void)
+{
+    return referee_recv_info;
+}
 
 /**
  * @brief  判断各种ID，选择客户端ID
@@ -63,8 +88,23 @@ void MyUIInit()
 {
     if (!referee_recv_info->init_flag)
         vTaskDelete(NULL); // 如果没有初始化裁判系统则直接删除ui任务
+    
+    // 等待裁判系统数据，带超时机制（最多等待10秒）
+    uint32_t wait_start = DWT_GetTimeline_ms();
     while (referee_recv_info->GameRobotState.robot_id == 0)
+    {
         osDelay(100); // 若还未收到裁判系统数据,等待一段时间后再检查
+        // 超时退出，避免无限等待导致UI任务卡死
+        if (DWT_GetTimeline_ms() - wait_start > 10000) {
+            LOGWARNING("[UI] Wait referee timeout, continue without referee");
+            break;
+        }
+    }
+    
+    // 如果超时未收到数据，跳过UI初始化
+    if (referee_recv_info->GameRobotState.robot_id == 0) {
+        return;
+    }
 
     DeterminRobotID();                                            // 确定ui要发送到的目标客户端
     UIDelete(&referee_recv_info->referee_id, UI_Data_Del_ALL, 0); // 清空UI
