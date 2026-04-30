@@ -50,7 +50,7 @@ static DJIMotorInstance *motor_lf, *motor_rf, *motor_lb, *motor_rb; // left righ
 static referee_info_t *referee_data;                               // 裁判系统数据指针
 
 // 不接裁判系统时的默认功率限制
-#define DEFAULT_POWER_LIMIT 200.0f
+#define DEFAULT_POWER_LIMIT 80.0f
 
 /* 私有函数计算的中介变量,设为静态避免参数传递的开销 */
 static float chassis_vx, chassis_vy;                      // 将云台系的速度投影到底盘
@@ -128,12 +128,12 @@ void ChassisInit()
     PIDInit(&buffer_PID, &Buffer_pid_conf); // 缓冲能量PID初始化
 
     PID_Init_Config_s Angle_pid_conf = {
-        .Kp = 1000.0f,
+        .Kp = 1100.0f,
         .Ki = 0.0f,
-        .Kd = 0.25f,
+        .Kd = 0.7f,
         .IntegralLimit = 2000.0f,
         .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement | PID_DerivativeFilter,
-        .Derivative_LPF_RC = 0.08f,
+        .Derivative_LPF_RC = 0.06f,
         .MaxOut = 12000.0f,
         .DeadBand = 0.5f,
     };
@@ -293,7 +293,7 @@ void ChassisTask()
     }
         break;
     case CHASSIS_ROTATE: // 自旋,同时保持全向机动;当前wz维持定值,后续增加不规则的变速策略
-        chassis_cmd_recv.wz = 6000;
+        chassis_cmd_recv.wz = 10000;
         break;
 
     default:

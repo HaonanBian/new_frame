@@ -43,12 +43,7 @@ typedef enum
 
 typedef enum
 {
-	BULLET_SPEED_NONE = 0,
-	BIG_AMU_10 = 10,
-	SMALL_AMU_15 = 15,
-	BIG_AMU_16 = 16,
-	SMALL_AMU_18 = 18,
-	SMALL_AMU_30 = 30,
+	SMALL_AMU_22 = 22,
 } Bullet_Speed_e;
 
 typedef struct

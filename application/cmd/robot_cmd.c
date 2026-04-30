@@ -176,10 +176,10 @@ static int16_t MouseDeltaFilter(int16_t raw_delta)
     if (abs_delta >= MOUSE_REJECT_DELTA)
         return 0;
 
-    // if (raw_delta > MOUSE_MAX_DELTA)
-    //     return MOUSE_MAX_DELTA;
-    // if (raw_delta < -MOUSE_MAX_DELTA)
-    //     return -MOUSE_MAX_DELTA;
+    if (raw_delta > MOUSE_MAX_DELTA)
+        return MOUSE_MAX_DELTA;
+    if (raw_delta < -MOUSE_MAX_DELTA)
+        return -MOUSE_MAX_DELTA;
 
     return raw_delta;
 }
@@ -204,8 +204,12 @@ static float WrapAngle180Deg(float angle_deg)
     return angle_deg;
 }
 
+// 底盘角度跟随滤波参数
+#define CHASSIS_ANGLE_FILTER_K    0.3f   // 角度滤波系数，越小越平滑
+
 // 全局标志：请求重新校准底盘对齐基准
 static uint8_t g_recalibrate_chassis_alignment = 0;
+static float chassis_offset_filtered = 0.0f;  // 滤波后的底盘偏移角度
 
 static void SyncGimbalTargetToCurrent(void)
 {
@@ -293,7 +297,7 @@ void RobotCMDInit()
     shoot_cmd_send.load_mode = LOAD_STOP;
     shoot_cmd_send.friction_mode = FRICTION_OFF;
     shoot_cmd_send.lid_mode = LID_CLOSE;
-    shoot_cmd_send.bullet_speed = SMALL_AMU_15;
+    shoot_cmd_send.bullet_speed = (Bullet_Speed_e)22;
     shoot_cmd_send.shoot_rate = 0;
 
     robot_state = ROBOT_READY; // 启动时机器人进入工作模式,后续加入所有应用初始化完成之后再进入
@@ -339,7 +343,7 @@ static void CalcOffsetAngle()
         yaw_align_signed -= 360.0f;
 
     float angle_diff_before_wrap = angle_signed - yaw_align_signed;
-    float relative_angle = WrapAngle180Deg(angle_diff_before_wrap); 
+    float relative_angle = WrapAngle180Deg(angle_diff_before_wrap);
 
     chassis_cmd_send.offset_angle = relative_angle;
     
@@ -370,7 +374,7 @@ static void CalcOffsetAngle()
     float imu_drift = gimbal_fetch_data.gimbal_imu_data.YawTotalAngle - imu_yaw_at_align;
     float motor_drift = angle_signed - motor_yaw_at_align;
     cmd_debug_data.yaw_motor_to_imu_diff = imu_drift - motor_drift;  // IMU 和电机的漂移差异
-    cmd_debug_data.imu_yaw_init_offset = imu_yaw_at_align;  // 记录对齐基准
+    cmd_debug_data.imu_yaw_init_offset = imu_yaw_at_align;  // 记录对齐基准 
     
     // 底盘跟随链路
     debug_offset_relative = relative_angle;
@@ -516,7 +520,7 @@ static void RemoteControlSet()
         shoot_cmd_send.load_mode = LOAD_STOP;
     // 射频控制,固定每秒1发,后续可以根据左侧拨轮的值大小切换射频,
     shoot_cmd_send.shoot_rate = 8;
-    shoot_cmd_send.bullet_speed = SMALL_AMU_15;  // 默认弹速15m/s
+    shoot_cmd_send.bullet_speed = (Bullet_Speed_e)22;  // 固定弹速22m/s
     shoot_cmd_send.shoot_mode = SHOOT_ON; // 开启发射系统
 }
 
@@ -526,42 +530,49 @@ static void RemoteControlSet()
  */
 static void MouseKeySet()
 {
+    static chassis_mode_e last_chassis_mode = (chassis_mode_e)0xff;
     int16_t mouse_x = MouseDeltaFilter(rc_data[TEMP].mouse.x);
     int16_t mouse_y = MouseDeltaFilter(rc_data[TEMP].mouse.y);
+    chassis_mode_e next_chassis_mode = CHASSIS_FOLLOW_GIMBAL_YAW;
 
     // 设置底盘和云台模式
-    chassis_cmd_send.chassis_mode = CHASSIS_ZERO_FORCE;
+    if (rc_data[TEMP].key_count[KEY_PRESS][Key_V] % 2)// V键切换底盘模式
+        next_chassis_mode = CHASSIS_ROTATE;
+
+    chassis_cmd_send.chassis_mode = next_chassis_mode;
     gimbal_cmd_send.gimbal_mode = GIMBAL_GYRO_MODE;
 
-    chassis_cmd_send.vx = rc_data[TEMP].key[KEY_PRESS].w * 300 - rc_data[TEMP].key[KEY_PRESS].s * 300; // 系数待测
-    chassis_cmd_send.vy = rc_data[TEMP].key[KEY_PRESS].a * 300 - rc_data[TEMP].key[KEY_PRESS].d * 300;
+    if (last_chassis_mode == CHASSIS_ROTATE &&
+        chassis_cmd_send.chassis_mode == CHASSIS_FOLLOW_GIMBAL_YAW)
+    {
+        RequestOffsetAngleReset();
+        RecalibrateIMUMotorAlignment();
+        chassis_offset_filtered = chassis_cmd_send.offset_angle;  // 同步滤波器当前值
+        cmd_debug_data.rotate_to_follow_sync_count++;
+        cmd_debug_data.rotate_to_follow_imu_total = gimbal_fetch_data.gimbal_imu_data.YawTotalAngle;
+        cmd_debug_data.rotate_to_follow_motor_deg = ((float)gimbal_fetch_data.yaw_motor_single_round_angle) / 182.044444444f;
+        cmd_debug_data.rotate_to_follow_offset = chassis_cmd_send.offset_angle;
+        cmd_debug_data.rotate_to_follow_target_yaw = gimbal_cmd_send.yaw;
+    }
 
-    gimbal_cmd_send.yaw += (float)mouse_x / 660 *9;  // 系数待测
-    gimbal_cmd_send.pitch -= (float)mouse_y / 660 * 0.5; // 系数待测,与摇杆方向一致(向上鼠标/摇杆都是减小)
+    if (last_chassis_mode != chassis_cmd_send.chassis_mode && last_chassis_mode != (chassis_mode_e)0xff)
+    {
+        cmd_debug_data.mode_switch_count++;
+    }
+    last_chassis_mode = chassis_cmd_send.chassis_mode;
+
+    int16_t mouse_pitch_delta = mouse_y;
+    if (mouse_pitch_delta < MOUSE_DEADBAND && mouse_pitch_delta > -MOUSE_DEADBAND)
+        mouse_pitch_delta = 0;
+    gimbal_cmd_send.yaw -= (float)mouse_x / 660 *9;  // 系数待测
+    gimbal_cmd_send.pitch -= (float)mouse_pitch_delta / 660 * 0.4; // 系数待测,与摇杆方向一致(向上鼠标/摇杆都是减小)
     LIMIT_MIN_MAX(gimbal_cmd_send.pitch, PITCH_MIN_RAD, PITCH_MAX_RAD);
 
-    switch (rc_data[TEMP].key_count[KEY_PRESS][Key_Z] % 3) // Z键设置弹速
+    shoot_cmd_send.bullet_speed = (Bullet_Speed_e)22; // 固定弹速22m/s
+    switch (rc_data[TEMP].key_count[KEY_PRESS][Key_Z] % 2) // Z键设置发射模式(单发/连发)
     {
     case 0:
-        shoot_cmd_send.bullet_speed = 15;
-        break;
-    case 1:
-        shoot_cmd_send.bullet_speed = 18;
-        break;
-    default:
-        shoot_cmd_send.bullet_speed = 30;
-        break;
-    }
-    switch (rc_data[TEMP].key_count[KEY_PRESS][Key_Q] % 4) // Q键设置发射模式
-    {
-    case 0:
-        shoot_cmd_send.load_mode = LOAD_STOP;
-        break;
-    case 1:
         shoot_cmd_send.load_mode = LOAD_1_BULLET;
-        break;
-    case 2:
-        shoot_cmd_send.load_mode = LOAD_3_BULLET;
         break;
     default:
         shoot_cmd_send.load_mode = LOAD_BURSTFIRE;
@@ -576,15 +587,11 @@ static void MouseKeySet()
         shoot_cmd_send.lid_mode = LID_CLOSE;
         break;
     }
-    switch (rc_data[TEMP].key_count[KEY_PRESS][Key_E] % 2) // E键开关摩擦轮
-    {
-    case 0:
-        shoot_cmd_send.friction_mode = FRICTION_OFF;
-        break;
-    default:
+    // Q键开摩擦轮, E键关摩擦轮
+    if (rc_data[TEMP].key[KEY_PRESS].q)
         shoot_cmd_send.friction_mode = FRICTION_ON;
-        break;
-    }
+    if (rc_data[TEMP].key[KEY_PRESS].e)
+        shoot_cmd_send.friction_mode = FRICTION_OFF;
     switch (rc_data[TEMP].key_count[KEY_PRESS][Key_C] % 4) // C键设置底盘速度
     {
     case 0:
@@ -600,6 +607,11 @@ static void MouseKeySet()
         chassis_cmd_send.chassis_speed_buff = 100;
         break;
     }
+
+    float kb_speed_scale = (float)chassis_cmd_send.chassis_speed_buff / 100.0f;
+    chassis_cmd_send.vx = (rc_data[TEMP].key[KEY_PRESS].a * 6600.0f - rc_data[TEMP].key[KEY_PRESS].d * 6600.0f) * kb_speed_scale; // 前后
+    chassis_cmd_send.vy = (rc_data[TEMP].key[KEY_PRESS].w * 6600.0f - rc_data[TEMP].key[KEY_PRESS].s * 6600.0f) * kb_speed_scale; // 左右
+
     switch (rc_data[TEMP].key[KEY_PRESS].shift) // 待添加 按shift允许超功率 消耗缓冲能量
     {
     case 1:

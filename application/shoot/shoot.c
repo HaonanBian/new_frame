@@ -325,26 +325,8 @@ void ShootTask()
     // 热量限制:当热量受限时关闭摩擦轮
     if (shoot_cmd_recv.friction_mode == FRICTION_ON && heat_status != HEAT_LIMITED)
     {
-        // 根据收到的弹速设置设定摩擦轮电机参考值,需实测后填入
-        switch (shoot_cmd_recv.bullet_speed)
-        {
-        case SMALL_AMU_15:
-            DJIMotorSetRef(friction_l, 35000); // 15m/s弹速对应的摩擦轮速度
-            DJIMotorSetRef(friction_r, 35000);
-            break;
-        case SMALL_AMU_18:
-            DJIMotorSetRef(friction_l, 40000); // 18m/s弹速对应的摩擦轮速度
-            DJIMotorSetRef(friction_r, 40000);
-            break;
-        case SMALL_AMU_30:
-            DJIMotorSetRef(friction_l, 60000); // 30m/s弹速对应的摩擦轮速度
-            DJIMotorSetRef(friction_r, 60000);
-            break;
-        default: // 默认15m/s弹速
-            DJIMotorSetRef(friction_l, 35000);
-            DJIMotorSetRef(friction_r, 35000);
-            break;
-        }
+        DJIMotorSetRef(friction_l, 35000); // 固定22m/s弹速(实测)
+        DJIMotorSetRef(friction_r, 35000);
     }
     else // 关闭摩擦轮或热量受限
     {
