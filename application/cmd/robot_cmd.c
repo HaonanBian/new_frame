@@ -144,6 +144,7 @@ static uint8_t last_control_mode = 0; // 0=未知, 1=遥控器, 2=键鼠
 #define CONTROL_MODE_KB 2
 #define CHASSIS_VEL_ACCEL_STEP 600.0f
 #define CHASSIS_VEL_DECEL_STEP 45.0f
+#define KB_CHASSIS_MOVE_VALUE 5000.0f
 #define PITCH_RC_DEADBAND 5
 #define RAD2DEG 57.295779513f
 // #define MOUSE_DEADBAND 2
@@ -190,9 +191,25 @@ static void UpdateChassisVelTarget(void)
     chassis_cmd_send.vy_target = RampFollow(chassis_cmd_send.vy, chassis_cmd_send.vy_target, CHASSIS_VEL_ACCEL_STEP, CHASSIS_VEL_DECEL_STEP);
 }
 
+// 底盘角度跟随滤波参数
+#define CHASSIS_ANGLE_FILTER_K    0.3f   // 角度滤波系数，越小越平滑
+
+// 全局标志：请求重新校准底盘对齐基准
+static uint8_t g_recalibrate_chassis_alignment = 0;
+static float chassis_offset_filtered = 0.0f;  // 滤波后的底盘偏移角度
+
+static void ClearChassisMotionCommand(void)
+{
+    chassis_cmd_send.vx = 0.0f;
+    chassis_cmd_send.vy = 0.0f;
+    chassis_cmd_send.vx_target = 0.0f;
+    chassis_cmd_send.vy_target = 0.0f;
+    chassis_cmd_send.wz = 0.0f;
+}
+
 static void RequestOffsetAngleReset(void)
 {
-    return;
+    chassis_offset_filtered = chassis_cmd_send.offset_angle;
 }
 
 static float WrapAngle180Deg(float angle_deg)
@@ -203,13 +220,6 @@ static float WrapAngle180Deg(float angle_deg)
         angle_deg += 360.0f;
     return angle_deg;
 }
-
-// 底盘角度跟随滤波参数
-#define CHASSIS_ANGLE_FILTER_K    0.3f   // 角度滤波系数，越小越平滑
-
-// 全局标志：请求重新校准底盘对齐基准
-static uint8_t g_recalibrate_chassis_alignment = 0;
-static float chassis_offset_filtered = 0.0f;  // 滤波后的底盘偏移角度
 
 static void SyncGimbalTargetToCurrent(void)
 {
@@ -267,7 +277,7 @@ void RobotCMDInit()
     //     },
     // };
     //bmi088_test = BMI088Register(&bmi088_config);
-   rc_data = RemoteControlInit(&huart3);   // 修改为对应串口,注意如果是自研板dbus协议串口需选用添加了反相器的那个
+    rc_data = RemoteControlInit(&huart3);   // 修改为对应串口,注意如果是自研板dbus协议串口需选用添加了反相器的那个
     vision_recv_data = VisionInit(&huart1); // 视觉通信串口
 
     gimbal_cmd_pub = PubRegister("gimbal_cmd", sizeof(Gimbal_Ctrl_Cmd_s));
@@ -299,6 +309,7 @@ void RobotCMDInit()
     shoot_cmd_send.lid_mode = LID_CLOSE;
     shoot_cmd_send.bullet_speed = (Bullet_Speed_e)22;
     shoot_cmd_send.shoot_rate = 0;
+    chassis_cmd_send.chassis_power_limit = 0;
 
     robot_state = ROBOT_READY; // 启动时机器人进入工作模式,后续加入所有应用初始化完成之后再进入
 }
@@ -461,7 +472,9 @@ static void RemoteControlSet()
         // 仅在视觉有新数据时累加diff,防止同一diff在200Hz任务中被重复累加
         if (vision_recv_data->data_updated)
         {
-            if (vision_recv_data->control)
+            if (vision_recv_data->control &&
+                isfinite(vision_recv_data->yaw) &&
+                isfinite(vision_recv_data->pitch))
             {
                 gimbal_cmd_send.yaw += vision_recv_data->yaw * RAD2DEG;
                 gimbal_cmd_send.pitch += vision_recv_data->pitch;
@@ -503,6 +516,9 @@ static void RemoteControlSet()
     // 底盘参数,目前没有加入小陀螺(调试似乎暂时没有必要),系数需要调整
     chassis_cmd_send.vx = 10.0f * (float)rc_data[TEMP].rc.rocker_r_; // 前后(底盘解算中vx=前后)
     chassis_cmd_send.vy = 10.0f * (float)rc_data[TEMP].rc.rocker_r1; // 左右(底盘解算中vy=左右)
+    chassis_cmd_send.chassis_power_limit = 0;
+    if (chassis_cmd_send.chassis_mode == CHASSIS_ZERO_FORCE)
+        ClearChassisMotionCommand();
 
     // 发射参数
     if (switch_is_up(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[上],弹舱打开
@@ -536,7 +552,7 @@ static void MouseKeySet()
     chassis_mode_e next_chassis_mode = CHASSIS_FOLLOW_GIMBAL_YAW;
 
     // 设置底盘和云台模式
-    if (rc_data[TEMP].key_count[KEY_PRESS][Key_V] % 2)// V键切换底盘模式
+    if (rc_data[TEMP].key_count[KEY_PRESS][Key_R] % 2) // R键切换底盘模式
         next_chassis_mode = CHASSIS_ROTATE;
 
     chassis_cmd_send.chassis_mode = next_chassis_mode;
@@ -564,7 +580,7 @@ static void MouseKeySet()
     int16_t mouse_pitch_delta = mouse_y;
     if (mouse_pitch_delta < MOUSE_DEADBAND && mouse_pitch_delta > -MOUSE_DEADBAND)
         mouse_pitch_delta = 0;
-    gimbal_cmd_send.yaw -= (float)mouse_x / 660 *9;  // 系数待测
+    gimbal_cmd_send.yaw -= (float)mouse_x / 660 * 9;  // 系数待测
     gimbal_cmd_send.pitch -= (float)mouse_pitch_delta / 660 * 0.4; // 系数待测,与摇杆方向一致(向上鼠标/摇杆都是减小)
     LIMIT_MIN_MAX(gimbal_cmd_send.pitch, PITCH_MIN_RAD, PITCH_MAX_RAD);
 
@@ -578,7 +594,7 @@ static void MouseKeySet()
         shoot_cmd_send.load_mode = LOAD_BURSTFIRE;
         break;
     }
-    switch (rc_data[TEMP].key_count[KEY_PRESS][Key_R] % 2) // R键开关弹舱
+    switch (rc_data[TEMP].key_count[KEY_PRESS][Key_V] % 2) // V键开关弹舱
     {
     case 0:
         shoot_cmd_send.lid_mode = LID_OPEN;
@@ -592,25 +608,9 @@ static void MouseKeySet()
         shoot_cmd_send.friction_mode = FRICTION_ON;
     if (rc_data[TEMP].key[KEY_PRESS].e)
         shoot_cmd_send.friction_mode = FRICTION_OFF;
-    switch (rc_data[TEMP].key_count[KEY_PRESS][Key_C] % 4) // C键设置底盘速度
-    {
-    case 0:
-        chassis_cmd_send.chassis_speed_buff = 40;
-        break;
-    case 1:
-        chassis_cmd_send.chassis_speed_buff = 60;
-        break;
-    case 2:
-        chassis_cmd_send.chassis_speed_buff = 80;
-        break;
-    default:
-        chassis_cmd_send.chassis_speed_buff = 100;
-        break;
-    }
-
-    float kb_speed_scale = (float)chassis_cmd_send.chassis_speed_buff / 100.0f;
-    chassis_cmd_send.vx = (rc_data[TEMP].key[KEY_PRESS].a * 6600.0f - rc_data[TEMP].key[KEY_PRESS].d * 6600.0f) * kb_speed_scale; // 前后
-    chassis_cmd_send.vy = (rc_data[TEMP].key[KEY_PRESS].w * 6600.0f - rc_data[TEMP].key[KEY_PRESS].s * 6600.0f) * kb_speed_scale; // 左右
+    chassis_cmd_send.chassis_power_limit = 0;
+    chassis_cmd_send.vx = rc_data[TEMP].key[KEY_PRESS].a * KB_CHASSIS_MOVE_VALUE - rc_data[TEMP].key[KEY_PRESS].d * KB_CHASSIS_MOVE_VALUE; // 前后
+    chassis_cmd_send.vy = rc_data[TEMP].key[KEY_PRESS].w * KB_CHASSIS_MOVE_VALUE - rc_data[TEMP].key[KEY_PRESS].s * KB_CHASSIS_MOVE_VALUE; // 左右
 
     switch (rc_data[TEMP].key[KEY_PRESS].shift) // 待添加 按shift允许超功率 消耗缓冲能量
     {
@@ -626,7 +626,7 @@ static void MouseKeySet()
     // 鼠标左键按住时拨弹盘开启
     if (rc_data[TEMP].mouse.press_l)
         shoot_cmd_send.load_mode = LOAD_BURSTFIRE;
-    
+
     shoot_cmd_send.shoot_rate = 8;  // 拨弹射频与遥控器一致(8颗/秒)
     shoot_cmd_send.shoot_mode = SHOOT_ON; // 开启发射系统
 }
@@ -646,6 +646,7 @@ static void EmergencyHandler()
         if (switch_is_up(rc_data[TEMP].rc.switch_right) && rc_data[TEMP].rc.dial <= 300)
         {
             robot_state = ROBOT_READY;
+            ClearChassisMotionCommand();
             shoot_cmd_send.shoot_mode = SHOOT_ON;
             LOGINFO("[CMD] reinstate, robot ready");
         }
@@ -653,6 +654,7 @@ static void EmergencyHandler()
         {
             gimbal_cmd_send.gimbal_mode = GIMBAL_ZERO_FORCE;
             chassis_cmd_send.chassis_mode = CHASSIS_ZERO_FORCE;
+            ClearChassisMotionCommand();
             shoot_cmd_send.shoot_mode = SHOOT_OFF;
             shoot_cmd_send.friction_mode = FRICTION_OFF;
             shoot_cmd_send.load_mode = LOAD_STOP;
@@ -666,6 +668,7 @@ static void EmergencyHandler()
         robot_state = ROBOT_STOP;
         gimbal_cmd_send.gimbal_mode = GIMBAL_ZERO_FORCE;
         chassis_cmd_send.chassis_mode = CHASSIS_ZERO_FORCE;
+        ClearChassisMotionCommand();
         shoot_cmd_send.shoot_mode = SHOOT_OFF;
         shoot_cmd_send.friction_mode = FRICTION_OFF;
         shoot_cmd_send.load_mode = LOAD_STOP;

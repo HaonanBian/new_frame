@@ -14,13 +14,14 @@ const float constant[4] = {4.081f, 4.081f, 4.081f, 4.081f};
 #define WARNING_POWER_BUFF    50.0f       // 警告功率缓冲阈值
 #define BUFFER_TARGET        30.0f       // 缓冲能量目标值
 #define POWER_SCALE_MIN      0.1f        // 最小功率缩放系数
+#define POWER_CONTROL_MOTOR_CNT 4
 
 static uint8_t idx = 0; // register idx,是该文件的全局电机索引,在注册时使用
 /* DJI电机的实例,此处仅保存指针,内存的分配将通过电机实例初始化时通过malloc()进行 */
 static DJIMotorInstance *dji_motor_instance[DJI_MOTOR_CNT] = {NULL}; // 会在control任务中遍历该指针数组进行pid计算
-static float initial_torque[4];                                      // 电机输出轴实际转矩，单位N·m
+static float initial_torque[POWER_CONTROL_MOTOR_CNT];                // 电机输出轴实际转矩，单位N·m
 static float A, B, C;                                                // 测试用
-static float power_control_out[4], initial_give_power[4];            // 电机输出功率
+static float power_control_out[POWER_CONTROL_MOTOR_CNT], initial_give_power[POWER_CONTROL_MOTOR_CNT];            // 电机输出功率
 static float chassis_max_power, chassis_power, initial_total_power = 0.0f;
 
 // 缓冲能量PID
@@ -65,7 +66,6 @@ static uint8_t sender_enable_flag[6] = {0};
 void SetPowerLimit(float power_limit)
 {
     chassis_max_power = power_limit;
-    referee_power_data.chassis_power_limit = (uint16_t)power_limit;
 }
 
 /**
@@ -192,8 +192,18 @@ static void DJIMotorLostCallback(void *motor_ptr)
 // 电机初始化,返回一个电机实例
 DJIMotorInstance *PowerControlInit(Motor_Init_Config_s *config)
 {
+    if (idx >= POWER_CONTROL_MOTOR_CNT)
+    {
+        while (1)
+            LOGERROR("[power_control] too many motors registered.");
+    }
 
     DJIMotorInstance *instance = (DJIMotorInstance *)malloc(sizeof(DJIMotorInstance));
+    if (instance == NULL)
+    {
+        while (1)
+            LOGERROR("[power_control] malloc failed.");
+    }
     memset(instance, 0, sizeof(DJIMotorInstance));
 
     // motor basic setting 电机基本设置
@@ -255,9 +265,9 @@ void PowerControl()
     Motor_Control_Setting_s *motor_setting; // 电机控制参数
     Motor_Controller_s *motor_controller;   // 电机控制器
     DJI_Motor_Measure_s *measure;           // 电机测量值
-     float pid_measure, pid_ref;             // 电机PID测量值和设定值
-     
-     // 缓冲能量PID计算
+    float pid_measure, pid_ref;             // 电机PID测量值和设定值
+
+    // 缓冲能量PID计算
     float buffer_pid_out = 0.0f;
     float available_power = chassis_max_power; // 默认使用底盘最大功率限制
     
@@ -267,9 +277,9 @@ void PowerControl()
         buffer_pid_out = buffer_PID.Output;
         
         // 计算实际可用功率限制
-        available_power = referee_power_data.chassis_power_limit - buffer_pid_out;
-        if (available_power < referee_power_data.chassis_power_limit * POWER_SCALE_MIN) {
-            available_power = referee_power_data.chassis_power_limit * POWER_SCALE_MIN;
+        available_power = chassis_max_power - buffer_pid_out;
+        if (available_power < chassis_max_power * POWER_SCALE_MIN) {
+            available_power = chassis_max_power * POWER_SCALE_MIN;
         }
     }
     
@@ -277,7 +287,12 @@ void PowerControl()
     // 遍历所有电机实例,进行串级PID的计算并设置发送报文的值
     for (size_t i = 0; i < idx; ++i) // idx实际上是4个
     {                                // 减小访存开销,先保存指针引用
+        initial_torque[i] = 0.0f;
+        power_control_out[i] = 0.0f;
+        initial_give_power[i] = 0.0f;
         motor = dji_motor_instance[i];
+        if (motor == NULL)
+            continue;
         motor_setting = &motor->motor_settings;
         motor_controller = &motor->motor_controller;
         measure = &motor->measure;
@@ -291,10 +306,10 @@ void PowerControl()
         // 计算速度环,(外层闭环为速度或位置)且(启用速度环)时会计算速度环
         if ((motor_setting->close_loop_type & SPEED_LOOP) && (motor_setting->outer_loop_type & (ANGLE_LOOP | SPEED_LOOP)))
         {
-            if (motor_setting->feedforward_flag & SPEED_FEEDFORWARD)
+            if ((motor_setting->feedforward_flag & SPEED_FEEDFORWARD) && motor_controller->speed_feedforward_ptr != NULL)
                 pid_ref += *motor_controller->speed_feedforward_ptr;
 
-            if (motor_setting->speed_feedback_source == OTHER_FEED)
+            if (motor_setting->speed_feedback_source == OTHER_FEED && motor_controller->other_speed_feedback_ptr != NULL)
                 pid_measure = *motor_controller->other_speed_feedback_ptr;
             else // MOTOR_FEED
                 pid_measure = measure->speed_aps / 6.0f; // 电机的速度单位是度每秒,转换为rpm
@@ -332,6 +347,8 @@ void PowerControl()
         for (uint8_t i = 0; i < idx; i++)
         {
             motor = dji_motor_instance[i];
+            if (motor == NULL)
+                continue;
             measure = &motor->measure;
             pid_measure = measure->speed_aps / 6.0f; // 电机的速度单位是度每秒,转换为rpm
             initial_give_power[i] *= ratio;
@@ -382,6 +399,8 @@ void PowerControl()
     for (uint8_t i = 0; i < idx; i++)
     {
         motor = dji_motor_instance[i];
+        if (motor == NULL)
+            continue;
         set = (int16_t)power_control_out[i];
         group = motor->sender_group;
         num = motor->message_num;

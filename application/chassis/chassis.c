@@ -21,7 +21,12 @@
 
 #include "general_def.h"
 #include "bsp_dwt.h"
+#include "bsp_log.h"
 #include "arm_math.h"
+
+// 调试：裁判系统状态检查计数器
+static uint32_t referee_check_counter = 0;
+#define REFEREE_CHECK_INTERVAL 100 // 每100次调用检查一次（约1秒）
 
 /* 根据robot_def.h中的macro自动计算的参数 */
 //#define HALF_WHEEL_BASE (WHEEL_BASE / 2.0f)     // 半轴距
@@ -37,20 +42,58 @@ static CANCommInstance *chasiss_can_comm; // 双板通信CAN comm
 attitude_t *Chassis_IMU_data;
 #endif // CHASSIS_BOARD
 #ifdef ONE_BOARD
+#include "ins_task.h"
 static Publisher_t *chassis_pub;                    // 用于发布底盘的数据
 static Subscriber_t *chassis_sub;                   // 用于订阅底盘的控制命令
+attitude_t *Chassis_IMU_data;                       // ONE_BOARD下复用一个IMU实例给底盘
 #endif                                              // !ONE_BOARD
 static Chassis_Ctrl_Cmd_s chassis_cmd_recv;         // 底盘接收到的控制命令
 static Chassis_Upload_Data_s chassis_feedback_data; // 底盘回传的反馈数据
 
 static PIDInstance buffer_PID;             // 用于底盘的缓冲能量PID
-static PIDInstance angle_PID;
+static PIDInstance angle_PID;              // 角度环 PID (外环)
+static PIDInstance yaw_rate_PID;           // 角速度环 PID (内环,串级控制)
 static SuperCapInstance *cap;                                       // 超级电容
 static DJIMotorInstance *motor_lf, *motor_rf, *motor_lb, *motor_rb; // left right forward back
 static referee_info_t *referee_data;                               // 裁判系统数据指针
 
+// 调试用：裁判系统状态结构体（可在 Ozone 中直接展开监视）
+typedef struct {
+    uint8_t connected_flag;     // 连接状态：0=未连接, 1=已连接
+    uint16_t last_cmd_id;
+    uint8_t game_robot_state_rx;
+    uint8_t power_heat_data_rx;
+    uint8_t shoot_data_rx;
+    uint16_t robot_id;          // 机器人ID
+    uint8_t robot_level;
+    uint16_t current_hp;
+    uint16_t maximum_hp;
+    uint16_t power_limit;       // 功率限制
+    uint16_t heat_limit;
+    uint16_t cooling_value;
+    uint8_t gimbal_power_output;
+    uint8_t chassis_power_output;
+    uint8_t shooter_power_output;
+    uint16_t chassis_voltage;
+    uint16_t chassis_current;
+    float chassis_power;        // 底盘功率
+    uint16_t buffer_energy;
+    uint16_t shooter_heat;      // 17mm枪口热量
+    uint16_t shooter_17mm_2_heat;
+    uint16_t shooter_42mm_heat;
+    uint8_t bullet_type;
+    uint8_t shooter_id;
+    uint8_t bullet_freq;
+    float bullet_speed;
+    uint8_t recv_counter;       // 接收帧计数
+    uint8_t crc8_fail_count;    // CRC8校验失败计数
+    uint8_t crc16_fail_count;   // CRC16校验失败计数
+} Referee_Debug_s;
+
+extern Referee_Debug_s referee_debug; // 在 rm_referee.c 中定义
+
 // 不接裁判系统时的默认功率限制
-#define DEFAULT_POWER_LIMIT 80.0f
+#define DEFAULT_POWER_LIMIT 45.0f
 
 /* 私有函数计算的中介变量,设为静态避免参数传递的开销 */
 static float chassis_vx, chassis_vy;                      // 将云台系的速度投影到底盘
@@ -60,6 +103,9 @@ static float vt_lf, vt_rf, vt_lb, vt_rb;                  // 底盘速度解算�
 float debug_chassis_offset_recv = 0;     // 从 cmd 接收到的 offset_angle
 float debug_chassis_follow_err = 0;      // 底盘跟随时实际使用的误差角 (wrap 后)
 float debug_chassis_wz_output = 0;       // 底盘跟随 PID 输出的旋转速度
+float debug_chassis_yaw_rate_feedback = 0; // 角速度反馈值
+float debug_chassis_yaw_rate_target = 0;   // 角速度目标值 (外环输出)
+float debug_chassis_angle_output = 0;      // 外环输出 (内环给定)
 
 static float WrapAngle180Deg(float deg)
 {
@@ -68,6 +114,23 @@ static float WrapAngle180Deg(float deg)
     while (deg < -180.0f)
         deg += 360.0f;
     return deg;
+}
+
+static void ResetPIDRuntimeState(PIDInstance *pid)
+{
+    pid->Measure = 0.0f;
+    pid->Last_Measure = 0.0f;
+    pid->Err = 0.0f;
+    pid->Last_Err = 0.0f;
+    pid->Last_ITerm = 0.0f;
+    pid->Pout = 0.0f;
+    pid->Iout = 0.0f;
+    pid->Dout = 0.0f;
+    pid->ITerm = 0.0f;
+    pid->Output = 0.0f;
+    pid->Last_Output = 0.0f;
+    pid->Last_Dout = 0.0f;
+    pid->Ref = 0.0f;
 }
 
 void ChassisInit()
@@ -128,16 +191,28 @@ void ChassisInit()
     PIDInit(&buffer_PID, &Buffer_pid_conf); // 缓冲能量PID初始化
 
     PID_Init_Config_s Angle_pid_conf = {
-        .Kp = 1100.0f,
+        .Kp = 7.0f,         // 略微减小
         .Ki = 0.0f,
-        .Kd = 0.7f,
-        .IntegralLimit = 2000.0f,
-        .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement | PID_DerivativeFilter,
-        .Derivative_LPF_RC = 0.06f,
-        .MaxOut = 12000.0f,
-        .DeadBand = 0.5f,
+        .Kd = 7.0f,         // 增大微分阻尼
+        .IntegralLimit = 500.0f,
+        .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
+        .Derivative_LPF_RC = 0.05f,  // 增强滤波
+        .MaxOut = 3000.0f,  // 限制输出峰值
+        .DeadBand = 1.5f,
     };
     PIDInit(&angle_PID, &Angle_pid_conf);
+
+    // 角速度环 PID (内环,串级控制)
+    PID_Init_Config_s YawRate_pid_conf = {
+        .Kp = 38.0f,        // 微调
+        .Ki = 0.0f,
+        .Kd = 2.5f,         // 增大微分
+        .IntegralLimit = 3000.0f,
+        .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
+        .MaxOut = 9000.0f,  // 减小限制
+        .DeadBand = 5.0f,
+    };
+    PIDInit(&yaw_rate_PID, &YawRate_pid_conf);
 
     SuperCap_Init_Config_s cap_conf = {
         .can_config = {
@@ -164,6 +239,7 @@ void ChassisInit()
 #endif                                          // CHASSIS_BOARD
 
 #ifdef ONE_BOARD // 单板控制整车,则通过pubsub来传递消息
+    Chassis_IMU_data = INS_Init(); // 复用云台的IMU,底盘跟随需要用到角速度
     chassis_sub = SubRegister("chassis_cmd", sizeof(Chassis_Ctrl_Cmd_s));
     chassis_pub = PubRegister("chassis_feed", sizeof(Chassis_Upload_Data_s));
 #endif // ONE_BOARD
@@ -221,9 +297,70 @@ static void LimitChassisOutput()
     //后续添加打滑检测的代码
 //}
 
+/* 裁判系统调试检查函数 */
+static void CheckRefereeStatus()
+{
+    referee_check_counter++;
+    if (referee_check_counter % REFEREE_CHECK_INTERVAL != 0)
+        return;
+
+    if (referee_data == NULL) {
+        referee_debug.connected_flag = 0;
+        referee_debug.robot_id = 0;
+        referee_debug.robot_level = 0;
+        referee_debug.current_hp = 0;
+        referee_debug.maximum_hp = 0;
+        referee_debug.power_limit = 0;
+        referee_debug.heat_limit = 0;
+        referee_debug.cooling_value = 0;
+        referee_debug.gimbal_power_output = 0;
+        referee_debug.chassis_power_output = 0;
+        referee_debug.shooter_power_output = 0;
+        referee_debug.chassis_voltage = 0;
+        referee_debug.chassis_current = 0;
+        referee_debug.chassis_power = 0.0f;
+        referee_debug.buffer_energy = 0;
+        referee_debug.shooter_heat = 0;
+        referee_debug.shooter_17mm_2_heat = 0;
+        referee_debug.shooter_42mm_heat = 0;
+        referee_debug.bullet_type = 0;
+        referee_debug.shooter_id = 0;
+        referee_debug.bullet_freq = 0;
+        referee_debug.bullet_speed = 0.0f;
+        return;
+    }
+
+    // 更新调试变量（可以在 Ozone 中直接展开 referee_debug 监视）
+    referee_debug.robot_id = referee_data->GameRobotState.robot_id;
+    referee_debug.robot_level = referee_data->GameRobotState.robot_level;
+    referee_debug.current_hp = referee_data->GameRobotState.current_HP;
+    referee_debug.maximum_hp = referee_data->GameRobotState.maximum_HP;
+    referee_debug.power_limit = referee_data->GameRobotState.chassis_power_limit;
+    referee_debug.heat_limit = referee_data->GameRobotState.shooter_barrel_heat_limit;
+    referee_debug.cooling_value = referee_data->GameRobotState.shooter_barrel_cooling_value;
+    referee_debug.gimbal_power_output = referee_data->GameRobotState.power_management_gimbal_output;
+    referee_debug.chassis_power_output = referee_data->GameRobotState.power_management_chassis_output;
+    referee_debug.shooter_power_output = referee_data->GameRobotState.power_management_shooter_output;
+    referee_debug.chassis_voltage = referee_data->PowerHeatData.chassis_voltage;
+    referee_debug.chassis_current = referee_data->PowerHeatData.chassis_current;
+    referee_debug.chassis_power = referee_data->PowerHeatData.chassis_power;
+    referee_debug.buffer_energy = referee_data->PowerHeatData.buffer_energy;
+    referee_debug.shooter_heat = referee_data->PowerHeatData.shooter_17mm_1_barrel_heat;
+    referee_debug.shooter_17mm_2_heat = referee_data->PowerHeatData.shooter_17mm_2_barrel_heat;
+    referee_debug.shooter_42mm_heat = referee_data->PowerHeatData.shooter_42mm_barrel_heat;
+    referee_debug.bullet_type = referee_data->ShootData.bullet_type;
+    referee_debug.shooter_id = referee_data->ShootData.shooter_id;
+    referee_debug.bullet_freq = referee_data->ShootData.bullet_freq;
+    referee_debug.bullet_speed = referee_data->ShootData.bullet_speed;
+    referee_debug.connected_flag = (referee_data->GameRobotState.robot_id != 0) ? 1 : 0;
+}
+
 /* 机器人底盘控制核心任务 */
 void ChassisTask()
 {
+    // 裁判系统状态检查
+    CheckRefereeStatus();
+
     // 后续增加没收到消息的处理(双板的情况)
     // 获取新的控制信息
 #ifdef ONE_BOARD
@@ -235,21 +372,25 @@ void ChassisTask()
 
     // 裁判系统功率数据更新（不接裁判系统时使用默认功率限制）
     if (referee_data != NULL && referee_data->GameRobotState.robot_id != 0) {
-        // 裁判系统已连接，使用裁判系统数据
+        float power_limit = (float)referee_data->GameRobotState.chassis_power_limit;
         UpdatePowerControlRefereeData(
             referee_data->PowerHeatData.chassis_power,
             referee_data->PowerHeatData.buffer_energy,
             referee_data->GameRobotState.chassis_power_limit
         );
-        SetPowerLimit(referee_data->GameRobotState.chassis_power_limit);
+        SetPowerLimit(power_limit);
     } else {
-        // 裁判系统未连接，使用默认功率限制
         UpdatePowerControlRefereeData(0.0f, 0.0f, 0);
         SetPowerLimit(DEFAULT_POWER_LIMIT);
     }
 
     if (chassis_cmd_recv.chassis_mode == CHASSIS_ZERO_FORCE)
     { // 如果出现重要模块离线或遥控器设置为急停,让电机停止
+        chassis_cmd_recv.vx = 0.0f;
+        chassis_cmd_recv.vy = 0.0f;
+        chassis_cmd_recv.vx_target = 0.0f;
+        chassis_cmd_recv.vy_target = 0.0f;
+        chassis_cmd_recv.wz = 0.0f;
         DJIMotorStop(motor_lf);
         DJIMotorStop(motor_rf);
         DJIMotorStop(motor_lb);
@@ -265,30 +406,40 @@ void ChassisTask()
 
     static chassis_mode_e last_chassis_mode = (chassis_mode_e)0xff;
 
+    // === 模式切换时重置底盘跟随 PID 状态 ===
+    if (last_chassis_mode != CHASSIS_FOLLOW_GIMBAL_YAW &&
+        chassis_cmd_recv.chassis_mode == CHASSIS_FOLLOW_GIMBAL_YAW)
+    {
+        ResetPIDRuntimeState(&angle_PID);
+        ResetPIDRuntimeState(&yaw_rate_PID);
+    }
+
     // 根据控制模式设定旋转速度
     switch (chassis_cmd_recv.chassis_mode)
     {
     case CHASSIS_NO_FOLLOW: // 底盘不旋转,但维持全向机动,一般用于调整云台姿态
         chassis_cmd_recv.wz = 0;
         break;
-    case CHASSIS_FOLLOW_GIMBAL_YAW: // 跟随云台,不单独设置pid,以误差角度平方为速度输出
+    case CHASSIS_FOLLOW_GIMBAL_YAW: // 跟随云台
     {
-        if (last_chassis_mode != CHASSIS_FOLLOW_GIMBAL_YAW)
-        {
-            angle_PID.Iout = 0.0f;
-            angle_PID.ITerm = 0.0f;
-            angle_PID.Err = 0.0f;
-            angle_PID.Last_Err = 0.0f;
-            angle_PID.Dout = 0.0f;
-            angle_PID.Last_Dout = 0.0f;
-            angle_PID.Output = 0.0f;
-            angle_PID.Last_Output = 0.0f;
-        }
-
         debug_chassis_offset_recv = chassis_cmd_recv.offset_angle;
         float follow_err_deg = WrapAngle180Deg(chassis_cmd_recv.offset_angle);
         debug_chassis_follow_err = follow_err_deg;
-        chassis_cmd_recv.wz = -PIDCalculate(&angle_PID, follow_err_deg, 0.0f);
+
+        // 获取底盘角速度反馈 (deg/s) - Chassis_IMU_data 在 CHASSIS_BOARD 和 ONE_BOARD 下都已初始化
+        float yaw_rate_feedback = Chassis_IMU_data->Gyro[Z] * RAD_2_DEGREE; // rad/s -> deg/s
+
+        debug_chassis_yaw_rate_feedback = yaw_rate_feedback;
+
+        // 串级PID：外环(角度环) -> 内环(角速度环)
+        // 外环：角度误差 -> 角速度目标
+        float yaw_rate_target = PIDCalculate(&angle_PID, 0.0f, follow_err_deg);
+        debug_chassis_angle_output = yaw_rate_target;
+        debug_chassis_yaw_rate_target = yaw_rate_target;
+
+        // 内环：角速度误差 -> 最终输出
+        // 按 PID 接口顺序使用角速度反馈和角速度目标
+        chassis_cmd_recv.wz = PIDCalculate(&yaw_rate_PID, yaw_rate_feedback, yaw_rate_target);
         debug_chassis_wz_output = chassis_cmd_recv.wz;
     }
         break;

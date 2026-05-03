@@ -46,6 +46,41 @@ static DaemonInstance *referee_daemon;		  // 裁判系统守护进程
 static referee_info_t referee_info;			  // 裁判系统数据
 static RefereeUnpackObj_t referee_unpack_obj;
 
+// 调试用：裁判系统状态结构体（在 Ozone 中展开 referee_debug 监视）
+typedef struct {
+    uint8_t connected_flag;     // 连接状态：0=未连接, 1=已连接
+    uint16_t last_cmd_id;
+    uint8_t game_robot_state_rx;
+    uint8_t power_heat_data_rx;
+    uint8_t shoot_data_rx;
+    uint16_t robot_id;          // 机器人ID
+    uint8_t robot_level;
+    uint16_t current_hp;
+    uint16_t maximum_hp;
+    uint16_t power_limit;       // 功率限制
+    uint16_t heat_limit;
+    uint16_t cooling_value;
+    uint8_t gimbal_power_output;
+    uint8_t chassis_power_output;
+    uint8_t shooter_power_output;
+    uint16_t chassis_voltage;
+    uint16_t chassis_current;
+    float chassis_power;        // 底盘功率
+    uint16_t buffer_energy;
+    uint16_t shooter_heat;      // 17mm枪口热量
+    uint16_t shooter_17mm_2_heat;
+    uint16_t shooter_42mm_heat;
+    uint8_t bullet_type;
+    uint8_t shooter_id;
+    uint8_t bullet_freq;
+    float bullet_speed;
+    uint8_t recv_counter;       // 接收帧计数
+    uint8_t crc8_fail_count;    // CRC8校验失败计数
+    uint8_t crc16_fail_count;   // CRC16校验失败计数
+} Referee_Debug_s;
+
+Referee_Debug_s referee_debug = {0}; // 裁判系统调试变量（定义在此，由chassis.c使用extern引用）
+
 /**
  * @brief  读取裁判数据,中断中读取保证速度
  * @param  buff: 读取到的裁判系统原始数据
@@ -65,6 +100,7 @@ static void JudgeReadFrameData(uint8_t *buff)
 	{
 		// 2个8位拼成16位int
 		referee_info.CmdID = (buff[6] << 8 | buff[5]);
+		referee_debug.last_cmd_id = referee_info.CmdID;
 		// 解析数据命令码,将数据拷贝到相应结构体中(注意拷贝数据的长度)
 		// 第8个字节开始才是数据 data=7
 		switch (referee_info.CmdID)
@@ -86,9 +122,11 @@ static void JudgeReadFrameData(uint8_t *buff)
 			break;
 		case ID_game_robot_state: // 0x0201
 			memcpy(&referee_info.GameRobotState, (buff + DATA_Offset), LEN_game_robot_state);
+			referee_debug.game_robot_state_rx = 1;
 			break;
 		case ID_power_heat_data: // 0x0202
 			memcpy(&referee_info.PowerHeatData, (buff + DATA_Offset), LEN_power_heat_data);
+			referee_debug.power_heat_data_rx = 1;
 			break;
 		case ID_game_robot_pos: // 0x0203
 			memcpy(&referee_info.GameRobotPos, (buff + DATA_Offset), LEN_game_robot_pos);
@@ -104,6 +142,7 @@ static void JudgeReadFrameData(uint8_t *buff)
 			break;
 		case ID_shoot_data: // 0x0207
 			memcpy(&referee_info.ShootData, (buff + DATA_Offset), LEN_shoot_data);
+			referee_debug.shoot_data_rx = 1;
 			break;
 		case ID_student_interactive: // 0x0301   syhtodo接收代码未测试
 			memcpy(&referee_info.ReceiveData, (buff + DATA_Offset), LEN_receive_data);
@@ -118,6 +157,8 @@ static void JudgeReadData(uint8_t *buff, uint16_t len)
 {
 	if (buff == NULL || len == 0)
 		return;
+
+    referee_debug.recv_counter++;
 
 	for (uint16_t i = 0; i < len; i++)
 	{
@@ -169,6 +210,7 @@ static void JudgeReadData(uint8_t *buff, uint16_t len)
 				}
 				else
 				{
+                    referee_debug.crc8_fail_count++; // CRC8校验失败计数
 					referee_unpack_obj.unpack_step = STEP_HEADER_SOF;
 					referee_unpack_obj.index = 0;
 				}
@@ -192,6 +234,10 @@ static void JudgeReadData(uint8_t *buff, uint16_t len)
 				{
 					JudgeReadFrameData(referee_unpack_obj.protocol_packet);
 				}
+				else
+				{
+                    referee_debug.crc16_fail_count++; // CRC16校验失败计数
+				}
 			}
 		}
 		break;
@@ -213,6 +259,35 @@ static void RefereeRxCallback()
 // 裁判系统丢失回调函数,重新初始化裁判系统串口
 static void RefereeLostCallback(void *arg)
 {
+	(void)arg;
+	memset(&referee_info.GameRobotState, 0, sizeof(referee_info.GameRobotState));
+	memset(&referee_info.PowerHeatData, 0, sizeof(referee_info.PowerHeatData));
+	referee_debug.connected_flag = 0;
+	referee_debug.last_cmd_id = 0;
+	referee_debug.game_robot_state_rx = 0;
+	referee_debug.power_heat_data_rx = 0;
+	referee_debug.shoot_data_rx = 0;
+	referee_debug.robot_id = 0;
+	referee_debug.robot_level = 0;
+	referee_debug.current_hp = 0;
+	referee_debug.maximum_hp = 0;
+	referee_debug.power_limit = 0;
+	referee_debug.heat_limit = 0;
+	referee_debug.cooling_value = 0;
+	referee_debug.gimbal_power_output = 0;
+	referee_debug.chassis_power_output = 0;
+	referee_debug.shooter_power_output = 0;
+	referee_debug.chassis_voltage = 0;
+	referee_debug.chassis_current = 0;
+	referee_debug.chassis_power = 0.0f;
+	referee_debug.buffer_energy = 0;
+	referee_debug.shooter_heat = 0;
+	referee_debug.shooter_17mm_2_heat = 0;
+	referee_debug.shooter_42mm_heat = 0;
+	referee_debug.bullet_type = 0;
+	referee_debug.shooter_id = 0;
+	referee_debug.bullet_freq = 0;
+	referee_debug.bullet_speed = 0.0f;
 	USARTServiceInit(referee_usart_instance);
 	LOGWARNING("[rm_ref] lost referee data");
 }

@@ -33,9 +33,13 @@ static uint8_t loading_in_progress = 0;         // 当前是否处于拨盘中
 static heat_limit_status_e heat_status = HEAT_OK;
 static referee_info_t *referee_data; // 裁判系统数据指针
 
-// 热量限制检测:当前热量 + 单发预估热量 > 热量上限 则禁止发射
+// 热量限制检测:当前热量 + 两发预估热量 > 热量上限 则禁止发射
 static heat_limit_status_e ShootHeatLimitCheck(void)
 {
+    if (referee_data == NULL) {
+        referee_data = GetRefereeData();
+    }
+
     // 空指针检查
     if (referee_data == NULL) {
         return HEAT_OK; // 默认允许发射
@@ -44,9 +48,12 @@ static heat_limit_status_e ShootHeatLimitCheck(void)
     // 从裁判系统获取当前热量和热量上限
     uint16_t current_heat = referee_data->PowerHeatData.shooter_17mm_1_barrel_heat;
     uint16_t heat_limit = referee_data->GameRobotState.shooter_barrel_heat_limit;
+    if (referee_data->GameRobotState.robot_id == 0 || heat_limit == 0) {
+        return HEAT_OK;
+    }
     
-    // 当前热量 + 预估单发热量 > 上限，禁止发射
-    if (current_heat + BULLET_HEAT_ESTIMATE > heat_limit) {
+    // 当前热量 + 预估两发热量 > 上限，禁止发射
+    if (current_heat + 2 * BULLET_HEAT_ESTIMATE > heat_limit) {
         return HEAT_LIMITED;
     }
     return HEAT_OK;
@@ -246,9 +253,13 @@ void ShootTask()
     // if (bullet_count < 0) bullet_count = MAX_BULLET_COUNT;
 
     // 反馈数据更新(带空指针检查)
-    if (referee_data != NULL) {
-        shoot_feedback_data.rest_heat = referee_data->GameRobotState.shooter_barrel_heat_limit 
-                                       - referee_data->PowerHeatData.shooter_17mm_1_barrel_heat;
+    if (referee_data == NULL) {
+        referee_data = GetRefereeData();
+    }
+    if (referee_data != NULL && referee_data->GameRobotState.robot_id != 0) {
+        uint16_t heat_limit = referee_data->GameRobotState.shooter_barrel_heat_limit;
+        uint16_t current_heat = referee_data->PowerHeatData.shooter_17mm_1_barrel_heat;
+        shoot_feedback_data.rest_heat = heat_limit > current_heat ? heat_limit - current_heat : 0;
     } else {
         shoot_feedback_data.rest_heat = 0;
     }
@@ -322,13 +333,12 @@ void ShootTask()
     }
 
     // 确定是否开启摩擦轮,后续可能修改为键鼠模式下始终开启摩擦轮(上场时建议一直开启)
-    // 热量限制:当热量受限时关闭摩擦轮
-    if (shoot_cmd_recv.friction_mode == FRICTION_ON && heat_status != HEAT_LIMITED)
+    if (shoot_cmd_recv.friction_mode == FRICTION_ON)
     {
         DJIMotorSetRef(friction_l, 35000); // 固定22m/s弹速(实测)
         DJIMotorSetRef(friction_r, 35000);
     }
-    else // 关闭摩擦轮或热量受限
+    else // 关闭摩擦轮
     {
         DJIMotorSetRef(friction_l, 0);
         DJIMotorSetRef(friction_r, 0);
