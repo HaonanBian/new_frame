@@ -142,8 +142,6 @@ BMI088_Data_t bmi088_data;
 static uint8_t last_control_mode = 0; // 0=未知, 1=遥控器, 2=键鼠
 #define CONTROL_MODE_RC 1
 #define CONTROL_MODE_KB 2
-#define CHASSIS_VEL_ACCEL_STEP 600.0f
-#define CHASSIS_VEL_DECEL_STEP 45.0f
 #define KB_CHASSIS_MOVE_VALUE 5000.0f
 #define PITCH_RC_DEADBAND 5
 #define RAD2DEG 57.295779513f
@@ -153,19 +151,7 @@ static uint8_t last_control_mode = 0; // 0=未知, 1=遥控器, 2=键鼠
 #define MOUSE_DEADBAND 4
 #define MOUSE_MAX_DELTA 120
 #define MOUSE_REJECT_DELTA 2000
-
-static float RampFollow(float input, float current, float accel_step, float decel_step)
-{
-    float delta = input - current;
-    float step = decel_step;
-    if (current == 0.0f || current * delta > 0.0f)
-        step = accel_step;
-    if (delta > step)
-        delta = step;
-    else if (delta < -step)
-        delta = -step;
-    return current + delta;
-}
+#define MOUSE_LONG_PRESS_MS 250.0f
 
 static int16_t MouseDeltaFilter(int16_t raw_delta)
 {
@@ -187,8 +173,8 @@ static int16_t MouseDeltaFilter(int16_t raw_delta)
 
 static void UpdateChassisVelTarget(void)
 {
-    chassis_cmd_send.vx_target = RampFollow(chassis_cmd_send.vx, chassis_cmd_send.vx_target, CHASSIS_VEL_ACCEL_STEP, CHASSIS_VEL_DECEL_STEP);
-    chassis_cmd_send.vy_target = RampFollow(chassis_cmd_send.vy, chassis_cmd_send.vy_target, CHASSIS_VEL_ACCEL_STEP, CHASSIS_VEL_DECEL_STEP);
+    chassis_cmd_send.vx_target = chassis_cmd_send.vx;
+    chassis_cmd_send.vy_target = chassis_cmd_send.vy;
 }
 
 // 底盘角度跟随滤波参数
@@ -585,15 +571,24 @@ static void MouseKeySet()
     LIMIT_MIN_MAX(gimbal_cmd_send.pitch, PITCH_MIN_RAD, PITCH_MAX_RAD);
 
     shoot_cmd_send.bullet_speed = (Bullet_Speed_e)22; // 固定弹速22m/s
-    switch (rc_data[TEMP].key_count[KEY_PRESS][Key_Z] % 2) // Z键设置发射模式(单发/连发)
+    static uint8_t last_mouse_left = 0;
+    static float mouse_left_press_time = 0.0f;
+    uint8_t mouse_left = rc_data[TEMP].mouse.press_l ? 1 : 0;
+    float now_ms = DWT_GetTimeline_ms();
+    shoot_cmd_send.load_mode = LOAD_STOP;
+    if (mouse_left)
     {
-    case 0:
-        shoot_cmd_send.load_mode = LOAD_1_BULLET;
-        break;
-    default:
-        shoot_cmd_send.load_mode = LOAD_BURSTFIRE;
-        break;
+        if (!last_mouse_left)
+        {
+            mouse_left_press_time = now_ms;
+            shoot_cmd_send.load_mode = LOAD_1_BULLET;
+        }
+        else if (now_ms - mouse_left_press_time >= MOUSE_LONG_PRESS_MS)
+        {
+            shoot_cmd_send.load_mode = LOAD_BURSTFIRE;
+        }
     }
+    last_mouse_left = mouse_left;
     switch (rc_data[TEMP].key_count[KEY_PRESS][Key_V] % 2) // V键开关弹舱
     {
     case 0:
@@ -623,10 +618,6 @@ static void MouseKeySet()
         break;
     }
 
-    // 鼠标左键按住时拨弹盘开启
-    if (rc_data[TEMP].mouse.press_l)
-        shoot_cmd_send.load_mode = LOAD_BURSTFIRE;
-
     shoot_cmd_send.shoot_rate = 8;  // 拨弹射频与遥控器一致(8颗/秒)
     shoot_cmd_send.shoot_mode = SHOOT_ON; // 开启发射系统
 }
@@ -648,6 +639,8 @@ static void EmergencyHandler()
             robot_state = ROBOT_READY;
             ClearChassisMotionCommand();
             shoot_cmd_send.shoot_mode = SHOOT_ON;
+            shoot_cmd_send.friction_mode = FRICTION_OFF;
+            shoot_cmd_send.load_mode = LOAD_STOP;
             LOGINFO("[CMD] reinstate, robot ready");
         }
         else

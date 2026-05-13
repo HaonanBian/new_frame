@@ -49,8 +49,8 @@ void OSTaskInit()
     motorTaskHandle = osThreadCreate(osThread(motortask), NULL);
      
     // 3. 创建守护任务（后台辅助任务）
-    // osThreadDef(daemontask, StartDAEMONTASK, osPriorityNormal, 0, 128);
-    // daemonTaskHandle = osThreadCreate(osThread(daemontask), NULL);
+    osThreadDef(daemontask, StartDAEMONTASK, osPriorityNormal, 0, 256);
+    daemonTaskHandle = osThreadCreate(osThread(daemontask), NULL);
 
     // 4. 创建机器人核心逻辑任务
     osThreadDef(robottask, StartROBOTTASK, osPriorityNormal, 0, 1024);
@@ -77,7 +77,7 @@ __attribute__((noreturn)) void StartINSTASK(void const *argument)
         INS_Task();
         ins_dt = DWT_GetTimeline_ms() - ins_start;
         if (ins_dt > 1)
-            LOGERROR("[freeRTOS] INS Task is being DELAY! dt = [%f]", &ins_dt);
+            LOGERROR("[freeRTOS] INS Task is being DELAY! dt = [%f]", ins_dt);
         // VisionSend(); // 已改为请求-应答模式，由DecodeVision回调触发发送
         osDelay(1);
     }
@@ -94,7 +94,7 @@ __attribute__((noreturn)) void StartMOTORTASK(void const *argument)
         MotorControlTask();
         motor_dt = DWT_GetTimeline_ms() - motor_start;
         if (motor_dt > 1)
-            LOGERROR("[freeRTOS] MOTOR Task is being DELAY! dt = [%f]", &motor_dt);
+            LOGERROR("[freeRTOS] MOTOR Task is being DELAY! dt = [%f]", motor_dt);
         osDelay(1);
     }
 }
@@ -113,7 +113,7 @@ __attribute__((noreturn)) void StartDAEMONTASK(void const *argument)
         BuzzerTask();
         daemon_dt = DWT_GetTimeline_ms() - daemon_start;
         if (daemon_dt > 10)
-            LOGERROR("[freeRTOS] Daemon Task is being DELAY! dt = [%f]", &daemon_dt);
+            LOGERROR("[freeRTOS] Daemon Task is being DELAY! dt = [%f]", daemon_dt);
         osDelay(10);
     }
 }
@@ -131,7 +131,7 @@ __attribute__((noreturn)) void StartROBOTTASK(void const *argument)
         VisionSend();
         robot_dt = DWT_GetTimeline_ms() - robot_start;
         if (robot_dt > 5)
-            LOGERROR("[freeRTOS] ROBOT core Task is being DELAY! dt = [%f]", &robot_dt);
+            LOGERROR("[freeRTOS] ROBOT core Task is being DELAY! dt = [%f]", robot_dt);
         osDelay(5);
     }
 }

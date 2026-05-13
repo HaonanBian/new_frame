@@ -24,14 +24,177 @@ static Shoot_Upload_Data_s shoot_feedback_data; // 来自cmd的发射控制信�
 static float hibernate_time = 0, dead_time = 0;
 
 // 载弹量计数器 (无裁判系统时使用)
-#define MAX_BULLET_COUNT    50  // 根据机器人实际最大载弹量修改
-static int16_t bullet_count = MAX_BULLET_COUNT; // 当前剩余弹量
-static int16_t last_loader_angle = 0;            // 上一次拨盘累计角度，用于检测拨盘转动
+// #define MAX_BULLET_COUNT    50  // 根据机器人实际最大载弹量修改
+// static int16_t bullet_count = MAX_BULLET_COUNT; // 当前剩余弹量
+// static int16_t last_loader_angle = 0;            // 上一次拨盘累计角度，用于检测拨盘转动
 static uint8_t loading_in_progress = 0;         // 当前是否处于拨盘中
+static uint8_t loader_angle_motion_active = 0;
+static float loader_start_angle = 0.0f;
+static float loader_target_angle = 0.0f;
+// static float loader_count_ref_angle = 0.0f;
+static loader_mode_e last_load_mode = LOAD_STOP;
+static uint8_t heat_single_shot_active = 0;
+static uint8_t loader_hold_active = 0;
 
 // 热量限制相关变量
 static heat_limit_status_e heat_status = HEAT_OK;
 static referee_info_t *referee_data; // 裁判系统数据指针
+
+static uint16_t GetShooterRestHeat(void)
+{
+    if (referee_data == NULL) {
+        referee_data = GetRefereeData();
+    }
+
+    if (referee_data == NULL || referee_data->GameRobotState.robot_id == 0) {
+        return 0;
+    }
+
+    uint16_t heat_limit = referee_data->GameRobotState.shooter_barrel_heat_limit;
+    uint16_t current_heat = referee_data->PowerHeatData.shooter_17mm_1_barrel_heat;
+    return heat_limit > current_heat ? heat_limit - current_heat : 0;
+}
+
+static uint8_t IsLowLevelHeatLimit(void)
+{
+    if (referee_data == NULL) {
+        referee_data = GetRefereeData();
+    }
+
+    if (referee_data == NULL || referee_data->GameRobotState.robot_id == 0) {
+        return 0;
+    }
+
+    return referee_data->GameRobotState.robot_level >= 1 && referee_data->GameRobotState.robot_level <= 2;
+}
+
+static float LoaderOneBulletMotorAngle(void)
+{
+    return ONE_BULLET_DELTA_ANGLE * REDUCTION_RATIO_LOADER;
+}
+
+static float LoaderDirectionSign(void)
+{
+    return loader->motor_settings.motor_reverse_flag == MOTOR_DIRECTION_REVERSE ? -1.0f : 1.0f;
+}
+
+static float LoaderForwardProgress(float start_angle, float current_angle)
+{
+    return (current_angle - start_angle) * LoaderDirectionSign();
+}
+
+static float LoaderRawTargetToRef(float raw_target)
+{
+    return loader->motor_settings.motor_reverse_flag == MOTOR_DIRECTION_REVERSE ? -raw_target : raw_target;
+}
+
+static void LoaderResetRuntimeState(void)
+{
+    loading_in_progress = 0;
+    loader_angle_motion_active = 0;
+    loader_hold_active = 0;
+}
+
+static void LoaderStartAngleMotion(uint8_t bullet_num)
+{
+    float delta = LoaderOneBulletMotorAngle() * (float)bullet_num;
+    loader_start_angle = loader->measure.total_angle;
+    loader_target_angle = loader_start_angle + LoaderDirectionSign() * delta;
+    // loader_count_ref_angle = loader_start_angle;
+    loader_angle_motion_active = 1;
+    loading_in_progress = 1;
+    loader_hold_active = 0;
+}
+
+static uint8_t LoaderAngleMotionDone(void)
+{
+    float target_delta = loader_target_angle - loader->measure.total_angle;
+    float progress = LoaderForwardProgress(loader_start_angle, loader->measure.total_angle);
+    float target_progress = LoaderForwardProgress(loader_start_angle, loader_target_angle);
+    if (target_delta < 0.0f)
+        target_delta = -target_delta;
+    return target_delta <= LoaderOneBulletMotorAngle() * 0.05f || progress >= target_progress;
+}
+
+static void LoaderHoldCurrentPosition(void)
+{
+    if (!loader_hold_active)
+    {
+        loader_target_angle = loader->measure.total_angle;
+        loader_start_angle = loader_target_angle;
+        loader_hold_active = 1;
+    }
+    loading_in_progress = 0;
+    loader_angle_motion_active = 0;
+    DJIMotorOuterLoop(loader, ANGLE_LOOP);
+    DJIMotorSetRef(loader, LoaderRawTargetToRef(loader_target_angle));
+}
+
+static void LoaderRunAngleMotion(void)
+{
+    DJIMotorOuterLoop(loader, ANGLE_LOOP);
+    DJIMotorSetRef(loader, LoaderRawTargetToRef(loader_target_angle));
+    if (LoaderAngleMotionDone())
+    {
+        LoaderResetRuntimeState();
+        DJIMotorOuterLoop(loader, SPEED_LOOP);
+        DJIMotorSetRef(loader, 0);
+    }
+}
+
+static float GetHeatLimitedShootRate(float shoot_rate)
+{
+    uint16_t rest_heat = GetShooterRestHeat();
+
+    if (IsLowLevelHeatLimit()) {
+        return shoot_rate;
+    }
+
+    if (rest_heat == 0 || rest_heat > HEAT_BURST_SLOWDOWN_REST) {
+        return shoot_rate;
+    }
+
+    return shoot_rate > HEAT_BURST_SLOW_RATE ? HEAT_BURST_SLOW_RATE : shoot_rate;
+}
+
+static uint8_t ShouldBurstSwitchToSingle(void)
+{
+    uint16_t rest_heat = GetShooterRestHeat();
+    if (IsLowLevelHeatLimit()) {
+        return 0;
+    }
+    return rest_heat != 0 && rest_heat <= HEAT_BURST_SINGLE_REST;
+}
+
+// static void LoaderUpdateBulletCount(void)
+// {
+//     if (!loading_in_progress || bullet_count <= 0)
+//         return;
+//     float progress = LoaderForwardProgress(loader_count_ref_angle, loader->measure.total_angle);
+//     if (progress >= LoaderOneBulletMotorAngle())
+//     {
+//         int16_t fed = (int16_t)(progress / LoaderOneBulletMotorAngle());
+//         if (fed > bullet_count)
+//             fed = bullet_count;
+//         bullet_count -= fed;
+//         loader_count_ref_angle += LoaderDirectionSign() * LoaderOneBulletMotorAngle() * (float)fed;
+//     }
+// }
+//
+// static void LoaderCompleteAngleMotionCount(void)
+// {
+//     if (!loader_angle_motion_active || bullet_count <= 0)
+//         return;
+//     float progress = LoaderForwardProgress(loader_count_ref_angle, loader_target_angle);
+//     if (progress >= LoaderOneBulletMotorAngle())
+//     {
+//         int16_t fed = (int16_t)(progress / LoaderOneBulletMotorAngle());
+//         if (fed > bullet_count)
+//             fed = bullet_count;
+//         bullet_count -= fed;
+//         loader_count_ref_angle += LoaderDirectionSign() * LoaderOneBulletMotorAngle() * (float)fed;
+//     }
+// }
 
 // 热量限制检测:当前热量 + 两发预估热量 > 热量上限 则禁止发射
 static heat_limit_status_e ShootHeatLimitCheck(void)
@@ -52,8 +215,10 @@ static heat_limit_status_e ShootHeatLimitCheck(void)
         return HEAT_OK;
     }
     
+    uint16_t heat_margin = IsLowLevelHeatLimit() ? 0 : HEAT_SAFE_MARGIN;
+    
     // 当前热量 + 预估两发热量 > 上限，禁止发射
-    if (current_heat + 2 * BULLET_HEAT_ESTIMATE > heat_limit) {
+    if (current_heat + 2 * BULLET_HEAT_ESTIMATE + heat_margin > heat_limit) {
         return HEAT_LIMITED;
     }
     return HEAT_OK;
@@ -120,7 +285,7 @@ void ShootInit()
                 .Kp =20, // 10
                 .Ki = 0,
                 .Kd = 0,
-                .MaxOut = 200,
+                .MaxOut = 12000,
             },
             .speed_PID = {
                 .Kp = 10, // 10
@@ -142,7 +307,7 @@ void ShootInit()
         .controller_setting_init_config = {
             .angle_feedback_source = MOTOR_FEED, .speed_feedback_source = MOTOR_FEED,
             .outer_loop_type = SPEED_LOOP, // 初始化成SPEED_LOOP,让拨盘停在原地,防止拨盘上电时乱转
-            .close_loop_type = CURRENT_LOOP | SPEED_LOOP,
+            .close_loop_type = CURRENT_LOOP | SPEED_LOOP | ANGLE_LOOP,
             .motor_reverse_flag = MOTOR_DIRECTION_REVERSE, // 注意方向设置为拨盘的拨出的击发方向
         },
         .motor_type = M2006 // 英雄使用m3508
@@ -162,96 +327,6 @@ void ShootTask()
     // 热量限制检测
     heat_status = ShootHeatLimitCheck();
 
-    // 载弹量计数 (无裁判系统时使用)
-    // 原理: 拨盘每转动 ONE_BULLET_DELTA_ANGLE 角度 = 成功送出一发弹
-    static int16_t bullet_ref_angle = 0; // 每次发射开始时的拨盘累计角度
-    static int8_t  bullet_count_per_shot = 0; // 本次发射累计送出的弹数
-
-    // 记录每次发射指令开始时的拨盘位置 (单次触发，只在进入发射模式瞬间抓取)
-    switch (shoot_cmd_recv.load_mode) {
-        case LOAD_1_BULLET:
-            // 单发: 只记录一次基准
-            if (!loading_in_progress) {
-                bullet_ref_angle = (int16_t)loader->measure.total_angle;
-                bullet_count_per_shot = 0;
-                loading_in_progress = 1;
-            }
-            break;
-        case LOAD_3_BULLET:
-            if (!loading_in_progress) {
-                bullet_ref_angle = (int16_t)loader->measure.total_angle;
-                bullet_count_per_shot = 0;
-                loading_in_progress = 1;
-            }
-            break;
-        case LOAD_BURSTFIRE:
-            // 连发: 持续累加计数
-            if (!loading_in_progress) {
-                bullet_ref_angle = (int16_t)loader->measure.total_angle;
-                bullet_count_per_shot = 0;
-                loading_in_progress = 1;
-            }
-            break;
-        default:
-            loading_in_progress = 0;
-            break;
-    }
-
-    // 拨盘转动时，累加计数
-    if (loading_in_progress) {
-        int16_t delta = (int16_t)loader->measure.total_angle - bullet_ref_angle;
-        // 防止第一次刚进入时的瞬间跳变
-        if (delta > ONE_BULLET_DELTA_ANGLE / 2) {
-            int8_t new_bullets = delta / ONE_BULLET_DELTA_ANGLE;
-            if (new_bullets > bullet_count_per_shot) {
-                int8_t fed = new_bullets - bullet_count_per_shot;
-                // 连发模式下，每送出一发就扣弹量
-                if (shoot_cmd_recv.load_mode == LOAD_BURSTFIRE) {
-                    if (bullet_count >= fed) {
-                        bullet_count -= fed;
-                        bullet_count_per_shot = new_bullets;
-                    }
-                }
-                // 单发/三发模式: 等拨盘完全转到位再扣 (在下面的拨盘控制里处理)
-            }
-        }
-    }
-
-    // 单发/三发模式: 拨盘转到目标角度后扣弹 (拨盘停止时)
-    switch (shoot_cmd_recv.load_mode) {
-        case LOAD_1_BULLET:
-            if (loading_in_progress) {
-                int16_t delta = (int16_t)loader->measure.total_angle - bullet_ref_angle;
-                if (delta >= ONE_BULLET_DELTA_ANGLE - 5 && bullet_count > 0) {
-                    bullet_count--;
-                    loading_in_progress = 0;
-                }
-            }
-            break;
-        case LOAD_3_BULLET:
-            if (loading_in_progress) {
-                int16_t delta = (int16_t)loader->measure.total_angle - bullet_ref_angle;
-                if (delta >= 3 * ONE_BULLET_DELTA_ANGLE - 5 && bullet_count >= 3) {
-                    bullet_count -= 3;
-                    loading_in_progress = 0;
-                } else if (delta >= ONE_BULLET_DELTA_ANGLE - 5 && bullet_count > 0 && bullet_count < 3) {
-                    bullet_count = 0;
-                    loading_in_progress = 0;
-                }
-            }
-            break;
-        default:
-            break;
-    }
-
-    // 上传到反馈数据，供 gimbal 等模块使用
-    shoot_feedback_data.bullet_count = bullet_count;
-
-    // 补弹: 复位弹量 (在 cmd 或 UI 中调用，或通过遥控器某个通道触发)
-    // 目前暂时用热量作为补弹检测 (有裁判系统时), 无裁判系统时请在 UI/遥控器中手动补弹
-    // 也可通过以下宏开启自动补弹 (上电自动装满):
-    // if (bullet_count < 0) bullet_count = MAX_BULLET_COUNT;
-
     // 反馈数据更新(带空指针检查)
     if (referee_data == NULL) {
         referee_data = GetRefereeData();
@@ -270,6 +345,13 @@ void ShootTask()
         DJIMotorStop(friction_l);
         DJIMotorStop(friction_r);
         DJIMotorStop(loader);
+        LoaderResetRuntimeState();
+        heat_single_shot_active = 0;
+        last_load_mode = LOAD_STOP;
+        shoot_feedback_data.bullet_count = 0;
+        shoot_feedback_data.heat_status = heat_status;
+        PubPushMessage(shoot_pub, (void *)&shoot_feedback_data);
+        return;
     }
     else // 恢复运行
     {
@@ -278,59 +360,82 @@ void ShootTask()
         DJIMotorEnable(loader);
     }
 
-    // 如果上一次触发单发或3发指令的时间加上不应期仍然大于当前时间(尚未休眠完毕),直接返回即可
-    // 单发模式主要提供给能量机关激活使用(以及英雄的射击大部分处于单发)
-    // if (hibernate_time + dead_time > DWT_GetTimeline_ms())
-    //     return;
-
-    // 若不在休眠状态,根据robotCMD传来的控制模式进行拨盘电机参考值设定和模式切换
-    // 热量限制:当热量受限时不执行拨盘动作
     if (heat_status != HEAT_LIMITED)
     {
         switch (shoot_cmd_recv.load_mode)
         {
-        // 停止拨盘
         case LOAD_STOP:
-            DJIMotorOuterLoop(loader, SPEED_LOOP); // 切换到速度环
-            DJIMotorSetRef(loader, 0);             // 同时设定参考值为0,这样停止的速度最快
+            heat_single_shot_active = 0;
+            if (loader_angle_motion_active)
+                LoaderRunAngleMotion();
+            else
+            {
+                LoaderResetRuntimeState();
+                DJIMotorOuterLoop(loader, SPEED_LOOP);
+                DJIMotorSetRef(loader, 0);
+            }
             break;
-        // 单发模式,根据鼠标按下的时间,触发一次之后需要进入不响应输入的状态(否则按下的时间内可能多次进入,导致多次发射)
-        case LOAD_1_BULLET:                                                                     // 激活能量机关/干扰对方用,英雄用.
-            DJIMotorOuterLoop(loader, ANGLE_LOOP);                                              // 切换到角度环
-            DJIMotorSetRef(loader, loader->measure.total_angle + ONE_BULLET_DELTA_ANGLE); // 控制量增加一发弹丸的角度
-            hibernate_time = DWT_GetTimeline_ms();                                              // 记录触发指令的时间
-            dead_time = 150;                                                                    // 完成1发弹丸发射的时间
+        case LOAD_1_BULLET:
+            heat_single_shot_active = 0;
+            if (!loader_angle_motion_active && last_load_mode != LOAD_1_BULLET)
+                LoaderStartAngleMotion(1);
+            if (loader_angle_motion_active)
+                LoaderRunAngleMotion();
             break;
-        // 三连发,如果不需要后续可能删除
         case LOAD_3_BULLET:
-            DJIMotorOuterLoop(loader, ANGLE_LOOP);                                                  // 切换到速度环
-            DJIMotorSetRef(loader, loader->measure.total_angle + 3 * ONE_BULLET_DELTA_ANGLE); // 增加3发
-            hibernate_time = DWT_GetTimeline_ms();                                                  // 记录触发指令的时间
-            dead_time = 300;                                                                        // 完成3发弹丸发射的时间
+            heat_single_shot_active = 0;
+            if (!loader_angle_motion_active && last_load_mode != LOAD_3_BULLET)
+                LoaderStartAngleMotion(3);
+            if (loader_angle_motion_active)
+                LoaderRunAngleMotion();
             break;
-        // 连发模式,对速度闭环,射频后续修改为可变,目前固定为1Hz
         case LOAD_BURSTFIRE:
-            DJIMotorOuterLoop(loader, SPEED_LOOP);
-            DJIMotorSetRef(loader, shoot_cmd_recv.shoot_rate * 360 * REDUCTION_RATIO_LOADER / 8);
-            // x颗/秒换算成速度: 已知一圈的载弹量,由此计算出1s需要转的角度,注意换算角速度(DJIMotor的速度单位是angle per second)
+            if (ShouldBurstSwitchToSingle())
+            {
+                if (!loader_angle_motion_active && !heat_single_shot_active)
+                {
+                    LoaderStartAngleMotion(1);
+                    heat_single_shot_active = 1;
+                }
+                if (loader_angle_motion_active)
+                    LoaderRunAngleMotion();
+                else
+                    LoaderHoldCurrentPosition();
+            }
+            else
+            {
+                heat_single_shot_active = 0;
+                loader_angle_motion_active = 0;
+                loader_hold_active = 0;
+                if (!loading_in_progress)
+                {
+                    loading_in_progress = 1;
+                }
+                DJIMotorOuterLoop(loader, SPEED_LOOP);
+                DJIMotorSetRef(loader, GetHeatLimitedShootRate(shoot_cmd_recv.shoot_rate) * 360.0f * REDUCTION_RATIO_LOADER / NUM_PER_CIRCLE);
+            }
             break;
-        // 拨盘反转,对速度闭环,后续增加卡弹检测(通过裁判系统剩余热量反馈和电机电流)
-        // 也有可能需要从switch-case中独立出来
         case LOAD_REVERSE:
+            heat_single_shot_active = 0;
+            LoaderResetRuntimeState();
             DJIMotorOuterLoop(loader, SPEED_LOOP);
-            // ...
+            DJIMotorSetRef(loader, -shoot_cmd_recv.shoot_rate * 360.0f * REDUCTION_RATIO_LOADER / NUM_PER_CIRCLE);
             break;
         default:
-            while (1)
-                ; // 未知模式,停止运行,检查指针越界,内存溢出等问题
+            heat_single_shot_active = 0;
+            LoaderResetRuntimeState();
+            DJIMotorOuterLoop(loader, SPEED_LOOP);
+            DJIMotorSetRef(loader, 0);
+            break;
         }
     }
     else
     {
-        // 热量受限时停止拨盘
-        DJIMotorOuterLoop(loader, SPEED_LOOP);
-        DJIMotorSetRef(loader, 0);
+        heat_single_shot_active = 0;
+        LoaderHoldCurrentPosition();
     }
+    last_load_mode = shoot_cmd_recv.load_mode;
+    shoot_feedback_data.bullet_count = 0;
 
     // 确定是否开启摩擦轮,后续可能修改为键鼠模式下始终开启摩擦轮(上场时建议一直开启)
     if (shoot_cmd_recv.friction_mode == FRICTION_ON)
@@ -368,9 +473,7 @@ void ShootTask()
  */
 int16_t GetBulletCount(void)
 {
-    if (bullet_count < 0) return 0;
-    if (bullet_count > MAX_BULLET_COUNT) return MAX_BULLET_COUNT;
-    return bullet_count;
+    return 0;
 }
 
 /**
@@ -379,13 +482,7 @@ int16_t GetBulletCount(void)
  */
 void ReloadBullets(int16_t count)
 {
-    if (count <= 0) {
-        bullet_count = MAX_BULLET_COUNT;
-    } else {
-        bullet_count += count;
-        if (bullet_count > MAX_BULLET_COUNT)
-            bullet_count = MAX_BULLET_COUNT;
-    }
+    (void)count;
 }
 
 /**
@@ -393,5 +490,4 @@ void ReloadBullets(int16_t count)
  */
 void ResetBulletCount(void)
 {
-    bullet_count = MAX_BULLET_COUNT;
 }

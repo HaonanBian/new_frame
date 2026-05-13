@@ -16,9 +16,8 @@ DaemonInstance *DaemonRegister(Daemon_Init_Config_s *config)
     instance->owner_id = config->owner_id;
     instance->reload_count = config->reload_count == 0 ? 100 : config->reload_count; // 默认值为100
     instance->callback = config->callback;
-    instance->temp_count = config->init_count == 0 ? 100 : config->init_count; // 默认值为100,初始计数
+    instance->temp_count = config->init_count == 0 ? instance->reload_count : config->init_count; // 默认值为100,初始计数
 
-    instance->temp_count = config->reload_count;
     daemon_instances[idx++] = instance;
     return instance;
 }
@@ -46,6 +45,7 @@ void DaemonTask()
         else if (dins->callback) // 等于零说明超时了,调用回调函数(如果有的话)
         {
             dins->callback(dins->owner_id); // module内可以将owner_id强制类型转换成自身类型从而调用特定module的offline callback
+            dins->temp_count = dins->reload_count;
             // @todo 为蜂鸣器/led等增加离线报警的功能,非常关键!
         }
     }

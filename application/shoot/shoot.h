@@ -6,9 +6,12 @@
 /**
  * @brief 发射机构宏定义
  */
-#define BULLET_HEAT_ESTIMATE 41          // 单发子弹预估热量
+#define BULLET_HEAT_ESTIMATE 10          // 单发子弹预估热量
 #define HEAT_SAFE_MARGIN 20              // 热量安全余量
-#define MAX_BULLET_COUNT    50           // 机器人最大载弹量，根据实际情况修改
+#define HEAT_BURST_SLOWDOWN_REST 80
+#define HEAT_BURST_SINGLE_REST 50
+#define HEAT_BURST_SLOW_RATE 4.0f
+// #define MAX_BULLET_COUNT    50           // 机器人最大载弹量，根据实际情况修改
 
 #define FRIC_SPEED_PID_KP        20.0f
 #define FRIC_SPEED_PID_KI        1.0f
