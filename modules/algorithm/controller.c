@@ -206,3 +206,26 @@ float PIDCalculate(PIDInstance *pid, float measure, float ref)
 
     return pid->Output;
 }
+
+/**
+ * @brief 重置PID运行状态（清除积分项、微分项、误差等）
+ *        用于防止积分累积导致的控制量突变
+ *
+ * @param pid PID实例指针
+ */
+void ResetPIDRuntimeState(PIDInstance *pid)
+{
+    pid->Measure = 0.0f;
+    pid->Last_Measure = 0.0f;
+    pid->Err = 0.0f;
+    pid->Last_Err = 0.0f;
+    pid->Last_ITerm = 0.0f;
+    pid->Pout = 0.0f;
+    pid->Iout = 0.0f;
+    pid->Dout = 0.0f;
+    pid->ITerm = 0.0f;
+    pid->Output = 0.0f;
+    pid->Last_Output = 0.0f;
+    pid->Last_Dout = 0.0f;
+    pid->Ref = 0.0f;
+}

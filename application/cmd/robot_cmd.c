@@ -4,7 +4,7 @@
 // module
 #include "remote_control.h"
 #include "ins_task.h"
-#include "master_process.h"
+#include "sp_vision.h"
 #include "message_center.h"
 #include "general_def.h"
 #include "dji_motor.h"
@@ -81,8 +81,69 @@ typedef struct
     float tast_angle_total;
 } RobotCmdDebugData_t;
 
+typedef struct
+{
+    uint8_t robot_state;
+    uint8_t auto_aim_enabled;
+    uint8_t vision_online;
+    uint8_t vision_data_updated;
+    uint8_t vision_control;
+    uint8_t vision_shoot;
+    uint8_t vision_recv_mode;
+    uint8_t vision_send_mode;
+    uint8_t gimbal_mode;
+    uint8_t chassis_mode;
+
+    float rx_yaw_rad;
+    float rx_pitch_rad;
+    float rx_yaw_vel_rad_s;
+    float rx_pitch_vel_rad_s;
+    float rx_yaw_acc_rad_s2;
+    float rx_pitch_acc_rad_s2;
+    float rx_yaw_deg;
+    float rx_pitch_deg;
+
+    float applied_yaw_delta_deg;
+    float applied_pitch_delta_rad;
+    float target_yaw_before_vision_deg;
+    float target_pitch_before_vision_rad;
+    float target_yaw_after_vision_deg;
+    float target_pitch_after_vision_rad;
+
+    float target_yaw_deg;
+    float target_yaw_rad;
+    float target_pitch_rad;
+    float target_pitch_deg;
+    float actual_yaw_deg;
+    float actual_yaw_rad;
+    float actual_pitch_rad;
+    float actual_pitch_deg;
+    float actual_yaw_gyro_rad_s;
+    float actual_pitch_gyro_rad_s;
+    float yaw_error_deg;
+    float yaw_error_wrapped_deg;
+    float yaw_error_rad;
+    float pitch_error_rad;
+    float pitch_error_deg;
+
+    float tx_q[4];
+    float tx_yaw_rad;
+    float tx_pitch_rad;
+    float tx_yaw_vel_rad_s;
+    float tx_pitch_vel_rad_s;
+    float tx_bullet_speed;
+    uint16_t tx_bullet_count;
+
+    uint32_t rx_update_count;
+    uint32_t rx_apply_count;
+    uint32_t rx_reject_count;
+    uint32_t rx_no_update_count;
+    uint32_t tx_count;
+} AutoAimDebugData_t;
+
 // 全局调试数据实例
 RobotCmdDebugData_t cmd_debug_data = {0};
+volatile AutoAimDebugData_t auto_aim_debug_data = {0};
 
 // 为了兼容现有代码和 Ozone 调试，保留原变量名作为宏别名
 #define debug_yaw_motor_raw         (cmd_debug_data.yaw_motor_raw)
@@ -122,7 +183,17 @@ static Chassis_Ctrl_Cmd_s chassis_cmd_send;      // 发送给底盘应用的信�
 static Chassis_Upload_Data_s chassis_fetch_data; // 从底盘应用接收的反馈信息信息,底盘功率枪口热量与底盘运动状态等
 
 static RC_ctrl_t *rc_data;              // 遥控器数据,初始化时返回
-static Vision_Recv_s *vision_recv_data; // 视觉接收数据指针,初始化时返回
+static SP_Vision_RecvData_t *vision_recv_data; // 视觉接收数据指针,初始化时返回
+static SP_Vision_RecvData_t vision_cmd_data;
+
+// 自瞄视觉数据指数滤波参数
+// 值越小越平滑 (0.1 ~ 0.3 适合大多数场景)，越大响应越快但越容易抖动
+#define AUTO_AIM_VISION_FILTER_YAW    0.20f  // Yaw 滤波系数
+#define AUTO_AIM_VISION_FILTER_PITCH  0.18f  // Pitch 滤波系数（稍小于Yaw，因为pitch抖动更明显）
+
+// 视觉角度增量滤波状态（指数低通）
+static float vision_yaw_filtered_rad = 0.0f;
+static float vision_pitch_filtered_rad = 0.0f;
 
 static Publisher_t *gimbal_cmd_pub;            // 云台控制消息发布者
 static Subscriber_t *gimbal_feed_sub;          // 云台反馈信息订阅者
@@ -142,6 +213,7 @@ BMI088_Data_t bmi088_data;
 static uint8_t last_control_mode = 0; // 0=未知, 1=遥控器, 2=键鼠
 #define CONTROL_MODE_RC 1
 #define CONTROL_MODE_KB 2
+#define CONTROL_MODE_VISION 3
 #define KB_CHASSIS_MOVE_VALUE 5000.0f
 #define PITCH_RC_DEADBAND 5
 #define RAD2DEG 57.295779513f
@@ -213,6 +285,128 @@ static void SyncGimbalTargetToCurrent(void)
     gimbal_cmd_send.pitch = gimbal_fetch_data.pitch_motor_position;
 }
 
+static void AutoAimDebugCaptureRecv(const SP_Vision_RecvData_t *data)
+{
+    if (!data)
+        return;
+
+    auto_aim_debug_data.vision_data_updated = data->data_updated;
+    auto_aim_debug_data.vision_control = data->control;
+    auto_aim_debug_data.vision_shoot = data->shoot;
+    auto_aim_debug_data.vision_recv_mode = data->mode;
+    auto_aim_debug_data.rx_yaw_rad = data->yaw;
+    auto_aim_debug_data.rx_pitch_rad = data->pitch;
+    auto_aim_debug_data.rx_yaw_vel_rad_s = data->yaw_speed;
+    auto_aim_debug_data.rx_pitch_vel_rad_s = data->pitch_speed;
+    auto_aim_debug_data.rx_yaw_acc_rad_s2 = data->yaw_acc;
+    auto_aim_debug_data.rx_pitch_acc_rad_s2 = data->pitch_acc;
+    auto_aim_debug_data.rx_yaw_deg = data->yaw * RAD2DEG;
+    auto_aim_debug_data.rx_pitch_deg = data->pitch * RAD2DEG;
+}
+
+static void AutoAimDebugCaptureApply(const SP_Vision_RecvData_t *data,
+                                     float yaw_before_deg,
+                                     float pitch_before_rad,
+                                     uint8_t applied)
+{
+    AutoAimDebugCaptureRecv(data);
+    auto_aim_debug_data.target_yaw_before_vision_deg = yaw_before_deg;
+    auto_aim_debug_data.target_pitch_before_vision_rad = pitch_before_rad;
+    auto_aim_debug_data.target_yaw_after_vision_deg = gimbal_cmd_send.yaw;
+    auto_aim_debug_data.target_pitch_after_vision_rad = gimbal_cmd_send.pitch;
+    auto_aim_debug_data.applied_yaw_delta_deg = gimbal_cmd_send.yaw - yaw_before_deg;
+    auto_aim_debug_data.applied_pitch_delta_rad = gimbal_cmd_send.pitch - pitch_before_rad;
+
+    if (applied)
+        auto_aim_debug_data.rx_apply_count++;
+    else
+        auto_aim_debug_data.rx_reject_count++;
+}
+
+static uint8_t ApplyVisionAimCommand(void)
+{
+    if (SP_VisionGetAndClearRecvData(&vision_cmd_data))
+    {
+        uint8_t vision_applied = 0U;
+        float yaw_before_vision = gimbal_cmd_send.yaw;
+        float pitch_before_vision = gimbal_cmd_send.pitch;
+        auto_aim_debug_data.rx_update_count++;
+        if (vision_cmd_data.control &&
+            isfinite(vision_cmd_data.yaw) &&
+            isfinite(vision_cmd_data.pitch))
+        {
+            // 指数滤波：filtered = alpha * raw + (1-alpha) * filtered
+            vision_yaw_filtered_rad = AUTO_AIM_VISION_FILTER_YAW * vision_cmd_data.yaw
+                                   + (1.0f - AUTO_AIM_VISION_FILTER_YAW) * vision_yaw_filtered_rad;
+            vision_pitch_filtered_rad = AUTO_AIM_VISION_FILTER_PITCH * vision_cmd_data.pitch
+                                     + (1.0f - AUTO_AIM_VISION_FILTER_PITCH) * vision_pitch_filtered_rad;
+
+            gimbal_cmd_send.yaw = gimbal_fetch_data.gimbal_imu_data.YawTotalAngle + vision_yaw_filtered_rad * RAD2DEG;
+            gimbal_cmd_send.pitch = gimbal_fetch_data.pitch_motor_position - vision_pitch_filtered_rad;
+            vision_applied = 1U;
+        }
+        AutoAimDebugCaptureApply(&vision_cmd_data,
+                                 yaw_before_vision,
+                                 pitch_before_vision,
+                                 vision_applied);
+        return vision_applied;
+    }
+
+    auto_aim_debug_data.rx_no_update_count++;
+    return 0U;
+}
+
+static void AutoAimDebugUpdateState(void)
+{
+    auto_aim_debug_data.robot_state = (uint8_t)robot_state;
+    auto_aim_debug_data.auto_aim_enabled = gimbal_cmd_send.auto_aim_enabled;
+    auto_aim_debug_data.vision_online = SP_VisionIsOnline();
+    auto_aim_debug_data.gimbal_mode = (uint8_t)gimbal_cmd_send.gimbal_mode;
+    auto_aim_debug_data.chassis_mode = (uint8_t)chassis_cmd_send.chassis_mode;
+    auto_aim_debug_data.vision_data_updated = vision_recv_data ? vision_recv_data->data_updated : 0U;
+
+    auto_aim_debug_data.target_yaw_deg = gimbal_cmd_send.yaw;
+    auto_aim_debug_data.target_yaw_rad = gimbal_cmd_send.yaw * 0.01745329252f;
+    auto_aim_debug_data.target_pitch_rad = gimbal_cmd_send.pitch;
+    auto_aim_debug_data.target_pitch_deg = gimbal_cmd_send.pitch * RAD2DEG;
+    auto_aim_debug_data.actual_yaw_deg = gimbal_fetch_data.gimbal_imu_data.YawTotalAngle;
+    auto_aim_debug_data.actual_yaw_rad = gimbal_fetch_data.gimbal_imu_data.YawTotalAngle * 0.01745329252f;
+    auto_aim_debug_data.actual_pitch_rad = gimbal_fetch_data.pitch_motor_position;
+    auto_aim_debug_data.actual_pitch_deg = gimbal_fetch_data.pitch_motor_position * RAD2DEG;
+    auto_aim_debug_data.actual_yaw_gyro_rad_s = gimbal_fetch_data.gimbal_imu_data.Gyro[2];
+    auto_aim_debug_data.actual_pitch_gyro_rad_s = gimbal_fetch_data.gimbal_imu_data.Gyro[1];
+    auto_aim_debug_data.yaw_error_deg = auto_aim_debug_data.target_yaw_deg - auto_aim_debug_data.actual_yaw_deg;
+    auto_aim_debug_data.yaw_error_wrapped_deg = WrapAngle180Deg(auto_aim_debug_data.yaw_error_deg);
+    auto_aim_debug_data.yaw_error_rad = auto_aim_debug_data.yaw_error_wrapped_deg * 0.01745329252f;
+    auto_aim_debug_data.pitch_error_rad = auto_aim_debug_data.target_pitch_rad - auto_aim_debug_data.actual_pitch_rad;
+    auto_aim_debug_data.pitch_error_deg = auto_aim_debug_data.pitch_error_rad * RAD2DEG;
+}
+
+static void AutoAimDebugCaptureTx(uint8_t mode,
+                                  const float *q,
+                                  float yaw_rad,
+                                  float pitch_rad,
+                                  float yaw_vel_rad_s,
+                                  float pitch_vel_rad_s,
+                                  float bullet_speed,
+                                  uint16_t bullet_count)
+{
+    auto_aim_debug_data.vision_send_mode = mode;
+    if (q) {
+        auto_aim_debug_data.tx_q[0] = q[0];
+        auto_aim_debug_data.tx_q[1] = q[1];
+        auto_aim_debug_data.tx_q[2] = q[2];
+        auto_aim_debug_data.tx_q[3] = q[3];
+    }
+    auto_aim_debug_data.tx_yaw_rad = yaw_rad;
+    auto_aim_debug_data.tx_pitch_rad = pitch_rad;
+    auto_aim_debug_data.tx_yaw_vel_rad_s = yaw_vel_rad_s;
+    auto_aim_debug_data.tx_pitch_vel_rad_s = pitch_vel_rad_s;
+    auto_aim_debug_data.tx_bullet_speed = bullet_speed;
+    auto_aim_debug_data.tx_bullet_count = bullet_count;
+    auto_aim_debug_data.tx_count++;
+}
+
 // 在模式切换时重新校准 IMU-电机对应关系（补偿 IMU 漂移）
 static void RecalibrateIMUMotorAlignment(void)
 {
@@ -264,7 +458,7 @@ void RobotCMDInit()
     // };
     //bmi088_test = BMI088Register(&bmi088_config);
     rc_data = RemoteControlInit(&huart3);   // 修改为对应串口,注意如果是自研板dbus协议串口需选用添加了反相器的那个
-    vision_recv_data = VisionInit(&huart1); // 视觉通信串口
+    vision_recv_data = SP_VisionInit(&huart1); // 视觉通信串口
 
     gimbal_cmd_pub = PubRegister("gimbal_cmd", sizeof(Gimbal_Ctrl_Cmd_s));
     gimbal_feed_sub = SubRegister("gimbal_feed", sizeof(Gimbal_Upload_Data_s));
@@ -410,6 +604,7 @@ static void RemoteControlSet()
     static gimbal_mode_e last_gimbal_mode = (gimbal_mode_e)0xff;
     static chassis_mode_e last_chassis_mode = (chassis_mode_e)0xff;
     gimbal_mode_e next_gimbal_mode = gimbal_cmd_send.gimbal_mode;
+    gimbal_cmd_send.auto_aim_enabled = 0;
     // 控制底盘和云台运行模式,云台待添加,云台是否始终使用IMU数据?
     if (switch_is_mid(rc_data[TEMP].rc.switch_right)) // 右侧开关状态[中],底盘跟随云台
     {
@@ -451,23 +646,12 @@ static void RemoteControlSet()
     gimbal_cmd_send.gimbal_mode = next_gimbal_mode;
 
     // 云台参数,确定云台控制数据
-    if (switch_is_mid(rc_data[TEMP].rc.switch_left)) // 左侧开关状态为[中],视觉模式 + 底盘失能 + 摩擦轮开启
+    if (switch_is_mid(rc_data[TEMP].rc.switch_left)) // 左侧开关状态为[中],视觉模式 + 底盘遥控 + 摩擦轮开启
     {
-        chassis_cmd_send.chassis_mode = CHASSIS_ZERO_FORCE;
+        gimbal_cmd_send.auto_aim_enabled = 1;
         shoot_cmd_send.friction_mode = FRICTION_ON;
         // 仅在视觉有新数据时累加diff,防止同一diff在200Hz任务中被重复累加
-        if (vision_recv_data->data_updated)
-        {
-            if (vision_recv_data->control &&
-                isfinite(vision_recv_data->yaw) &&
-                isfinite(vision_recv_data->pitch))
-            {
-                gimbal_cmd_send.yaw += vision_recv_data->yaw * RAD2DEG;
-                gimbal_cmd_send.pitch += vision_recv_data->pitch;
-            }
-            VisionDataConsumed();
-        }
-        else
+        if (ApplyVisionAimCommand() == 0U)
         {
             int16_t yaw_ch = rc_data[TEMP].rc.rocker_l_;
             int16_t pitch_ch = rc_data[TEMP].rc.rocker_l1;
@@ -477,8 +661,8 @@ static void RemoteControlSet()
             if (pitch_ch < PITCH_RC_DEADBAND && pitch_ch > -PITCH_RC_DEADBAND)
                 pitch_ch = 0;
 
-            gimbal_cmd_send.yaw -= 0.001f * (float)yaw_ch;
-            gimbal_cmd_send.pitch -= 0.00005f * (float)pitch_ch;
+            gimbal_cmd_send.yaw -= 0.0002f * (float)yaw_ch;
+            gimbal_cmd_send.pitch -= 0.00001f * (float)pitch_ch;
         }
     }
     else if (switch_is_down(rc_data[TEMP].rc.switch_left))
@@ -492,8 +676,8 @@ static void RemoteControlSet()
         if (pitch_ch < PITCH_RC_DEADBAND && pitch_ch > -PITCH_RC_DEADBAND)
             pitch_ch = 0;
 
-        gimbal_cmd_send.yaw -= 0.0015f * (float)yaw_ch;
-        gimbal_cmd_send.pitch -= 0.00005f * (float)pitch_ch;
+        gimbal_cmd_send.yaw -= 0.0003f * (float)yaw_ch;
+        gimbal_cmd_send.pitch -= 0.00001f * (float)pitch_ch;
     }
 
     // 云台软件限位
@@ -533,9 +717,12 @@ static void RemoteControlSet()
 static void MouseKeySet()
 {
     static chassis_mode_e last_chassis_mode = (chassis_mode_e)0xff;
+    static uint8_t last_mouse_right = 0;
     int16_t mouse_x = MouseDeltaFilter(rc_data[TEMP].mouse.x);
     int16_t mouse_y = MouseDeltaFilter(rc_data[TEMP].mouse.y);
+    uint8_t mouse_right = rc_data[TEMP].mouse.press_r ? 1U : 0U;
     chassis_mode_e next_chassis_mode = CHASSIS_FOLLOW_GIMBAL_YAW;
+    gimbal_cmd_send.auto_aim_enabled = 0;
 
     // 设置底盘和云台模式
     if (rc_data[TEMP].key_count[KEY_PRESS][Key_R] % 2) // R键切换底盘模式
@@ -563,12 +750,28 @@ static void MouseKeySet()
     }
     last_chassis_mode = chassis_cmd_send.chassis_mode;
 
+    if (mouse_right && !last_mouse_right)
+    {
+        SyncGimbalTargetToCurrent();
+        SP_VisionDataConsumed();
+        // 清除视觉滤波状态，确保新目标无滞后
+        vision_yaw_filtered_rad = 0.0f;
+        vision_pitch_filtered_rad = 0.0f;
+    }
+    last_mouse_right = mouse_right;
+
     int16_t mouse_pitch_delta = mouse_y;
     if (mouse_pitch_delta < MOUSE_DEADBAND && mouse_pitch_delta > -MOUSE_DEADBAND)
         mouse_pitch_delta = 0;
-    gimbal_cmd_send.yaw -= (float)mouse_x / 660 * 9;  // 系数待测
-    gimbal_cmd_send.pitch -= (float)mouse_pitch_delta / 660 * 0.4; // 系数待测,与摇杆方向一致(向上鼠标/摇杆都是减小)
+    gimbal_cmd_send.yaw -= (float)mouse_x / 660 * 1.8f;  // 系数待测
+    gimbal_cmd_send.pitch -= (float)mouse_pitch_delta / 660 * 0.08f; // 系数待测,与摇杆方向一致(向上鼠标/摇杆都是减小)
     LIMIT_MIN_MAX(gimbal_cmd_send.pitch, PITCH_MIN_RAD, PITCH_MAX_RAD);
+
+    if (mouse_right)
+    {
+        gimbal_cmd_send.auto_aim_enabled = 1;
+        ApplyVisionAimCommand();
+    }
 
     shoot_cmd_send.bullet_speed = (Bullet_Speed_e)22; // 固定弹速22m/s
     static uint8_t last_mouse_left = 0;
@@ -646,6 +849,7 @@ static void EmergencyHandler()
         else
         {
             gimbal_cmd_send.gimbal_mode = GIMBAL_ZERO_FORCE;
+            gimbal_cmd_send.auto_aim_enabled = 0;
             chassis_cmd_send.chassis_mode = CHASSIS_ZERO_FORCE;
             ClearChassisMotionCommand();
             shoot_cmd_send.shoot_mode = SHOOT_OFF;
@@ -660,6 +864,7 @@ static void EmergencyHandler()
     {
         robot_state = ROBOT_STOP;
         gimbal_cmd_send.gimbal_mode = GIMBAL_ZERO_FORCE;
+        gimbal_cmd_send.auto_aim_enabled = 0;
         chassis_cmd_send.chassis_mode = CHASSIS_ZERO_FORCE;
         ClearChassisMotionCommand();
         shoot_cmd_send.shoot_mode = SHOOT_OFF;
@@ -694,12 +899,17 @@ void RobotCMDTask()
     else if (switch_is_up(rc_data[TEMP].rc.switch_left))
         current_control_mode = CONTROL_MODE_KB;
     else
-        current_control_mode = CONTROL_MODE_RC;
+        current_control_mode = CONTROL_MODE_VISION;
 
     // 检测模式切换,切换时同步云台角度
     if (current_control_mode != last_control_mode)
     {
         SyncGimbalTargetToCurrent();
+        // 清除视觉滤波状态，防止切换时旧滤波值导致目标滞后
+        vision_yaw_filtered_rad = 0.0f;
+        vision_pitch_filtered_rad = 0.0f;
+        if (current_control_mode == CONTROL_MODE_VISION)
+            SP_VisionDataConsumed();
         last_control_mode = current_control_mode;
     }
     
@@ -723,6 +933,7 @@ void RobotCMDTask()
         gimbal_cmd_send.gimbal_mode != GIMBAL_ZERO_FORCE)
     {
         /* 与当前电机位置对齐，避免目标为 0 rad 而实际不在零位时产生巨大误差导致剧烈抖动 */
+        gimbal_cmd_send.yaw = gimbal_fetch_data.gimbal_imu_data.YawTotalAngle;
         gimbal_cmd_send.pitch = gimbal_fetch_data.pitch_motor_position;
     }
     LIMIT_MIN_MAX(gimbal_cmd_send.pitch, PITCH_MIN_RAD, PITCH_MAX_RAD);
@@ -742,31 +953,82 @@ void RobotCMDTask()
     cmd_debug_data.chassis_wz = chassis_cmd_send.wz;
     
     last_gimbal_yaw_target = gimbal_cmd_send.yaw;
+    AutoAimDebugUpdateState();
 
-    // 更新视觉发送数据（仅在机器人正常工作时更新，实际发送由DecodeVision回调触发）
+    // 更新视觉发送数据（仅在机器人正常工作时更新，实际发送由 DecodeVision 回调触发）
     if (robot_state == ROBOT_READY)
     {
-        static float vision_q[4];
-        Vision_Mode_e vision_mode = switch_is_mid(rc_data[TEMP].rc.switch_left) ? VISION_MODE_AUTO_AIM : VISION_MODE_IDLE;
-
-        uint16_t vision_bullet_count = 0u;
-        if (shoot_fetch_data.bullet_count > 0)
-        {
-            vision_bullet_count = (uint16_t)shoot_fetch_data.bullet_count;
-        }
-
-        VisionSetStatus(vision_mode, (float)shoot_cmd_send.bullet_speed, vision_bullet_count);
-        EularAngleToQuaternion(gimbal_fetch_data.gimbal_imu_data.Yaw,
-                               gimbal_fetch_data.gimbal_imu_data.Pitch,
-                               gimbal_fetch_data.gimbal_imu_data.Roll,
-                               vision_q);
-        VisionSetQuaternion(vision_q);
+        uint8_t vision_mode = gimbal_cmd_send.auto_aim_enabled ? 1U : 0U;  /* 1=自瞄, 0=空闲 */
+        float vision_q[4];
+        float vision_yaw_rad;
+        float vision_pitch_rad;
+        float vision_yaw_vel_rad_s;
+        float vision_pitch_vel_rad_s;
+        float vision_bullet_speed;
+        uint16_t vision_bullet_count = 0U;
 
         #define DEG2RAD_VISION 0.01745329252f
-        VisionSetAltitude(gimbal_fetch_data.gimbal_imu_data.YawTotalAngle * DEG2RAD_VISION,
-                          gimbal_fetch_data.pitch_motor_position,
-                          gimbal_fetch_data.gimbal_imu_data.Gyro[2],
-                          gimbal_fetch_data.gimbal_imu_data.Gyro[1]);
+        EularAngleToQuaternion(gimbal_fetch_data.gimbal_imu_data.Yaw,
+                               -gimbal_fetch_data.pitch_motor_position * RAD2DEG,
+                               gimbal_fetch_data.gimbal_imu_data.Roll,
+                               vision_q);
+        vision_yaw_rad = gimbal_fetch_data.gimbal_imu_data.Yaw * DEG2RAD_VISION;
+        vision_pitch_rad = -gimbal_fetch_data.pitch_motor_position;
+        vision_yaw_vel_rad_s = gimbal_fetch_data.gimbal_imu_data.Gyro[2];
+        vision_pitch_vel_rad_s = -gimbal_fetch_data.gimbal_imu_data.Gyro[1];
+        vision_bullet_speed = (float)shoot_cmd_send.bullet_speed;
+        SP_Vision_SetQuaternion(vision_q);
+        SP_Vision_SetGimbalAttitude(
+            vision_yaw_rad,  /* yaw, rad */
+            vision_pitch_rad,                             /* pitch, rad */
+            vision_yaw_vel_rad_s,                        /* yaw speed, rad/s */
+            vision_pitch_vel_rad_s,                        /* pitch speed, rad/s */
+            gimbal_fetch_data.gimbal_imu_data.Roll * DEG2RAD_VISION            /* roll, rad */
+        );
+        SP_Vision_SetStatus(vision_mode, vision_bullet_speed, vision_bullet_count);
+        AutoAimDebugCaptureTx(vision_mode,
+                              vision_q,
+                              vision_yaw_rad,
+                              vision_pitch_rad,
+                              vision_yaw_vel_rad_s,
+                              vision_pitch_vel_rad_s,
+                              vision_bullet_speed,
+                              vision_bullet_count);
+        SP_VisionSend();
+    }
+    else if (robot_state == ROBOT_STOP)
+    {
+        float vision_q[4];
+        float vision_yaw_rad;
+        float vision_pitch_rad;
+        float vision_yaw_vel_rad_s;
+        float vision_pitch_vel_rad_s;
+
+        EularAngleToQuaternion(gimbal_fetch_data.gimbal_imu_data.Yaw,
+                               -gimbal_fetch_data.pitch_motor_position * RAD2DEG,
+                               gimbal_fetch_data.gimbal_imu_data.Roll,
+                               vision_q);
+        vision_yaw_rad = gimbal_fetch_data.gimbal_imu_data.Yaw * 0.01745329252f;
+        vision_pitch_rad = -gimbal_fetch_data.pitch_motor_position;
+        vision_yaw_vel_rad_s = gimbal_fetch_data.gimbal_imu_data.Gyro[2];
+        vision_pitch_vel_rad_s = -gimbal_fetch_data.gimbal_imu_data.Gyro[1];
+
+        SP_Vision_SetQuaternion(vision_q);
+        SP_Vision_SetGimbalAttitude(vision_yaw_rad,
+                                    vision_pitch_rad,
+                                    vision_yaw_vel_rad_s,
+                                    vision_pitch_vel_rad_s,
+                                    gimbal_fetch_data.gimbal_imu_data.Roll * 0.01745329252f);
+        SP_Vision_SetStatus(0U, 0.0f, 0U);
+        AutoAimDebugCaptureTx(0U,
+                              vision_q,
+                              vision_yaw_rad,
+                              vision_pitch_rad,
+                              vision_yaw_vel_rad_s,
+                              vision_pitch_vel_rad_s,
+                              0.0f,
+                              0U);
+        SP_VisionSend();
     }
 
     // 推送消息,双板通信,视觉通信等

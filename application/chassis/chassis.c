@@ -95,6 +95,43 @@ extern Referee_Debug_s referee_debug; // 在 rm_referee.c 中定义
 // 不接裁判系统时的默认功率限制
 #define DEFAULT_POWER_LIMIT 45.0f
 
+// === 复活检测相关 ===
+#define CHASSIS_REVIVE_BUFFER_MS 200    // 复活后零输出缓冲时间 (ms)
+#define CHASSIS_TASK_PERIOD_MS   5       // ChassisTask 周期 (200Hz)
+#define CHASSIS_REVIVE_BUFFER_CYCLES (CHASSIS_REVIVE_BUFFER_MS / CHASSIS_TASK_PERIOD_MS)  // 40个周期 ≈ 200ms
+
+// 底盘输出能力判断：HP > 0 且 裁判系统允许底盘输出
+static uint8_t IsChassisOutputEnabled(void)
+{
+    if (referee_data == NULL) {
+        // 无裁判系统时，默认允许输出
+        return 1;
+    }
+    
+    // 检查底盘是否可以被控制：HP > 0
+    if (referee_data->GameRobotState.current_HP == 0) {
+        return 0;
+    }
+    
+    // 检查裁判系统是否允许底盘输出
+    // power_management_chassis_output: 1=允许, 0=不允许(被裁判系统惩罚)
+    if (referee_data->GameRobotState.power_management_chassis_output == 0) {
+        return 0;
+    }
+    
+    return 1;
+}
+
+// 复活检测状态机
+typedef enum {
+    CHASSIS_REVIVE_STATE_NORMAL = 0,  // 正常运行
+    CHASSIS_REVIVE_STATE_JUST_ENABLED, // 刚检测到可输出，上升沿
+    CHASSIS_REVIVE_STATE_BUFFER,       // 零输出缓冲中
+} chassis_revive_state_e;
+
+static chassis_revive_state_e chassis_revive_state = CHASSIS_REVIVE_STATE_NORMAL;
+static uint32_t chassis_revive_start_tick = 0;  // 复活起始时间戳
+
 /* 私有函数计算的中介变量,设为静态避免参数传递的开销 */
 static float chassis_vx, chassis_vy;                      // 将云台系的速度投影到底盘
 static float vt_lf, vt_rf, vt_lb, vt_rb;                  // 底盘速度解算后的临时输出,待进行限幅
@@ -102,10 +139,27 @@ static float vt_lf, vt_rf, vt_lb, vt_rb;                  // 底盘速度解算�
 // 调试变量：底盘跟随误差角追踪
 float debug_chassis_offset_recv = 0;     // 从 cmd 接收到的 offset_angle
 float debug_chassis_follow_err = 0;      // 底盘跟随时实际使用的误差角 (wrap 后)
-float debug_chassis_wz_output = 0;       // 底盘跟随 PID 输出的旋转速度
-float debug_chassis_yaw_rate_feedback = 0; // 角速度反馈值
+float debug_chassis_wz_output = 0;       // 底盘跟随 PID 输出的旋转速度 (滤波后)
+float debug_chassis_wz_raw = 0;          // PID 输出的旋转速度 (滤波前)
+float debug_chassis_yaw_rate_feedback = 0; // 角速度反馈值 (滤波后)
+float debug_chassis_yaw_rate_raw = 0;   // 角速度反馈值 (滤波前)
 float debug_chassis_yaw_rate_target = 0;   // 角速度目标值 (外环输出)
 float debug_chassis_angle_output = 0;      // 外环输出 (内环给定)
+
+// 复活检测调试变量（可在 Ozone 中直接展开监视）
+float debug_chassis_revive_state = 0;       // 0=正常, 1=刚检测到复活, 2=缓冲中
+float debug_chassis_output_enabled = 0;     // 当前底盘是否可输出
+float debug_chassis_buffer_cycles = 0;      // 当前缓冲剩余周期数
+
+// === 底盘跟随抗抖动滤波参数 ===
+#define YAW_RATE_LPF_ALPHA     0.15f   // 角速度反馈低通滤波系数 (越小越平滑,建议0.1-0.3)
+#define WZ_OUTPUT_LPF_ALPHA    0.20f   // wz输出低通滤波系数 (越小越平滑)
+#define WZ_STEADY_DEADZONE     15.0f   // 稳态 wz 死区阈值 (deg/s)，低于此值认为已到位
+#define WZ_Settle_AngleThreshold 2.5f   // 角度误差小于此值时才启用稳态死区 (度)
+
+// 滤波状态变量
+static float yaw_rate_lpf = 0.0f;       // 角速度反馈滤波值
+static float wz_lpf = 0.0f;             // wz输出滤波值
 
 static float WrapAngle180Deg(float deg)
 {
@@ -114,23 +168,6 @@ static float WrapAngle180Deg(float deg)
     while (deg < -180.0f)
         deg += 360.0f;
     return deg;
-}
-
-static void ResetPIDRuntimeState(PIDInstance *pid)
-{
-    pid->Measure = 0.0f;
-    pid->Last_Measure = 0.0f;
-    pid->Err = 0.0f;
-    pid->Last_Err = 0.0f;
-    pid->Last_ITerm = 0.0f;
-    pid->Pout = 0.0f;
-    pid->Iout = 0.0f;
-    pid->Dout = 0.0f;
-    pid->ITerm = 0.0f;
-    pid->Output = 0.0f;
-    pid->Last_Output = 0.0f;
-    pid->Last_Dout = 0.0f;
-    pid->Ref = 0.0f;
 }
 
 void ChassisInit()
@@ -191,25 +228,25 @@ void ChassisInit()
     PIDInit(&buffer_PID, &Buffer_pid_conf); // 缓冲能量PID初始化
 
     PID_Init_Config_s Angle_pid_conf = {
-        .Kp = 7.0f,         // 略微减小
+        .Kp = 6.0f,         // 适当减小，降低超调
         .Ki = 0.0f,
-        .Kd = 7.0f,         // 增大微分阻尼
+        .Kd = 4.0f,         // 减小微分，降低振荡
         .IntegralLimit = 500.0f,
         .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
         .Derivative_LPF_RC = 0.05f,  // 增强滤波
-        .MaxOut = 3000.0f,  // 限制输出峰值
-        .DeadBand = 1.5f,
+        .MaxOut = 2500.0f,  // 限制输出峰值，降低响应激进程度
+        .DeadBand = 2.0f,  // 适当增大死区，减少稳态小幅振荡
     };
     PIDInit(&angle_PID, &Angle_pid_conf);
 
     // 角速度环 PID (内环,串级控制)
     PID_Init_Config_s YawRate_pid_conf = {
-        .Kp = 38.0f,        // 微调
+        .Kp = 35.0f,        // 略降低，使响应更柔和
         .Ki = 0.0f,
-        .Kd = 2.5f,         // 增大微分
+        .Kd = 2.0f,         // 略降低微分
         .IntegralLimit = 3000.0f,
         .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
-        .MaxOut = 9000.0f,  // 减小限制
+        .MaxOut = 8000.0f,  // 降低最大输出限制
         .DeadBand = 5.0f,
     };
     PIDInit(&yaw_rate_PID, &YawRate_pid_conf);
@@ -275,6 +312,15 @@ static void LimitChassisOutput()
     // 功率限制待添加
     // referee_data->PowerHeatData.chassis_power;
     // referee_data->PowerHeatData.chassis_power_buffer;
+
+    // 复活缓冲期间强制零输出，防止积分释放导致抖动
+    if (chassis_revive_state == CHASSIS_REVIVE_STATE_BUFFER) {
+        DJIMotorSetRef(motor_lf, 0.0f);
+        DJIMotorSetRef(motor_rf, 0.0f);
+        DJIMotorSetRef(motor_lb, 0.0f);
+        DJIMotorSetRef(motor_rb, 0.0f);
+        return;
+    }
 
     // 完成功率限制后进行电机参考输入设定
     DJIMotorSetRef(motor_lf, vt_lf);
@@ -384,6 +430,53 @@ void ChassisTask()
         SetPowerLimit(DEFAULT_POWER_LIMIT);
     }
 
+    // === 复活检测：检测底盘输出能力从"不可输出"变为"可输出"的上升沿 ===
+    static uint8_t last_chassis_output_enabled = 0;
+    uint8_t current_chassis_output_enabled = IsChassisOutputEnabled();
+
+    // 检测上升沿：从不可输出变为可输出
+    if (current_chassis_output_enabled && !last_chassis_output_enabled) {
+        // 检测到复活上升沿，清除所有PID状态
+        ResetPIDRuntimeState(&angle_PID);
+        ResetPIDRuntimeState(&yaw_rate_PID);
+        ResetAllMotorPID();  // 清除四个底盘电机速度PID
+
+        // 进入缓冲状态
+        chassis_revive_state = CHASSIS_REVIVE_STATE_JUST_ENABLED;
+        chassis_revive_start_tick = 0;  // 将由下一帧设置
+
+        LOGINFO("[chassis] revive detected, clearing PID states");
+    }
+    last_chassis_output_enabled = current_chassis_output_enabled;
+
+    // === 复活后零输出缓冲处理 ===
+    uint8_t force_zero_output = 0;
+    if (chassis_revive_state == CHASSIS_REVIVE_STATE_JUST_ENABLED ||
+        chassis_revive_state == CHASSIS_REVIVE_STATE_BUFFER) {
+
+        // 初始化起始时间戳
+        if (chassis_revive_start_tick == 0) {
+            chassis_revive_start_tick = 1;  // 标记为已启动
+        } else if (chassis_revive_start_tick == 1) {
+            chassis_revive_start_tick = 2;  // 第二帧开始计时
+        } else if (chassis_revive_start_tick >= 2) {
+            chassis_revive_start_tick++;
+
+            // 缓冲时间结束，恢复正常运行
+            if (chassis_revive_start_tick >= CHASSIS_REVIVE_BUFFER_CYCLES) {
+                chassis_revive_state = CHASSIS_REVIVE_STATE_NORMAL;
+                chassis_revive_start_tick = 0;
+                LOGINFO("[chassis] revive buffer finished, resuming normal control");
+            } else {
+                // 缓冲期间强制零输出
+                force_zero_output = 1;
+                if (chassis_revive_state == CHASSIS_REVIVE_STATE_JUST_ENABLED) {
+                    chassis_revive_state = CHASSIS_REVIVE_STATE_BUFFER;
+                }
+            }
+        }
+    }
+
     if (chassis_cmd_recv.chassis_mode == CHASSIS_ZERO_FORCE)
     { // 如果出现重要模块离线或遥控器设置为急停,让电机停止
         chassis_cmd_recv.vx = 0.0f;
@@ -412,6 +505,18 @@ void ChassisTask()
     {
         ResetPIDRuntimeState(&angle_PID);
         ResetPIDRuntimeState(&yaw_rate_PID);
+        // 重置滤波器状态，防止历史值导致初始冲击
+        yaw_rate_lpf = 0.0f;
+        wz_lpf = 0.0f;
+    }
+
+    // 更新复活检测调试变量
+    debug_chassis_revive_state = (float)chassis_revive_state;
+    debug_chassis_output_enabled = (float)current_chassis_output_enabled;
+    if (chassis_revive_state == CHASSIS_REVIVE_STATE_BUFFER) {
+        debug_chassis_buffer_cycles = (float)(CHASSIS_REVIVE_BUFFER_CYCLES - chassis_revive_start_tick);
+    } else {
+        debug_chassis_buffer_cycles = 0.0f;
     }
 
     // 根据控制模式设定旋转速度
@@ -427,9 +532,12 @@ void ChassisTask()
         debug_chassis_follow_err = follow_err_deg;
 
         // 获取底盘角速度反馈 (deg/s) - Chassis_IMU_data 在 CHASSIS_BOARD 和 ONE_BOARD 下都已初始化
-        float yaw_rate_feedback = Chassis_IMU_data->Gyro[Z] * RAD_2_DEGREE; // rad/s -> deg/s
+        float yaw_rate_raw = Chassis_IMU_data->Gyro[Z] * RAD_2_DEGREE; // rad/s -> deg/s
+        debug_chassis_yaw_rate_raw = yaw_rate_raw;
 
-        debug_chassis_yaw_rate_feedback = yaw_rate_feedback;
+        // 低通滤波：平滑角速度反馈，抑制高频噪声尖峰
+        yaw_rate_lpf = yaw_rate_lpf * (1.0f - YAW_RATE_LPF_ALPHA) + yaw_rate_raw * YAW_RATE_LPF_ALPHA;
+        debug_chassis_yaw_rate_feedback = yaw_rate_lpf;
 
         // 串级PID：外环(角度环) -> 内环(角速度环)
         // 外环：角度误差 -> 角速度目标
@@ -437,10 +545,20 @@ void ChassisTask()
         debug_chassis_angle_output = yaw_rate_target;
         debug_chassis_yaw_rate_target = yaw_rate_target;
 
-        // 内环：角速度误差 -> 最终输出
+        // 内环：角速度误差 -> 最终输出 (使用滤波后的角速度反馈)
         // 按 PID 接口顺序使用角速度反馈和角速度目标
-        chassis_cmd_recv.wz = PIDCalculate(&yaw_rate_PID, yaw_rate_feedback, yaw_rate_target);
-        debug_chassis_wz_output = chassis_cmd_recv.wz;
+        float wz_raw = PIDCalculate(&yaw_rate_PID, yaw_rate_lpf, yaw_rate_target);
+        debug_chassis_wz_raw = wz_raw;
+
+        // 稳态死区：当角度误差很小且 wz 输出很小时，清零输出防止持续小幅振荡
+        if (fabsf(follow_err_deg) < WZ_Settle_AngleThreshold && fabsf(wz_raw) < WZ_STEADY_DEADZONE) {
+            wz_raw = 0.0f;
+        }
+
+        // wz 输出低通滤波：平滑 PID 输出尖峰，减少底盘抖动
+        wz_lpf = wz_lpf * (1.0f - WZ_OUTPUT_LPF_ALPHA) + wz_raw * WZ_OUTPUT_LPF_ALPHA;
+        chassis_cmd_recv.wz = wz_lpf;
+        debug_chassis_wz_output = wz_lpf;
     }
         break;
     case CHASSIS_ROTATE: // 自旋,同时保持全向机动;当前wz维持定值,后续增加不规则的变速策略

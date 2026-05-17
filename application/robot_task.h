@@ -11,7 +11,6 @@
 #include "ins_task.h"
 #include "motor_task.h"
 #include "referee_task.h"
-#include "master_process.h"
 #include "daemon.h"
 #include "HT04.h"
 #include "buzzer.h"
@@ -128,11 +127,10 @@ __attribute__((noreturn)) void StartROBOTTASK(void const *argument)
     {
         robot_start = DWT_GetTimeline_ms();
         RobotTask();
-        VisionSend();
         robot_dt = DWT_GetTimeline_ms() - robot_start;
         if (robot_dt > 5)
             LOGERROR("[freeRTOS] ROBOT core Task is being DELAY! dt = [%f]", robot_dt);
-        osDelay(5);
+        osDelay(1);
     }
 }
 

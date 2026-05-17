@@ -4,8 +4,10 @@
 #include "bsp_usart.h"
 #include <stdint.h>
 
-#define VISION_FRAME_HEAD_0 'S'
-#define VISION_FRAME_HEAD_1 'P'
+#define VISION_FRAME_HEAD_0 0x5Au
+#define VISION_FRAME_HEAD_1 0xA5u
+#define VISION_FRAME_TAIL_0 0x7Fu
+#define VISION_FRAME_TAIL_1 0xFEu
 
 #define VISION_RECV_SIZE 29u
 #define VISION_SEND_SIZE 43u

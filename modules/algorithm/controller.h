@@ -133,4 +133,12 @@ void PIDInit(PIDInstance *pid, PID_Init_Config_s *config);
  */
 float PIDCalculate(PIDInstance *pid, float measure, float ref);
 
+/**
+ * @brief 重置PID运行状态（清除积分项、微分项、误差等）
+ *        用于防止积分累积导致的控制量突变
+ *
+ * @param pid PID实例指针
+ */
+void ResetPIDRuntimeState(PIDInstance *pid);
+
 #endif

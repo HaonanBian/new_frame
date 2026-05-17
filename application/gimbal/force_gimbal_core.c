@@ -2,8 +2,11 @@
 #include <string.h> // memset
 
 // 内部工具
+// 平滑符号函数：替代 sgn()，解决粘滑振荡（stick-slip）
+// 使用 tanh 平滑过渡，k 控制过渡宽度（k越大越接近sgn，但对噪声越敏感）
+// 对于摩擦大的同步带，建议 k=5~20
 static float fsgn(float x) {
-    return (x > 0.001f) ? 1.0f : ((x < -0.001f) ? -1.0f : 0.0f);
+    return tanhf(x * 10.0f);
 }
 
 static uint16_t float_to_uint(float x, float x_min, float x_max, int bits) {
@@ -95,8 +98,10 @@ void ForceAxis_CalcVelocityControl(ForceAxis_t *axis, float pos_loop_vel_cmd) {
 
 void ForceAxis_MapOutput(ForceAxis_t *axis) {
     if (axis->motor_type == MOTOR_TYPE_DM_MIT) {
-        if (axis->total_torque > 10.0f) axis->total_torque = 10.0f;
-        if (axis->total_torque < -10.0f) axis->total_torque = -10.0f;
+        // 🔧 扭矩限幅：DM4310 峰值扭矩约 33Nm，留安全余量限幅 ±20Nm
+        // 原限幅 ±10Nm 过小，严重限制了云台响应能力
+        if (axis->total_torque > 20.0f) axis->total_torque = 20.0f;
+        if (axis->total_torque < -20.0f) axis->total_torque = -20.0f;
 
         uint16_t p = float_to_uint(0, MIT_P_MIN, MIT_P_MAX, 16);
         uint16_t v = float_to_uint(0, MIT_V_MIN, MIT_V_MAX, 12);

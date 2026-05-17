@@ -484,3 +484,23 @@ float GetChassisPowerBuffer(void)
 {
     return referee_power_data.chassis_power_buffer;
 }
+
+/**
+ * @brief 重置所有电机PID的状态（积分项、微分项等）
+ *        用于复活后清除累积的PID状态，防止积分释放导致抖动
+ */
+void ResetAllMotorPID(void)
+{
+    // 遍历所有注册的电机，清除其三环PID的状态
+    for (uint8_t i = 0; i < idx; i++) {
+        DJIMotorInstance *motor = dji_motor_instance[i];
+        if (motor != NULL) {
+            // 清除速度环PID
+            ResetPIDRuntimeState(&motor->motor_controller.speed_PID);
+            // 清除电流环PID
+            ResetPIDRuntimeState(&motor->motor_controller.current_PID);
+            // 清除角度环PID
+            ResetPIDRuntimeState(&motor->motor_controller.angle_PID);
+        }
+    }
+}

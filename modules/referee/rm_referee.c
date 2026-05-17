@@ -17,6 +17,7 @@
 #include "daemon.h"
 #include "bsp_log.h"
 #include "cmsis_os.h"
+#include "general_def.h"
 
 #define RE_RX_BUFFER_SIZE 255u // 裁判系统接收缓冲区大小
 #define REF_PROTOCOL_HEADER_SIZE LEN_HEADER
@@ -130,6 +131,7 @@ static void JudgeReadFrameData(uint8_t *buff)
 			break;
 		case ID_game_robot_pos: // 0x0203
 			memcpy(&referee_info.GameRobotPos, (buff + DATA_Offset), LEN_game_robot_pos);
+			referee_info.GameRobotPos.yaw *= RAD_2_DEGREE;
 			break;
 		case ID_buff_musk: // 0x0204
 			memcpy(&referee_info.BuffMusk, (buff + DATA_Offset), LEN_buff_musk);

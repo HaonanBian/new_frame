@@ -86,4 +86,10 @@ float GetChassisPower(void);
  * @return float 缓冲能量值
  */
 float GetChassisPowerBuffer(void);
+
+/**
+ * @brief 重置所有电机PID的状态（积分项、微分项等）
+ *        用于复活后清除累积的PID状态，防止积分释放导致抖动
+ */
+void ResetAllMotorPID(void);
 #endif // !DJI_MOTOR_H

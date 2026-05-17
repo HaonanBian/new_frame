@@ -1,4 +1,4 @@
-#include "gimbal.h"
+﻿#include "gimbal.h"
 #include "motor_def.h"
 #include "robot_def.h"
 #include "dji_motor.h"
@@ -27,8 +27,10 @@
 // 斜坡规划参数
 // 限制云台最大转速，防止大角度跳变时冲击控制器导致超调和抖动
 #define YAW_MAX_VEL_RAD_S     15.0f   // Yaw 最大角速度 (rad/s)，约 860°/s
+#define PITCH_MAX_VEL_RAD_S   10.0f   // Pitch 最大角速度 (rad/s)，约 573°/s
 
 static float ramp_yaw_out = 0.0f;   // Yaw 斜坡输出（弧度）
+static float ramp_pitch_out = 0.0f; // Pitch 斜坡输出（弧度）
 
 static inline void Ramp_Update(float raw_target_rad, float max_vel_rad_s, float dt, float *out)
 {
@@ -154,7 +156,7 @@ static float GimbalFuzzyPIDCalculate(GimbalFuzzyPIDInstance *gimbal_fpid, float 
         float dt = (gimbal_fpid->dt > 0.0001f) ? gimbal_fpid->dt : 0.0001f;
         gimbal_fpid->Pout = gimbal_fpid->Kp * gimbal_fpid->e;
         gimbal_fpid->ITerm = gimbal_fpid->Ki * gimbal_fpid->e * dt;
-        gimbal_fpid->Dout = gimbal_fpid->Kd * (gimbal_fpid->Last_Measure - gimbal_fpid->Measure) / dt;
+        gimbal_fpid->Dout = gimbal_fpid->Kd * (gimbal_fpid->Measure - gimbal_fpid->Last_Measure) / dt;
         gimbal_fpid->Iout += gimbal_fpid->ITerm;
 
         float temp_output = gimbal_fpid->Pout + gimbal_fpid->Iout + gimbal_fpid->Dout;
@@ -283,15 +285,75 @@ static const GimbalYawParamConfig_t gimbal_pitch_param_config = {
     .C = 0.0f,
     .G_cos = 0.0f,
     .G_sin = 0.0f,
-    .PosKp = 25.0f,
+    .PosKp = 20.0f,       // 降低位置环P: 25.0 -> 20.0，减少响应激进度
     .PosKi = 0.0f,
     .PosKd = 0.0f,
-    .VelKp = 0.5f,
+    .VelKp = 0.4f,        // 降低速度环P: 0.5 -> 0.4，更平缓
     .VelKi = 0.0f,
     .VelKd = 0.0f,
     .FuzzyPIDConfig = {0},
-    .SmootherWn = 35.0f,
-    .SmootherZeta = 1.0f,
+    .SmootherWn = 30.0f,  // 降低自然频率: 35.0 -> 30.0
+    .SmootherZeta = 1.3f, // 提高阻尼比: 1.0 -> 1.3，抑制抖动
+    .SmootherDt = 0.001f,
+};
+
+
+// 自瞄参数和手动控制参数分开定义，方便切换和调整
+
+
+// 自瞄Yaw参数 - 针对"位置振荡+速度超调"的调整
+// 核心思路：增加速度环阻尼抑制超调，微调前馈减少激进的加速度补偿
+static const GimbalYawParamConfig_t auto_aim_yaw_param_config = {
+    .J = 0.002f,       // 降低: 0.001 -> 0.001，保持小值减少前馈激进补偿
+    .B = 0.06f,        // 保持
+    .C = 0.05f,        // 保持
+    .G_cos = 0.0f,
+    .G_sin = 0.0f,
+    .PosKp = 8.0f,       // 保持
+    .PosKi = 0.0f,
+    .PosKd = 0.0f,        // 保持
+    .VelKp = 0.3f,        // 降低: 2.5 -> 1.8，减少速度环比例增益，降低超调
+    .VelKi = 0.0f,
+    .VelKd = 0.0f,        // 大幅提高: 2.5 -> 4.0，增加速度环微分阻尼，抑制振荡
+    .FuzzyPIDConfig = {
+        .Kp0 = 14.0f,
+        .Ki0 = 0.0f,
+        .Kd0 = 0.0f,
+        .MaxOut = 25.0f,  // 保持
+        .DeadBand = 0.010f, // 降低: 0.012 -> 0.010，进一步减小死区
+        .e_max = 0.5f,
+        .ec_max = 5.0f,
+        .Kp_min = 3.0f,
+        .Kp_max = 20.0f,  // 保持
+        .Ki_min = 0.0f,
+        .Ki_max = 0.0f,
+        .Kd_min = 0.0f,
+        .Kd_max = 7.0f,
+        .Kp_scale = 0.0f,
+        .Ki_scale = 0.0f,
+        .Kd_scale = 0.0f,
+    },
+    .SmootherWn = 50.0f,  // 略降低: 55.0 -> 50.0，稍微减缓轨迹响应以配合更低的阻尼
+    .SmootherZeta = 1.35f, // 提高: 1.25 -> 1.35，增加轨迹平滑器的阻尼
+    .SmootherDt = 0.001f,
+};
+
+// 自瞄Pitch参数 - 消除高频抖动
+static const GimbalYawParamConfig_t auto_aim_pitch_param_config = {
+    .J = 0.001f,
+    .B = 0.03f,
+    .C = 0.05f,
+    .G_cos = 0.0f,
+    .G_sin = 0.0f,
+    .PosKp = 10.0f,        // 进一步降低位置环P: 8.0 -> 6.0，更保守抑制抖动
+    .PosKi = 0.0f,
+    .PosKd = 0.0f,
+    .VelKp = 0.8f,        // 降低速度环P: 1.0 -> 0.8，更平缓
+    .VelKi = 0.0f,
+    .VelKd = 0.2f,        // 降低微分项: 0.3 -> 0.2，进一步减少噪声放大
+    .FuzzyPIDConfig = {0},
+    .SmootherWn = 12.0f,  // 降低自然频率: 15.0 -> 12.0，更平缓响应
+    .SmootherZeta = 2.0f, // 提高阻尼比: 1.6 -> 2.0，强烈抑制抖动
     .SmootherDt = 0.001f,
 };
 
@@ -308,6 +370,7 @@ static Publisher_t *gimbal_pub;
 static Subscriber_t *gimbal_sub;
 static Gimbal_Upload_Data_s gimbal_feedback_data;
 static Gimbal_Ctrl_Cmd_s gimbal_cmd_recv;
+static uint8_t gimbal_active_auto_aim_param = 0xffU;
 
 static BMI088Instance *bmi088;
 
@@ -335,6 +398,45 @@ static inline void SyncSmootherState(TrajectorySmoother_t *smoother, float posit
     smoother->out_pos = position;
     smoother->out_vel = 0.0f;
     smoother->out_acc = 0.0f;
+}
+
+static void ApplyGimbalParamConfig(uint8_t auto_aim_enabled, float yaw_position, float pitch_position)
+{
+    if (gimbal_active_auto_aim_param == auto_aim_enabled)
+        return;
+
+    const GimbalYawParamConfig_t *yaw_param = auto_aim_enabled ? &auto_aim_yaw_param_config : &gimbal_yaw_param_config;
+    const GimbalYawParamConfig_t *pitch_param = auto_aim_enabled ? &auto_aim_pitch_param_config : &gimbal_pitch_param_config;
+
+    force_yaw.axis.J = yaw_param->J;
+    force_yaw.axis.B = yaw_param->B;
+    force_yaw.axis.C = yaw_param->C;
+    force_yaw.axis.G_cos = yaw_param->G_cos;
+    force_yaw.axis.G_sin = yaw_param->G_sin;
+    ForceAxis_SetPID(&force_yaw.axis,
+                     yaw_param->PosKp, yaw_param->PosKi, yaw_param->PosKd,
+                     yaw_param->VelKp, yaw_param->VelKi, yaw_param->VelKd);
+    GimbalFuzzyPIDInit(&force_yaw.fuzzy_pid, &yaw_param->FuzzyPIDConfig);
+    Smoother_Init(&force_yaw.smoother, yaw_param->SmootherWn, yaw_param->SmootherZeta, yaw_param->SmootherDt);
+    Smoother_SetWrap(&force_yaw.smoother, 0);
+
+    force_pitch.axis.J = pitch_param->J;
+    force_pitch.axis.B = pitch_param->B;
+    force_pitch.axis.C = pitch_param->C;
+    force_pitch.axis.G_cos = pitch_param->G_cos;
+    force_pitch.axis.G_sin = pitch_param->G_sin;
+    ForceAxis_SetPID(&force_pitch.axis,
+                     pitch_param->PosKp, pitch_param->PosKi, pitch_param->PosKd,
+                     pitch_param->VelKp, pitch_param->VelKi, pitch_param->VelKd);
+    Smoother_Init(&force_pitch.smoother, pitch_param->SmootherWn, pitch_param->SmootherZeta, pitch_param->SmootherDt);
+    Smoother_SetWrap(&force_pitch.smoother, 0);
+
+    ResetForceAxisPIDState(&force_yaw.axis);
+    ResetForceAxisPIDState(&force_pitch.axis);
+    ramp_yaw_out = yaw_position;
+    SyncSmootherState(&force_yaw.smoother, yaw_position);
+    SyncSmootherState(&force_pitch.smoother, pitch_position);
+    gimbal_active_auto_aim_param = auto_aim_enabled;
 }
 
 /**
@@ -478,15 +580,25 @@ void GimbalTask()
     // Pitch: 电机编码器反馈 (由于 IMU 无法反馈 Pitch)
     float motor_pitch_feedback = pitch_motor->measure.position;
     float motor_pitch_velocity = pitch_motor->measure.velocity;
-    ForceAxis_UpdateFeedback(&force_pitch.axis, motor_pitch_feedback, motor_pitch_velocity);
+    // 电机速度使用一阶低通滤波，减少编码器量化噪声经微分项放大导致的抖动
+    static float motor_pitch_vel_filtered = 0.0f;
+    const float MOTOR_VEL_LPF_ALPHA = 0.15f; // 滤波系数，越小越平滑 (1ms 周期)
+    motor_pitch_vel_filtered = MOTOR_VEL_LPF_ALPHA * motor_pitch_velocity
+                             + (1.0f - MOTOR_VEL_LPF_ALPHA) * motor_pitch_vel_filtered;
+    ForceAxis_UpdateFeedback(&force_pitch.axis, motor_pitch_feedback, motor_pitch_vel_filtered);
 
     // 更新全局变量供其他任务使用
     gimbal_pitch_angle_deg = motor_pitch_feedback * 57.295779513f;
 
+    ApplyGimbalParamConfig(gimbal_cmd_recv.auto_aim_enabled, imu_yaw_feedback, motor_pitch_feedback);
+
     if (gimbal_cmd_recv.gimbal_mode != last_mode)
     {
         ramp_yaw_out = imu_yaw_feedback;
+        ramp_pitch_out = motor_pitch_feedback;
+        SyncSmootherState(&force_yaw.smoother, imu_yaw_feedback);
         SyncSmootherState(&force_pitch.smoother, motor_pitch_feedback);
+        ResetForceAxisPIDState(&force_yaw.axis);
         ResetForceAxisPIDState(&force_pitch.axis);
         last_mode = gimbal_cmd_recv.gimbal_mode;
     }
@@ -502,7 +614,10 @@ void GimbalTask()
 
             // 同步斜坡输出，防止切回时跳变
             ramp_yaw_out   = imu_yaw_feedback;
+            ramp_pitch_out = motor_pitch_feedback;
+            SyncSmootherState(&force_yaw.smoother, imu_yaw_feedback);
             SyncSmootherState(&force_pitch.smoother, motor_pitch_feedback);
+            ResetForceAxisPIDState(&force_yaw.axis);
             ResetForceAxisPIDState(&force_pitch.axis);
             break;
 
@@ -537,11 +652,17 @@ void GimbalTask()
             // 斜坡限速  — 限制最大角速度，防止大角度跳变冲击控制器
             float dt_ms = 1.0f; // 1ms 控制周期
             Ramp_Update(raw_yaw_target,   YAW_MAX_VEL_RAD_S,   dt_ms * 0.001f, &ramp_yaw_out);
+            Ramp_Update(raw_pitch_target, PITCH_MAX_VEL_RAD_S, dt_ms * 0.001f, &ramp_pitch_out);
 
-            // 斜坡输出直接送入控制器 
-            ForceAxis_SetTarget(&force_yaw.axis,   ramp_yaw_out,   0.0f, 0.0f);
-            Smoother_Update(&force_pitch.smoother, raw_pitch_target);
-            ForceAxis_SetTarget(&force_pitch.axis, force_pitch.smoother.out_pos, force_pitch.smoother.out_vel, force_pitch.smoother.out_acc);
+            // Yaw: 斜坡 -> 轨迹平滑器 -> 控制器（与Pitch一致的双层平滑）
+            Smoother_Update(&force_yaw.smoother, ramp_yaw_out);
+            ForceAxis_SetTarget(&force_yaw.axis, force_yaw.smoother.out_pos,
+                                force_yaw.smoother.out_vel, force_yaw.smoother.out_acc);
+
+            // Pitch: 斜坡 -> 轨迹平滑器 -> 控制器
+            Smoother_Update(&force_pitch.smoother, ramp_pitch_out);
+            ForceAxis_SetTarget(&force_pitch.axis, force_pitch.smoother.out_pos,
+                                force_pitch.smoother.out_vel, force_pitch.smoother.out_acc);
 
             GimbalFuzzyPIDCalculateAxis(&force_yaw.axis, &force_yaw.fuzzy_pid, yaw_mode, time_now);
             ForceAxis_Calc(&force_pitch.axis, pitch_mode, time_now);
