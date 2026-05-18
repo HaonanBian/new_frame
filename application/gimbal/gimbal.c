@@ -592,6 +592,16 @@ void GimbalTask()
 
     ApplyGimbalParamConfig(gimbal_cmd_recv.auto_aim_enabled, imu_yaw_feedback, motor_pitch_feedback);
 
+    if (gimbal_cmd_recv.reset_state)
+    {
+        ramp_yaw_out = imu_yaw_feedback;
+        ramp_pitch_out = motor_pitch_feedback;
+        SyncSmootherState(&force_yaw.smoother, imu_yaw_feedback);
+        SyncSmootherState(&force_pitch.smoother, motor_pitch_feedback);
+        ResetForceAxisPIDState(&force_yaw.axis);
+        ResetForceAxisPIDState(&force_pitch.axis);
+    }
+
     if (gimbal_cmd_recv.gimbal_mode != last_mode)
     {
         ramp_yaw_out = imu_yaw_feedback;

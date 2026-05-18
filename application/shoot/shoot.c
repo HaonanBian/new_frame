@@ -145,12 +145,17 @@ static void LoaderRunAngleMotion(void)
 static float GetHeatLimitedShootRate(float shoot_rate)
 {
     uint16_t rest_heat = GetShooterRestHeat();
+    uint16_t slowdown_rest = HEAT_BURST_SLOWDOWN_REST;
 
     if (IsLowLevelHeatLimit()) {
-        return shoot_rate;
+        uint16_t heat_limit = referee_data->GameRobotState.shooter_barrel_heat_limit;
+        if (rest_heat == 0 || heat_limit == 0 || (uint32_t)rest_heat * 100U > (uint32_t)heat_limit * 80U) {
+            return shoot_rate;
+        }
+        return shoot_rate > HEAT_BURST_SLOW_RATE ? HEAT_BURST_SLOW_RATE : shoot_rate;
     }
 
-    if (rest_heat == 0 || rest_heat > HEAT_BURST_SLOWDOWN_REST) {
+    if (rest_heat == 0 || rest_heat > slowdown_rest) {
         return shoot_rate;
     }
 
@@ -163,7 +168,8 @@ static uint8_t ShouldBurstSwitchToSingle(void)
     if (IsLowLevelHeatLimit()) {
         return 0;
     }
-    return rest_heat != 0 && rest_heat <= HEAT_BURST_SINGLE_REST;
+    uint16_t single_rest = HEAT_BURST_SINGLE_REST;
+    return rest_heat != 0 && rest_heat <= single_rest;
 }
 
 // static void LoaderUpdateBulletCount(void)
@@ -215,7 +221,7 @@ static heat_limit_status_e ShootHeatLimitCheck(void)
         return HEAT_OK;
     }
     
-    uint16_t heat_margin = IsLowLevelHeatLimit() ? 0 : HEAT_SAFE_MARGIN;
+    uint16_t heat_margin = HEAT_SAFE_MARGIN;
     
     // 当前热量 + 预估两发热量 > 上限，禁止发射
     if (current_heat + 2 * BULLET_HEAT_ESTIMATE + heat_margin > heat_limit) {

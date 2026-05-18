@@ -449,6 +449,15 @@ void ChassisTask()
     }
     last_chassis_output_enabled = current_chassis_output_enabled;
 
+    if (chassis_cmd_recv.reset_state)
+    {
+        ResetPIDRuntimeState(&angle_PID);
+        ResetPIDRuntimeState(&yaw_rate_PID);
+        ResetAllMotorPID();
+        yaw_rate_lpf = 0.0f;
+        wz_lpf = 0.0f;
+    }
+
     // === 复活后零输出缓冲处理 ===
     uint8_t force_zero_output = 0;
     if (chassis_revive_state == CHASSIS_REVIVE_STATE_JUST_ENABLED ||

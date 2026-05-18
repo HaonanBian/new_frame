@@ -414,6 +414,22 @@ static void RecalibrateIMUMotorAlignment(void)
     g_recalibrate_chassis_alignment = 1;
 }
 
+static void ClearKeyboardShakeState(void)
+{
+    ClearChassisMotionCommand();
+    SyncGimbalTargetToCurrent();
+    RequestOffsetAngleReset();
+    RecalibrateIMUMotorAlignment();
+    chassis_cmd_send.offset_angle = 0.0f;
+    chassis_offset_filtered = 0.0f;
+    gimbal_cmd_send.auto_aim_enabled = 0;
+    chassis_cmd_send.reset_state = 1U;
+    gimbal_cmd_send.reset_state = 1U;
+    vision_yaw_filtered_rad = 0.0f;
+    vision_pitch_filtered_rad = 0.0f;
+    SP_VisionDataConsumed();
+}
+
 void RobotCMDInit()
 {
     // BMI088_Init_Config_s bmi088_config = {
@@ -718,14 +734,33 @@ static void MouseKeySet()
 {
     static chassis_mode_e last_chassis_mode = (chassis_mode_e)0xff;
     static uint8_t last_mouse_right = 0;
+    static uint8_t last_r_key_count = 0;
+    static uint8_t last_f_key_count = 0;
+    static uint8_t kb_chassis_rotate_enabled = 0;
     int16_t mouse_x = MouseDeltaFilter(rc_data[TEMP].mouse.x);
     int16_t mouse_y = MouseDeltaFilter(rc_data[TEMP].mouse.y);
     uint8_t mouse_right = rc_data[TEMP].mouse.press_r ? 1U : 0U;
+    uint8_t clear_shake_triggered = 0U;
     chassis_mode_e next_chassis_mode = CHASSIS_FOLLOW_GIMBAL_YAW;
     gimbal_cmd_send.auto_aim_enabled = 0;
 
     // 设置底盘和云台模式
-    if (rc_data[TEMP].key_count[KEY_PRESS][Key_R] % 2) // R键切换底盘模式
+    uint8_t r_key_count = rc_data[TEMP].key_count[KEY_PRESS][Key_R];
+    if (r_key_count != last_r_key_count)
+    {
+        kb_chassis_rotate_enabled = !kb_chassis_rotate_enabled;
+        last_r_key_count = r_key_count;
+    }
+
+    uint8_t f_key_count = rc_data[TEMP].key_count[KEY_PRESS][Key_F];
+    if (f_key_count != last_f_key_count)
+    {
+        clear_shake_triggered = 1U;
+        kb_chassis_rotate_enabled = 0U;
+        last_f_key_count = f_key_count;
+    }
+
+    if (kb_chassis_rotate_enabled) // R键切换底盘模式
         next_chassis_mode = CHASSIS_ROTATE;
 
     chassis_cmd_send.chassis_mode = next_chassis_mode;
@@ -749,6 +784,14 @@ static void MouseKeySet()
         cmd_debug_data.mode_switch_count++;
     }
     last_chassis_mode = chassis_cmd_send.chassis_mode;
+
+    if (clear_shake_triggered)
+    {
+        ClearKeyboardShakeState();
+        mouse_x = 0;
+        mouse_y = 0;
+        mouse_right = 0U;
+    }
 
     if (mouse_right && !last_mouse_right)
     {
@@ -807,8 +850,15 @@ static void MouseKeySet()
     if (rc_data[TEMP].key[KEY_PRESS].e)
         shoot_cmd_send.friction_mode = FRICTION_OFF;
     chassis_cmd_send.chassis_power_limit = 0;
-    chassis_cmd_send.vx = rc_data[TEMP].key[KEY_PRESS].a * KB_CHASSIS_MOVE_VALUE - rc_data[TEMP].key[KEY_PRESS].d * KB_CHASSIS_MOVE_VALUE; // 前后
-    chassis_cmd_send.vy = rc_data[TEMP].key[KEY_PRESS].w * KB_CHASSIS_MOVE_VALUE - rc_data[TEMP].key[KEY_PRESS].s * KB_CHASSIS_MOVE_VALUE; // 左右
+    if (clear_shake_triggered)
+    {
+        ClearChassisMotionCommand();
+    }
+    else
+    {
+        chassis_cmd_send.vx = rc_data[TEMP].key[KEY_PRESS].a * KB_CHASSIS_MOVE_VALUE - rc_data[TEMP].key[KEY_PRESS].d * KB_CHASSIS_MOVE_VALUE; // 前后
+        chassis_cmd_send.vy = rc_data[TEMP].key[KEY_PRESS].w * KB_CHASSIS_MOVE_VALUE - rc_data[TEMP].key[KEY_PRESS].s * KB_CHASSIS_MOVE_VALUE; // 左右
+    }
 
     switch (rc_data[TEMP].key[KEY_PRESS].shift) // 待添加 按shift允许超功率 消耗缓冲能量
     {
@@ -891,6 +941,8 @@ void RobotCMDTask()
 
     // 根据gimbal的反馈值计算云台和底盘正方向的夹角,不需要传参,通过static私有变量完成
     CalcOffsetAngle();
+    chassis_cmd_send.reset_state = 0U;
+    gimbal_cmd_send.reset_state = 0U;
 
     // 判断当前控制模式
     uint8_t current_control_mode = 0;
