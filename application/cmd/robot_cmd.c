@@ -335,14 +335,24 @@ static uint8_t ApplyVisionAimCommand(void)
             isfinite(vision_cmd_data.yaw) &&
             isfinite(vision_cmd_data.pitch))
         {
-            // 指数滤波：filtered = alpha * raw + (1-alpha) * filtered
-            vision_yaw_filtered_rad = AUTO_AIM_VISION_FILTER_YAW * vision_cmd_data.yaw
-                                   + (1.0f - AUTO_AIM_VISION_FILTER_YAW) * vision_yaw_filtered_rad;
-            vision_pitch_filtered_rad = AUTO_AIM_VISION_FILTER_PITCH * vision_cmd_data.pitch
-                                     + (1.0f - AUTO_AIM_VISION_FILTER_PITCH) * vision_pitch_filtered_rad;
+// ====== 【修复 Yaw 轴多圈疯转问题】 ======
+            float vision_yaw_deg = vision_cmd_data.yaw * RAD2DEG;
+            float yaw_diff = vision_yaw_deg - gimbal_cmd_send.yaw;
+            
+            // 将误差限制在 ±180° 内 (算出最短转动路径)
+            while (yaw_diff > 180.0f) yaw_diff -= 360.0f;
+            while (yaw_diff < -180.0f) yaw_diff += 360.0f;
+            
+            // 累加误差，保证多圈数据的连续性，绝不强行覆写
+            gimbal_cmd_send.yaw += yaw_diff; 
+            
+            gimbal_cmd_send.pitch = -vision_cmd_data.pitch;
 
-            gimbal_cmd_send.yaw = gimbal_fetch_data.gimbal_imu_data.YawTotalAngle + vision_yaw_filtered_rad * RAD2DEG;
-            gimbal_cmd_send.pitch = gimbal_fetch_data.pitch_motor_position - vision_pitch_filtered_rad;
+            // 2. 将上位机高价值的绝对速度、加速度前馈直接灌入
+            gimbal_cmd_send.yaw_vel   = vision_cmd_data.yaw_speed;  
+            gimbal_cmd_send.yaw_acc   = vision_cmd_data.yaw_acc;  
+            gimbal_cmd_send.pitch_vel = vision_cmd_data.pitch_speed; 
+            gimbal_cmd_send.pitch_acc = vision_cmd_data.pitch_acc;   
             vision_applied = 1U;
         }
         AutoAimDebugCaptureApply(&vision_cmd_data,
@@ -757,6 +767,13 @@ static void MouseKeySet()
         // 清除视觉滤波状态，确保新目标无滞后
         vision_yaw_filtered_rad = 0.0f;
         vision_pitch_filtered_rad = 0.0f;
+    }
+    else if (!mouse_right && last_mouse_right)
+    {
+        // ====== 【新增：修复退出自瞄时的点头/跳变】 ======
+        // 刚松开右键（退出自瞄）：强行把目标对齐到当前的真实物理坐标
+        // 彻底清空自瞄期间残留的追踪误差，保证平滑过渡
+        SyncGimbalTargetToCurrent();
     }
     last_mouse_right = mouse_right;
 

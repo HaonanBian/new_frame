@@ -334,7 +334,7 @@ static const GimbalYawParamConfig_t auto_aim_yaw_param_config = {
         .Kd_scale = 0.0f,
     },
     .SmootherWn = 50.0f,  // 略降低: 55.0 -> 50.0，稍微减缓轨迹响应以配合更低的阻尼
-    .SmootherZeta = 1.35f, // 提高: 1.25 -> 1.35，增加轨迹平滑器的阻尼
+    .SmootherZeta = 1.00f, // 提高: 1.25 -> 1.35，增加轨迹平滑器的阻尼
     .SmootherDt = 0.001f,
 };
 
@@ -410,7 +410,7 @@ static void ApplyGimbalParamConfig(uint8_t auto_aim_enabled, float yaw_position,
 
     force_yaw.axis.J = yaw_param->J;
     force_yaw.axis.B = yaw_param->B;
-    force_yaw.axis.C = yaw_param->C;
+    ForceAxis_SetDirectionC(&force_yaw.axis, yaw_param->C, yaw_param->C);
     force_yaw.axis.G_cos = yaw_param->G_cos;
     force_yaw.axis.G_sin = yaw_param->G_sin;
     ForceAxis_SetPID(&force_yaw.axis,
@@ -418,18 +418,16 @@ static void ApplyGimbalParamConfig(uint8_t auto_aim_enabled, float yaw_position,
                      yaw_param->VelKp, yaw_param->VelKi, yaw_param->VelKd);
     GimbalFuzzyPIDInit(&force_yaw.fuzzy_pid, &yaw_param->FuzzyPIDConfig);
     Smoother_Init(&force_yaw.smoother, yaw_param->SmootherWn, yaw_param->SmootherZeta, yaw_param->SmootherDt);
-    Smoother_SetWrap(&force_yaw.smoother, 0);
 
     force_pitch.axis.J = pitch_param->J;
     force_pitch.axis.B = pitch_param->B;
-    force_pitch.axis.C = pitch_param->C;
+    ForceAxis_SetDirectionC(&force_pitch.axis, pitch_param->C, pitch_param->C);
     force_pitch.axis.G_cos = pitch_param->G_cos;
     force_pitch.axis.G_sin = pitch_param->G_sin;
     ForceAxis_SetPID(&force_pitch.axis,
                      pitch_param->PosKp, pitch_param->PosKi, pitch_param->PosKd,
                      pitch_param->VelKp, pitch_param->VelKi, pitch_param->VelKd);
     Smoother_Init(&force_pitch.smoother, pitch_param->SmootherWn, pitch_param->SmootherZeta, pitch_param->SmootherDt);
-    Smoother_SetWrap(&force_pitch.smoother, 0);
 
     ResetForceAxisPIDState(&force_yaw.axis);
     ResetForceAxisPIDState(&force_pitch.axis);
@@ -526,7 +524,6 @@ void GimbalInit()
     
     // 轨迹平滑器（稍微提高响应速度）
     Smoother_Init(&force_yaw.smoother, gimbal_yaw_param_config.SmootherWn, gimbal_yaw_param_config.SmootherZeta, gimbal_yaw_param_config.SmootherDt);
-    Smoother_SetWrap(&force_yaw.smoother, 0);
 
     ForceAxis_Init(&force_pitch.axis, MOTOR_TYPE_DM_MIT, 1.0f,
                    gimbal_pitch_param_config.J,
@@ -538,7 +535,6 @@ void GimbalInit()
                      gimbal_pitch_param_config.PosKp, gimbal_pitch_param_config.PosKi, gimbal_pitch_param_config.PosKd,
                      gimbal_pitch_param_config.VelKp, gimbal_pitch_param_config.VelKi, gimbal_pitch_param_config.VelKd);
     Smoother_Init(&force_pitch.smoother, gimbal_pitch_param_config.SmootherWn, gimbal_pitch_param_config.SmootherZeta, gimbal_pitch_param_config.SmootherDt);
-    Smoother_SetWrap(&force_pitch.smoother, 0);
 
     gimbal_pub = PubRegister("gimbal_feed", sizeof(Gimbal_Upload_Data_s));
     gimbal_sub = SubRegister("gimbal_cmd", sizeof(Gimbal_Ctrl_Cmd_s));
@@ -651,24 +647,68 @@ void GimbalTask()
 
             // 斜坡限速  — 限制最大角速度，防止大角度跳变冲击控制器
             float dt_ms = 1.0f; // 1ms 控制周期
-            Ramp_Update(raw_yaw_target,   YAW_MAX_VEL_RAD_S,   dt_ms * 0.001f, &ramp_yaw_out);
             Ramp_Update(raw_pitch_target, PITCH_MAX_VEL_RAD_S, dt_ms * 0.001f, &ramp_pitch_out);
-
-            // Yaw: 斜坡 -> 轨迹平滑器 -> 控制器（与Pitch一致的双层平滑）
-            Smoother_Update(&force_yaw.smoother, ramp_yaw_out);
-            ForceAxis_SetTarget(&force_yaw.axis, force_yaw.smoother.out_pos,
-                                force_yaw.smoother.out_vel, force_yaw.smoother.out_acc);
 
             // Pitch: 斜坡 -> 轨迹平滑器 -> 控制器
             Smoother_Update(&force_pitch.smoother, ramp_pitch_out);
             ForceAxis_SetTarget(&force_pitch.axis, force_pitch.smoother.out_pos,
                                 force_pitch.smoother.out_vel, force_pitch.smoother.out_acc);
-
-            GimbalFuzzyPIDCalculateAxis(&force_yaw.axis, &force_yaw.fuzzy_pid, yaw_mode, time_now);
             ForceAxis_Calc(&force_pitch.axis, pitch_mode, time_now);
-
-            float final_yaw_torque = force_yaw.axis.total_torque;
             float final_pitch_torque = force_pitch.axis.total_torque;
+            
+            // === [Yaw 轴]：遥控器与自瞄精准分流 ===
+            float final_yaw_torque = 0.0f;
+
+            if (gimbal_cmd_recv.auto_aim_enabled)
+            {
+                // ========================================================
+                // 【高阶调参神器】：将这两个变量直接拖进 Ozone 的监视窗口！
+                // ========================================================
+                static float tune_ratio_sm  = 1.0f;  // 平滑器速度/加速度权重
+                static float tune_ratio_vis = 0.2f;  // 视觉预测速度/加速度权重
+                
+                // 1. 让平滑器正常工作，吃进绝对位置，生成连续丝滑的轨迹“底座”
+                Smoother_Update(&force_yaw.smoother, gimbal_cmd_recv.yaw);
+                
+                // 2. 核心混合算法：按照你的系数，将平滑波形与视觉预测波形进行加权融合
+                float mixed_vel = tune_ratio_sm * force_yaw.smoother.out_vel 
+                                + tune_ratio_vis * gimbal_cmd_recv.yaw_vel;
+                                
+                float mixed_acc = tune_ratio_sm * force_yaw.smoother.out_acc 
+                                + tune_ratio_vis * gimbal_cmd_recv.yaw_acc;
+
+                // 3. 将混合后的目标喂给底层引擎
+                // 【注意】：位置（out_pos）绝对不能混合，必须完全使用平滑器的位置，否则会出现瞬间的空间瞬移
+                ForceAxis_SetTarget(&force_yaw.axis, 
+                                    force_yaw.smoother.out_pos, 
+                                    mixed_vel, 
+                                    mixed_acc);
+                
+                // 4. 核心计算 (生成动力学前馈 ff_torque 和 纠错反馈 pid_torque)
+                ForceAxis_Calc(&force_yaw.axis, yaw_mode, time_now);
+                
+                // 5. 静摩擦踹脚逻辑 (Stiction Kick)
+                float error_pos = force_yaw.axis.target_pos - force_yaw.axis.current_pos;
+                float stiction_torque = 0.0f;
+                // 当速度极慢，且位置误差突破死区时，给个瞬时力矩踹过去
+                if (fabsf(force_yaw.axis.current_vel) < 0.1f) {
+                    if (error_pos > 0.01f) stiction_torque = 0.05f; 
+                    else if (error_pos < -0.01f) stiction_torque = -0.05f;
+                }
+                
+                final_yaw_torque = force_yaw.axis.total_torque + stiction_torque;
+            }
+            else
+            {
+                // --------- 【遥控器模式】：保持原有的 Fuzzy PID + Ramp 不变 ---------
+                Ramp_Update(raw_yaw_target, YAW_MAX_VEL_RAD_S, dt_ms * 0.001f, &ramp_yaw_out);
+                Smoother_Update(&force_yaw.smoother, ramp_yaw_out);
+                ForceAxis_SetTarget(&force_yaw.axis, force_yaw.smoother.out_pos,
+                                    force_yaw.smoother.out_vel, force_yaw.smoother.out_acc);
+
+                GimbalFuzzyPIDCalculateAxis(&force_yaw.axis, &force_yaw.fuzzy_pid, yaw_mode, time_now);
+                final_yaw_torque = force_yaw.axis.total_torque;
+            }
 
             if (yaw_motor->motor_settings.feedback_reverse_flag == FEEDBACK_DIRECTION_REVERSE) final_yaw_torque *= -1;
             if (pitch_motor->motor_settings.feedback_reverse_flag == FEEDBACK_DIRECTION_REVERSE) final_pitch_torque *= -1;

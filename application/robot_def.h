@@ -172,6 +172,12 @@ typedef struct
 { // 云台角度控制
     float yaw;
     float pitch;
+// ====== 新增：上位机高阶运动学前馈通道 ======
+    float yaw_vel;      // 上位机计算的目标角速度 (rad/s)
+    float yaw_acc;      // 上位机计算的目标角加速度 (rad/s^2)
+    float pitch_vel;    // 上位机计算的目标角速度 (rad/s)
+    float pitch_acc;    // 上位机计算的目标角加速度 (rad/s^2)
+
     float chassis_rotate_wz;
 
     gimbal_mode_e gimbal_mode;
