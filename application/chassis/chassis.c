@@ -23,6 +23,7 @@
 #include "bsp_dwt.h"
 #include "bsp_log.h"
 #include "arm_math.h"
+#include <math.h>
 
 // 调试：裁判系统状态检查计数器
 static uint32_t referee_check_counter = 0;
@@ -33,6 +34,8 @@ static uint32_t referee_check_counter = 0;
 //#define HALF_TRACK_WIDTH (TRACK_WIDTH / 2.0f)   // 半轮距
 #define MOTOR_TO_CENTER 0.2626   // 轮子到中心的距离，单位m
 #define PERIMETER_WHEEL (RADIUS_WHEEL * 2 * PI) // 轮子周长
+#define CHASSIS_ROTATE_WZ_MAX 50000.0f
+#define CHASSIS_ROTATE_WZ_MOVE 10000.0f
 
 /* 底盘应用包含的模块和信息存储,底盘是单例模式,因此不需要为底盘建立单独的结构体 */
 #ifdef CHASSIS_BOARD // 如果是底盘板,使用板载IMU获取底盘转动角速度
@@ -145,6 +148,9 @@ float debug_chassis_yaw_rate_feedback = 0; // 角速度反馈值 (滤波后)
 float debug_chassis_yaw_rate_raw = 0;   // 角速度反馈值 (滤波前)
 float debug_chassis_yaw_rate_target = 0;   // 角速度目标值 (外环输出)
 float debug_chassis_angle_output = 0;      // 外环输出 (内环给定)
+float debug_chassis_rotate_trans_max = 0.0f;
+float debug_chassis_rotate_wz_target = CHASSIS_ROTATE_WZ_MAX;
+float debug_chassis_rotate_wz_output = CHASSIS_ROTATE_WZ_MAX;
 
 // 复活检测调试变量（可在 Ozone 中直接展开监视）
 float debug_chassis_revive_state = 0;       // 0=正常, 1=刚检测到复活, 2=缓冲中
@@ -168,6 +174,39 @@ static float WrapAngle180Deg(float deg)
     while (deg < -180.0f)
         deg += 360.0f;
     return deg;
+}
+
+static float MaxAbs4(float a, float b, float c, float d)
+{
+    float max_abs = fabsf(a);
+    float abs_b = fabsf(b);
+    float abs_c = fabsf(c);
+    float abs_d = fabsf(d);
+
+    if (abs_b > max_abs)
+        max_abs = abs_b;
+    if (abs_c > max_abs)
+        max_abs = abs_c;
+    if (abs_d > max_abs)
+        max_abs = abs_d;
+
+    return max_abs;
+}
+
+static void UpdateRotateWzByTranslation(void)
+{
+    static const float k = 0.7071f;
+    float trans_lf = (-chassis_vx - chassis_vy) * k;
+    float trans_rf = (-chassis_vx + chassis_vy) * k;
+    float trans_lb = (chassis_vx - chassis_vy) * k;
+    float trans_rb = (chassis_vx + chassis_vy) * k;
+    float trans_max = MaxAbs4(trans_lf, trans_rf, trans_lb, trans_rb);
+    float target_wz = (trans_max > 1.0f) ? CHASSIS_ROTATE_WZ_MOVE : CHASSIS_ROTATE_WZ_MAX;
+
+    chassis_cmd_recv.wz = target_wz;
+    debug_chassis_rotate_trans_max = trans_max;
+    debug_chassis_rotate_wz_target = target_wz;
+    debug_chassis_rotate_wz_output = chassis_cmd_recv.wz;
 }
 
 void ChassisInit()
@@ -571,7 +610,7 @@ void ChassisTask()
     }
         break;
     case CHASSIS_ROTATE: // 自旋,同时保持全向机动;当前wz维持定值,后续增加不规则的变速策略
-        chassis_cmd_recv.wz = 10000;
+        chassis_cmd_recv.wz = CHASSIS_ROTATE_WZ_MAX;
         break;
 
     default:
@@ -593,6 +632,8 @@ void ChassisTask()
     sin_theta = arm_sin_f32(offset_rad);
     chassis_vx = chassis_cmd_recv.vx_target * cos_theta + chassis_cmd_recv.vy_target * sin_theta;
     chassis_vy = -chassis_cmd_recv.vx_target * sin_theta + chassis_cmd_recv.vy_target * cos_theta;
+    if (chassis_cmd_recv.chassis_mode == CHASSIS_ROTATE)
+        UpdateRotateWzByTranslation();
 
     // 根据控制模式进行正运动学解算,计算底盘输出
     OmniWheelCalculate();

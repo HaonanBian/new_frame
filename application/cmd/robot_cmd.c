@@ -1,6 +1,7 @@
                                                                                                                     // app
 #include "robot_def.h"
 #include "robot_cmd.h"
+#include "ui.h"
 // module
 #include "remote_control.h"
 #include "ins_task.h"
@@ -18,6 +19,24 @@
 // 私有宏,自动将编码器转换成角度值
 #define YAW_ALIGN_ANGLE ((float)YAW_CHASSIS_ALIGN_ECD) // 对齐时的角度,0-360
 #define PTICH_HORIZON_ANGLE ((float)PITCH_HORIZON_ECD) // pitch水平时电机的角度,0-360
+#define VISION_DEG2RAD 0.01745329252f
+#define VISION_PITCH_ZERO_RAD 0.0f
+#define VISION_ROLL_RAD 0.0f
+
+static void VisionSerialEulerZYXToQuaternion(float yaw_rad, float pitch_rad, float roll_rad, float *q)
+{
+    float cy = cosf(yaw_rad * 0.5f);
+    float sy = sinf(yaw_rad * 0.5f);
+    float cp = cosf(pitch_rad * 0.5f);
+    float sp = sinf(pitch_rad * 0.5f);
+    float cr = cosf(roll_rad * 0.5f);
+    float sr = sinf(roll_rad * 0.5f);
+
+    q[0] = cy * cp * cr + sy * sp * sr;
+    q[1] = cy * cp * sr - sy * sp * cr;
+    q[2] = cy * sp * cr + sy * cp * sr;
+    q[3] = sy * cp * cr - cy * sp * sr;
+}
 
 // 调试数据结构体：集中管理所有需要观测的变量
 typedef struct
@@ -346,7 +365,7 @@ static uint8_t ApplyVisionAimCommand(void)
             // 累加误差，保证多圈数据的连续性，绝不强行覆写
             gimbal_cmd_send.yaw += yaw_diff; 
             
-            gimbal_cmd_send.pitch = -vision_cmd_data.pitch;
+            gimbal_cmd_send.pitch = vision_cmd_data.pitch;
 
             // 2. 将上位机高价值的绝对速度、加速度前馈直接灌入
             gimbal_cmd_send.yaw_vel   = vision_cmd_data.yaw_speed;  
@@ -745,7 +764,8 @@ static void MouseKeySet()
     static chassis_mode_e last_chassis_mode = (chassis_mode_e)0xff;
     static uint8_t last_mouse_right = 0;
     static uint8_t last_r_key_count = 0;
-    static uint8_t last_f_key_count = 0;
+    static uint8_t last_z_key_count = 0;
+    static uint8_t last_c_key_count = 0;
     static uint8_t kb_chassis_rotate_enabled = 0;
     int16_t mouse_x = MouseDeltaFilter(rc_data[TEMP].mouse.x);
     int16_t mouse_y = MouseDeltaFilter(rc_data[TEMP].mouse.y);
@@ -762,12 +782,19 @@ static void MouseKeySet()
         last_r_key_count = r_key_count;
     }
 
-    uint8_t f_key_count = rc_data[TEMP].key_count[KEY_PRESS][Key_F];
-    if (f_key_count != last_f_key_count)
+    uint8_t z_key_count = rc_data[TEMP].key_count[KEY_PRESS][Key_Z];
+    if (z_key_count != last_z_key_count)
     {
         clear_shake_triggered = 1U;
         kb_chassis_rotate_enabled = 0U;
-        last_f_key_count = f_key_count;
+        last_z_key_count = z_key_count;
+    }
+
+    uint8_t c_key_count = rc_data[TEMP].key_count[KEY_PRESS][Key_C];
+    if (c_key_count != last_c_key_count)
+    {
+        ui_request_refresh();
+        last_c_key_count = c_key_count;
     }
 
     if (kb_chassis_rotate_enabled) // R键切换底盘模式
@@ -1036,13 +1063,12 @@ void RobotCMDTask()
         float vision_bullet_speed;
         uint16_t vision_bullet_count = 0U;
 
-        #define DEG2RAD_VISION 0.01745329252f
-        EularAngleToQuaternion(gimbal_fetch_data.gimbal_imu_data.Yaw,
-                               -gimbal_fetch_data.pitch_motor_position * RAD2DEG,
-                               gimbal_fetch_data.gimbal_imu_data.Roll,
-                               vision_q);
-        vision_yaw_rad = gimbal_fetch_data.gimbal_imu_data.Yaw * DEG2RAD_VISION;
-        vision_pitch_rad = -gimbal_fetch_data.pitch_motor_position;
+        vision_yaw_rad = gimbal_fetch_data.gimbal_imu_data.Yaw * VISION_DEG2RAD;
+        vision_pitch_rad = -(gimbal_fetch_data.pitch_motor_position - VISION_PITCH_ZERO_RAD);
+        VisionSerialEulerZYXToQuaternion(vision_yaw_rad,
+                                         vision_pitch_rad,
+                                         VISION_ROLL_RAD,
+                                         vision_q);
         vision_yaw_vel_rad_s = gimbal_fetch_data.gimbal_imu_data.Gyro[2];
         vision_pitch_vel_rad_s = -gimbal_fetch_data.gimbal_imu_data.Gyro[1];
         vision_bullet_speed = (float)shoot_cmd_send.bullet_speed;
@@ -1052,7 +1078,7 @@ void RobotCMDTask()
             vision_pitch_rad,                             /* pitch, rad */
             vision_yaw_vel_rad_s,                        /* yaw speed, rad/s */
             vision_pitch_vel_rad_s,                        /* pitch speed, rad/s */
-            gimbal_fetch_data.gimbal_imu_data.Roll * DEG2RAD_VISION            /* roll, rad */
+            VISION_ROLL_RAD            /* roll, rad */
         );
         SP_Vision_SetStatus(vision_mode, vision_bullet_speed, vision_bullet_count);
         AutoAimDebugCaptureTx(vision_mode,
@@ -1073,12 +1099,12 @@ void RobotCMDTask()
         float vision_yaw_vel_rad_s;
         float vision_pitch_vel_rad_s;
 
-        EularAngleToQuaternion(gimbal_fetch_data.gimbal_imu_data.Yaw,
-                               -gimbal_fetch_data.pitch_motor_position * RAD2DEG,
-                               gimbal_fetch_data.gimbal_imu_data.Roll,
-                               vision_q);
-        vision_yaw_rad = gimbal_fetch_data.gimbal_imu_data.Yaw * 0.01745329252f;
-        vision_pitch_rad = -gimbal_fetch_data.pitch_motor_position;
+        vision_yaw_rad = gimbal_fetch_data.gimbal_imu_data.Yaw * VISION_DEG2RAD;
+        vision_pitch_rad = -(gimbal_fetch_data.pitch_motor_position - VISION_PITCH_ZERO_RAD);
+        VisionSerialEulerZYXToQuaternion(vision_yaw_rad,
+                                         vision_pitch_rad,
+                                         VISION_ROLL_RAD,
+                                         vision_q);
         vision_yaw_vel_rad_s = gimbal_fetch_data.gimbal_imu_data.Gyro[2];
         vision_pitch_vel_rad_s = -gimbal_fetch_data.gimbal_imu_data.Gyro[1];
 
@@ -1087,7 +1113,7 @@ void RobotCMDTask()
                                     vision_pitch_rad,
                                     vision_yaw_vel_rad_s,
                                     vision_pitch_vel_rad_s,
-                                    gimbal_fetch_data.gimbal_imu_data.Roll * 0.01745329252f);
+                                    VISION_ROLL_RAD);
         SP_Vision_SetStatus(0U, 0.0f, 0U);
         AutoAimDebugCaptureTx(0U,
                               vision_q,

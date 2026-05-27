@@ -11,6 +11,7 @@
 #include "ins_task.h"
 #include "motor_task.h"
 #include "referee_task.h"
+#include "ui.h"
 #include "daemon.h"
 #include "HT04.h"
 #include "buzzer.h"
@@ -56,8 +57,8 @@ void OSTaskInit()
     robotTaskHandle = osThreadCreate(osThread(robottask), NULL);
 
     // 5. 创建UI交互任务
-    // osThreadDef(uitask, StartUITASK, osPriorityNormal, 0, 512);
-    // uiTaskHandle = osThreadCreate(osThread(uitask), NULL);
+    osThreadDef(uitask, StartUITASK, osPriorityNormal, 0, 512);
+    uiTaskHandle = osThreadCreate(osThread(uitask), NULL);
 
     // HTMotorControlInit(); // 没有注册HT电机则不会执行
     DMMotorControlInit();
@@ -137,12 +138,19 @@ __attribute__((noreturn)) void StartROBOTTASK(void const *argument)
 __attribute__((noreturn)) void StartUITASK(void const *argument)
 {
     LOGINFO("[freeRTOS] UI Task Start");
-    MyUIInit();
+    referee_info_t *referee_data = GetRefereeData();
+    while (referee_data == NULL || referee_data->GameRobotState.robot_id == 0)
+    {
+        osDelay(100);
+        referee_data = GetRefereeData();
+    }
+    ui_self_id = referee_data->GameRobotState.robot_id;
+    ui_init_g_Ungroup();
     LOGINFO("[freeRTOS] UI Init Done, communication with ref has established");
     for (;;)
     {
-        // 每给裁判系统发送一包数据会挂起一次,详见UITask函数的refereeSend()
-        UITask();
-        osDelay(1); // 即使没有任何UI需要刷新,也挂起一次,防止卡在UITask中无法切换
+        if (ui_take_refresh_request())
+            ui_init_g_Ungroup();
+        osDelay(50);
     }
 }

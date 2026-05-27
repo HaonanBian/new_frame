@@ -87,6 +87,7 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
     "modules/super_cap/*.c"
     "modules/TFminiPlus/*.c"
     "modules/unicomm/*.c"
+    "codes/*.c"
     "Middlewares/Third_Party/SEGGER/RTT/*.c"
     "Middlewares/Third_Party/SEGGER/Config/*.c"
     
@@ -154,6 +155,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
     modules/TFminiPlus
     modules/unicomm
+    codes
 
     Middlewares/Third_Party/SEGGER/Config
     Middlewares/Third_Party/SEGGER/RTT

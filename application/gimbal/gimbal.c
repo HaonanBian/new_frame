@@ -244,6 +244,25 @@ typedef struct {
     float SmootherDt;
 } GimbalYawParamConfig_t;
 
+typedef struct {
+    float J;
+    float B;
+    float C_pos;
+    float C_neg;
+    float G_cos;
+    float G_sin;
+    float PosKp;
+    float PosKi;
+    float PosKd;
+    float VelKp;
+    float VelKi;
+    float VelKd;
+    GimbalFuzzyPID_Init_Config_s FuzzyPIDConfig;
+    float SmootherWn;
+    float SmootherZeta;
+    float SmootherDt;
+} GimbalAutoAimParamConfig_t;
+
 static const GimbalYawParamConfig_t gimbal_yaw_param_config = {
     .J = 0.006f,
     .B = 0.025f,
@@ -301,30 +320,35 @@ static const GimbalYawParamConfig_t gimbal_pitch_param_config = {
 // 自瞄参数和手动控制参数分开定义，方便切换和调整
 
 
-// 自瞄Yaw参数 - 针对"位置振荡+速度超调"的调整
-// 核心思路：增加速度环阻尼抑制超调，微调前馈减少激进的加速度补偿
-static const GimbalYawParamConfig_t auto_aim_yaw_param_config = {
-    .J = 0.002f,       // 降低: 0.001 -> 0.001，保持小值减少前馈激进补偿
-    .B = 0.06f,        // 保持
-    .C = 0.05f,        // 保持
+// 自瞄Yaw参数
+// 核心思路：调前馈（J惯性、B阻尼、C摩擦）+ Smoother + 速度环Kd
+// 2026-05-21 调整（消除反转超调 + 减少跟随滞后）：
+// 1. SmootherWn 75→120：提升自然频率，减少Smoother相位延迟（位置跟随滞后的主因）
+// 2. VelKd 0→0.03：引入速度微分，压制方向反转时的overshoot
+//    （B与速度成正比，速度→0时B≈0；Kd在低速段主动阻尼，是抑制超调的关键）
+static const GimbalAutoAimParamConfig_t auto_aim_yaw_param_config = {
+    .J = 0.0f,      // 0.010：继续提高惯性前馈（J小→PID补加速度→相位滞后）
+    .B = 0.0f,        // 0.50：增大阻尼前馈，抑制减速时的overshoot
+    .C_pos = 0.5f,      // 不动
+    .C_neg = 0.5f,      // 不动
     .G_cos = 0.0f,
     .G_sin = 0.0f,
-    .PosKp = 8.0f,       // 保持
+    .PosKp = 14.0f,       // 不动PID
     .PosKi = 0.0f,
-    .PosKd = 0.0f,        // 保持
-    .VelKp = 0.3f,        // 降低: 2.5 -> 1.8，减少速度环比例增益，降低超调
+    .PosKd = 0.0f,
+    .VelKp = 0.55f,       // 不动PID
     .VelKi = 0.0f,
-    .VelKd = 0.0f,        // 大幅提高: 2.5 -> 4.0，增加速度环微分阻尼，抑制振荡
+    .VelKd = 0.0f,      // ← 0→0.03：引入速度微分，压制方向反转时的overshoot
     .FuzzyPIDConfig = {
         .Kp0 = 14.0f,
         .Ki0 = 0.0f,
         .Kd0 = 0.0f,
-        .MaxOut = 25.0f,  // 保持
-        .DeadBand = 0.010f, // 降低: 0.012 -> 0.010，进一步减小死区
+        .MaxOut = 60.0f,
+        .DeadBand = 0.010f,
         .e_max = 0.5f,
         .ec_max = 5.0f,
         .Kp_min = 3.0f,
-        .Kp_max = 20.0f,  // 保持
+        .Kp_max = 20.0f,
         .Ki_min = 0.0f,
         .Ki_max = 0.0f,
         .Kd_min = 0.0f,
@@ -333,29 +357,31 @@ static const GimbalYawParamConfig_t auto_aim_yaw_param_config = {
         .Ki_scale = 0.0f,
         .Kd_scale = 0.0f,
     },
-    .SmootherWn = 50.0f,  // 略降低: 55.0 -> 50.0，稍微减缓轨迹响应以配合更低的阻尼
-    .SmootherZeta = 1.00f, // 提高: 1.25 -> 1.35，增加轨迹平滑器的阻尼
+    .SmootherWn = 80.0f,  // ← 75→120：提升自然频率，减少Smoother相位延迟（改善位置跟随滞后）
+    .SmootherZeta = 1.2f, // 维持
     .SmootherDt = 0.001f,
 };
 
 // 自瞄Pitch参数 - 消除高频抖动
-static const GimbalYawParamConfig_t auto_aim_pitch_param_config = {
-    .J = 0.001f,
-    .B = 0.03f,
-    .C = 0.05f,
-    .G_cos = 0.0f,
+static const GimbalAutoAimParamConfig_t auto_aim_pitch_param_config = {
+    .J = 0.0f,
+    .B = 0.0f,
+    .C_pos = 0.0f,
+    .C_neg = 0.0f,
+    .G_cos = -1.3f,
     .G_sin = 0.0f,
-    .PosKp = 10.0f,        // 进一步降低位置环P: 8.0 -> 6.0，更保守抑制抖动
+    .PosKp = 7.0f,       // 降低位置环P: 20.0 -> 15.0，减少响应激进度0
     .PosKi = 0.0f,
     .PosKd = 0.0f,
-    .VelKp = 0.8f,        // 降低速度环P: 1.0 -> 0.8，更平缓
+    .VelKp = 0.3f,        // 降低速度环P: 0.5 -> 0.4，更平缓
     .VelKi = 0.0f,
-    .VelKd = 0.2f,        // 降低微分项: 0.3 -> 0.2，进一步减少噪声放大
+    .VelKd = 0.0f,
     .FuzzyPIDConfig = {0},
-    .SmootherWn = 12.0f,  // 降低自然频率: 15.0 -> 12.0，更平缓响应
-    .SmootherZeta = 2.0f, // 提高阻尼比: 1.6 -> 2.0，强烈抑制抖动
+    .SmootherWn = 40.0f,  // 降低自然频率: 35.0 -> 30.0
+    .SmootherZeta = 1.35f, // 提高阻尼比: 1.0 -> 1.3，抑制抖动
     .SmootherDt = 0.001f,
 };
+
 
 static ForceGimbalAxis_t force_yaw;
 static ForceGimbalAxis_t force_pitch;
@@ -405,29 +431,58 @@ static void ApplyGimbalParamConfig(uint8_t auto_aim_enabled, float yaw_position,
     if (gimbal_active_auto_aim_param == auto_aim_enabled)
         return;
 
-    const GimbalYawParamConfig_t *yaw_param = auto_aim_enabled ? &auto_aim_yaw_param_config : &gimbal_yaw_param_config;
-    const GimbalYawParamConfig_t *pitch_param = auto_aim_enabled ? &auto_aim_pitch_param_config : &gimbal_pitch_param_config;
+    if (auto_aim_enabled)
+    {
+        const GimbalAutoAimParamConfig_t *yaw_param = &auto_aim_yaw_param_config;
+        const GimbalAutoAimParamConfig_t *pitch_param = &auto_aim_pitch_param_config;
 
-    force_yaw.axis.J = yaw_param->J;
-    force_yaw.axis.B = yaw_param->B;
-    ForceAxis_SetDirectionC(&force_yaw.axis, yaw_param->C, yaw_param->C);
-    force_yaw.axis.G_cos = yaw_param->G_cos;
-    force_yaw.axis.G_sin = yaw_param->G_sin;
-    ForceAxis_SetPID(&force_yaw.axis,
-                     yaw_param->PosKp, yaw_param->PosKi, yaw_param->PosKd,
-                     yaw_param->VelKp, yaw_param->VelKi, yaw_param->VelKd);
-    GimbalFuzzyPIDInit(&force_yaw.fuzzy_pid, &yaw_param->FuzzyPIDConfig);
-    Smoother_Init(&force_yaw.smoother, yaw_param->SmootherWn, yaw_param->SmootherZeta, yaw_param->SmootherDt);
+        force_yaw.axis.J = yaw_param->J;
+        force_yaw.axis.B = yaw_param->B;
+        ForceAxis_SetDirectionC(&force_yaw.axis, yaw_param->C_pos, yaw_param->C_neg);
+        force_yaw.axis.G_cos = yaw_param->G_cos;
+        force_yaw.axis.G_sin = yaw_param->G_sin;
+        ForceAxis_SetPID(&force_yaw.axis,
+                         yaw_param->PosKp, yaw_param->PosKi, yaw_param->PosKd,
+                         yaw_param->VelKp, yaw_param->VelKi, yaw_param->VelKd);
+        GimbalFuzzyPIDInit(&force_yaw.fuzzy_pid, &yaw_param->FuzzyPIDConfig);
+        Smoother_Init(&force_yaw.smoother, yaw_param->SmootherWn, yaw_param->SmootherZeta, yaw_param->SmootherDt);
 
-    force_pitch.axis.J = pitch_param->J;
-    force_pitch.axis.B = pitch_param->B;
-    ForceAxis_SetDirectionC(&force_pitch.axis, pitch_param->C, pitch_param->C);
-    force_pitch.axis.G_cos = pitch_param->G_cos;
-    force_pitch.axis.G_sin = pitch_param->G_sin;
-    ForceAxis_SetPID(&force_pitch.axis,
-                     pitch_param->PosKp, pitch_param->PosKi, pitch_param->PosKd,
-                     pitch_param->VelKp, pitch_param->VelKi, pitch_param->VelKd);
-    Smoother_Init(&force_pitch.smoother, pitch_param->SmootherWn, pitch_param->SmootherZeta, pitch_param->SmootherDt);
+        force_pitch.axis.J = pitch_param->J;
+        force_pitch.axis.B = pitch_param->B;
+        ForceAxis_SetDirectionC(&force_pitch.axis, pitch_param->C_pos, pitch_param->C_neg);
+        force_pitch.axis.G_cos = pitch_param->G_cos;
+        force_pitch.axis.G_sin = pitch_param->G_sin;
+        ForceAxis_SetPID(&force_pitch.axis,
+                         pitch_param->PosKp, pitch_param->PosKi, pitch_param->PosKd,
+                         pitch_param->VelKp, pitch_param->VelKi, pitch_param->VelKd);
+        Smoother_Init(&force_pitch.smoother, pitch_param->SmootherWn, pitch_param->SmootherZeta, pitch_param->SmootherDt);
+    }
+    else
+    {
+        const GimbalYawParamConfig_t *yaw_param = &gimbal_yaw_param_config;
+        const GimbalYawParamConfig_t *pitch_param = &gimbal_pitch_param_config;
+
+        force_yaw.axis.J = yaw_param->J;
+        force_yaw.axis.B = yaw_param->B;
+        ForceAxis_SetDirectionC(&force_yaw.axis, yaw_param->C, yaw_param->C);
+        force_yaw.axis.G_cos = yaw_param->G_cos;
+        force_yaw.axis.G_sin = yaw_param->G_sin;
+        ForceAxis_SetPID(&force_yaw.axis,
+                         yaw_param->PosKp, yaw_param->PosKi, yaw_param->PosKd,
+                         yaw_param->VelKp, yaw_param->VelKi, yaw_param->VelKd);
+        GimbalFuzzyPIDInit(&force_yaw.fuzzy_pid, &yaw_param->FuzzyPIDConfig);
+        Smoother_Init(&force_yaw.smoother, yaw_param->SmootherWn, yaw_param->SmootherZeta, yaw_param->SmootherDt);
+
+        force_pitch.axis.J = pitch_param->J;
+        force_pitch.axis.B = pitch_param->B;
+        ForceAxis_SetDirectionC(&force_pitch.axis, pitch_param->C, pitch_param->C);
+        force_pitch.axis.G_cos = pitch_param->G_cos;
+        force_pitch.axis.G_sin = pitch_param->G_sin;
+        ForceAxis_SetPID(&force_pitch.axis,
+                         pitch_param->PosKp, pitch_param->PosKi, pitch_param->PosKd,
+                         pitch_param->VelKp, pitch_param->VelKi, pitch_param->VelKd);
+        Smoother_Init(&force_pitch.smoother, pitch_param->SmootherWn, pitch_param->SmootherZeta, pitch_param->SmootherDt);
+    }
 
     ResetForceAxisPIDState(&force_yaw.axis);
     ResetForceAxisPIDState(&force_pitch.axis);
@@ -674,11 +729,15 @@ void GimbalTask()
                 // ========================================================
                 // 【高阶调参神器】：将这两个变量直接拖进 Ozone 的监视窗口！
                 // ========================================================
-                static float tune_ratio_sm  = 1.0f;  // 平滑器速度/加速度权重
-                static float tune_ratio_vis = 0.2f;  // 视觉预测速度/加速度权重
+                // 调参策略：
+                // 1. SmootherWn 75→120：提升自然频率，减少Smoother相位延迟
+                // 2. VelKd 0→0.03：引入速度微分，压制反转超调
+                // 3. J 0.010，B 0.50 维持
+                static float tune_ratio_sm  = 0.99f;
+                static float tune_ratio_vis = 0.01f;
                 
                 // 1. 让平滑器正常工作，吃进绝对位置，生成连续丝滑的轨迹“底座”
-                Smoother_Update(&force_yaw.smoother, gimbal_cmd_recv.yaw);
+                Smoother_Update(&force_yaw.smoother, raw_yaw_target);
                 
                 // 2. 核心混合算法：按照你的系数，将平滑波形与视觉预测波形进行加权融合
                 float mixed_vel = tune_ratio_sm * force_yaw.smoother.out_vel 
@@ -698,12 +757,12 @@ void GimbalTask()
                 ForceAxis_Calc(&force_yaw.axis, yaw_mode, time_now);
                 
                 // 5. 静摩擦踹脚逻辑 (Stiction Kick)
+                // stiction力矩适当降低减少低速抖动（配合J增大后系统响应改善）
                 float error_pos = force_yaw.axis.target_pos - force_yaw.axis.current_pos;
                 float stiction_torque = 0.0f;
-                // 当速度极慢，且位置误差突破死区时，给个瞬时力矩踹过去
                 if (fabsf(force_yaw.axis.current_vel) < 0.1f) {
-                    if (error_pos > 0.01f) stiction_torque = 0.05f; 
-                    else if (error_pos < -0.01f) stiction_torque = -0.05f;
+                    if (error_pos > 0.01f) stiction_torque = 0.0f;
+                    else if (error_pos < -0.01f) stiction_torque = -0.0f;
                 }
                 
                 final_yaw_torque = force_yaw.axis.total_torque + stiction_torque;
